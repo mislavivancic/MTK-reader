@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MTK Reader</string>
+
+    <!-- Dialog Strings -->
+    <string name="permission_denied">Permission Denied</string>
+    <string name="go_back">Go Back</string>
 </resources>
