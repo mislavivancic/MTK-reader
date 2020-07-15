@@ -1,26 +1,32 @@
 package com.mtkreader.views.fragments
 
 import android.Manifest
+import android.app.Activity
+import android.bluetooth.BluetoothDevice
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.R
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.commons.base.ErrorDialog
+import com.mtkreader.contracts.ConnectionContract
+import com.mtkreader.presenters.ConnectionPresenter
 import com.mtkreader.utils.PermissionUtils
 import kotlinx.android.synthetic.main.fragment_connect.*
 
-class ConnectFragment : Fragment() {
+class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionContract.View {
 
     companion object {
         private const val TAG = "CONNECT_FRAGMENT"
     }
 
-    private lateinit var bluetoothManager: RxBluetooth
+
+    private val bluetoothDevices = mutableListOf<BluetoothDevice>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,13 +38,21 @@ class ConnectFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        initializePresenter()
         initializeViews()
         initializeRoutes()
     }
 
+    private fun initializePresenter() {
+        presenter = ConnectionPresenter(this)
+    }
+
     private fun initializeViews() {
-        PermissionUtils.checkCoarseLocationPermission(this)
-        bluetoothManager = RxBluetooth(context)
+        if (PermissionUtils.hasCoarseLocation(this))
+            presenter.initBluetooth()
+        else
+            PermissionUtils.requestCoarseLocationPermission(this)
+
     }
 
     private fun initializeRoutes() {
@@ -47,6 +61,33 @@ class ConnectFragment : Fragment() {
         }
     }
 
+    override fun onBluetoothInit() {
+        presenter.observeDevices()
+    }
+
+
+    override fun onObservedDevice(device: BluetoothDevice) {
+        bluetoothDevices.add(device)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        if (requestCode == Const.RequestCode.REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK) {
+                presenter.observeDevices()
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                ErrorDialog(
+                    requireContext(),
+                    Const.Error.BT_REQUIRED,
+                    View.OnClickListener { requireActivity().finish() }).show()
+
+            }
+        }
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -55,9 +96,14 @@ class ConnectFragment : Fragment() {
     ) {
         if (requestCode == PermissionUtils.COARSE_LOCATION_REQUEST_CODE) {
             if (!permissions.contains(Manifest.permission.ACCESS_COARSE_LOCATION) || grantResults[0] == Const.PermissionCode.DENIED) {
-                ErrorDialog(context!!).show()
+                ErrorDialog(requireContext()).show()
+            } else {
+                presenter.initBluetooth()
             }
         }
     }
+
+    override fun provideFragment(): Fragment = this
+
 
 }

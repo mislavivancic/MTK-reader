@@ -1,0 +1,21 @@
+package com.mtkreader.contracts
+
+import android.bluetooth.BluetoothDevice
+import androidx.fragment.app.Fragment
+import com.mtkreader.commons.base.AutoDisposePresenter
+import com.mtkreader.commons.base.ErrorHandlingFragment
+
+interface ConnectionContract {
+
+    interface View : ErrorHandlingFragment {
+        fun provideFragment(): Fragment
+
+        fun onBluetoothInit()
+        fun onObservedDevice(device: BluetoothDevice)
+    }
+
+    interface Presenter : AutoDisposePresenter {
+        fun initBluetooth()
+        fun observeDevices()
+    }
+}

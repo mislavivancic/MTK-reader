@@ -10,7 +10,12 @@ interface AutoDisposePresenter {
     fun dispose()
 }
 
-class BasePresenter : AutoDisposePresenter {
+interface ErrorHandlingPresenter {
+    fun onErrorOccurred(throwable: Throwable)
+}
+
+abstract class BasePresenter(private val view: ErrorHandlingFragment) : AutoDisposePresenter,
+    ErrorHandlingPresenter {
     private val compositeDisposable = CompositeDisposable()
 
 
@@ -24,6 +29,10 @@ class BasePresenter : AutoDisposePresenter {
 
     override fun dispose() {
         compositeDisposable.dispose()
+    }
+
+    override fun onErrorOccurred(throwable: Throwable) {
+        view.displayErrorPopup(throwable)
     }
 
 

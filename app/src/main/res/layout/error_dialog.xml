@@ -21,6 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dialog_element_vertical_margin"
         android:text="@string/permission_denied"
+        android:textAlignment="center"
         android:textColor="@color/dark_gray"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

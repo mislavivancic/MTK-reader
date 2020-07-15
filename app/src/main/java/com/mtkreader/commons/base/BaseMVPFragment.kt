@@ -2,7 +2,11 @@ package com.mtkreader.commons.base
 
 import androidx.fragment.app.Fragment
 
-class BaseMVPFragment<T> : Fragment() where T : AutoDisposePresenter {
+interface ErrorHandlingFragment {
+    fun displayErrorPopup(throwable: Throwable)
+}
+
+open class BaseMVPFragment<T> : Fragment(), ErrorHandlingFragment where T : AutoDisposePresenter {
 
     protected lateinit var presenter: T
 
@@ -14,5 +18,10 @@ class BaseMVPFragment<T> : Fragment() where T : AutoDisposePresenter {
     override fun onDestroy() {
         presenter.dispose()
         super.onDestroy()
+    }
+
+
+    override fun displayErrorPopup(throwable: Throwable) {
+        ErrorDialog(requireContext(), throwable.localizedMessage).show()
     }
 }

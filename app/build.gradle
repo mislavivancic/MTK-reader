@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.mtkreader"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -39,6 +39,10 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$project.ext.rxJavaVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$project.ext.rxAndroidVersion"
     implementation "com.github.ivbaranov:rxbluetooth2:$project.ext.rxBluetoothVersion"
+
+    // koin - DI
+    implementation "org.koin:koin-android:$project.ext.koinVersion"
+    implementation "org.koin:koin-android-viewmodel:$project.ext.koinVersion"
 
     // navigation-component
     // Kotlin
