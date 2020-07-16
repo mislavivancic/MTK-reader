@@ -17,9 +17,12 @@ import com.mtkreader.commons.base.ErrorDialog
 import com.mtkreader.contracts.ConnectionContract
 import com.mtkreader.presenters.ConnectionPresenter
 import com.mtkreader.utils.PermissionUtils
+import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
+import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import kotlinx.android.synthetic.main.fragment_connect.*
 
-class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionContract.View {
+class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionContract.View,
+    ConnectedDevicesRecyclerView.OnItemClickListener {
 
     companion object {
         private const val TAG = "CONNECT_FRAGMENT"
@@ -27,6 +30,7 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
 
 
     private val bluetoothDevices = mutableListOf<BluetoothDevice>()
+    private lateinit var connectedDevicesAdapter: ConnectedDevicesRecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,12 +66,28 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
     }
 
     override fun onBluetoothInit() {
-        presenter.observeDevices()
+        presenter.getConnectedDevices()
     }
 
 
     override fun onObservedDevice(device: BluetoothDevice) {
         bluetoothDevices.add(device)
+    }
+
+    override fun onConnectedDevices(devices: Set<BluetoothDevice>?) {
+        if (devices != null) {
+            connectedDevicesAdapter = ConnectedDevicesRecyclerView(layoutInflater)
+            connectedDevicesAdapter.addData(devices)
+            connectedDevicesAdapter.setOnClickListener(this)
+            rv_devices.apply {
+                adapter = AlphaInAnimationAdapter(connectedDevicesAdapter)
+            }
+
+        }
+    }
+
+    override fun onClick(device: BluetoothDevice) {
+
     }
 
     override fun onActivityResult(
@@ -77,7 +97,7 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
     ) {
         if (requestCode == Const.RequestCode.REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_OK) {
-                presenter.observeDevices()
+                presenter.getConnectedDevices()
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 ErrorDialog(

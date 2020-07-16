@@ -12,10 +12,12 @@ interface ConnectionContract {
 
         fun onBluetoothInit()
         fun onObservedDevice(device: BluetoothDevice)
+        fun onConnectedDevices(devices: Set<BluetoothDevice>?)
     }
 
     interface Presenter : AutoDisposePresenter {
         fun initBluetooth()
         fun observeDevices()
+        fun getConnectedDevices()
     }
 }

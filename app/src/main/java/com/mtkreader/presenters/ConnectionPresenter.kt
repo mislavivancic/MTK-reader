@@ -1,14 +1,12 @@
 package com.mtkreader.presenters
 
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BasePresenter
 import com.mtkreader.contracts.ConnectionContract
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -39,23 +37,18 @@ class ConnectionPresenter(private val view: ConnectionContract.View) : BasePrese
             bluetoothManager.observeDevices()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.computation())
-                .subscribe(object : Consumer<BluetoothDevice> {
-                    override fun accept(t: BluetoothDevice?) {
-                        if (t != null)
-                            view.onObservedDevice(t)
-                    }
-
-                })
-            //.subscribe(this::onObservedDevicesConsumer)
+                .subscribe { device ->
+                    if (device != null)
+                        view.onObservedDevice(device)
+                }
         )
 
     }
 
-    private fun onObservedDevicesConsumer(bluetoothDevice: BluetoothDevice?): Consumer<BluetoothDevice> {
-        return object : Consumer<BluetoothDevice> {
-            override fun accept(t: BluetoothDevice?) {
-                TODO("Not yet implemented")
-            }
-        }
+
+    override fun getConnectedDevices() {
+        view.onConnectedDevices(bluetoothManager.bondedDevices)
     }
+
+
 }
