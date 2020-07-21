@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">MTK Reader</string>
 
+    <!-- Formats for Strings -->
+    <string name="square_bracket">[ %s ]</string>
+
     <!-- Dialog Strings -->
     <string name="permission_denied">Permission Denied</string>
     <string name="go_back">Go Back</string>

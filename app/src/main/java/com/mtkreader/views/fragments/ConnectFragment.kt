@@ -3,6 +3,7 @@ package com.mtkreader.views.fragments
 import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -67,6 +68,7 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
 
     override fun onBluetoothInit() {
         presenter.getConnectedDevices()
+        presenter.observeDevices()
     }
 
 
@@ -76,7 +78,7 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
 
     override fun onConnectedDevices(devices: Set<BluetoothDevice>?) {
         if (devices != null) {
-            connectedDevicesAdapter = ConnectedDevicesRecyclerView(layoutInflater)
+            connectedDevicesAdapter = ConnectedDevicesRecyclerView(requireContext(), layoutInflater)
             connectedDevicesAdapter.addData(devices)
             connectedDevicesAdapter.setOnClickListener(this)
             rv_devices.apply {
@@ -87,7 +89,11 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
     }
 
     override fun onClick(device: BluetoothDevice) {
+        presenter.connectToDevice(device)
+    }
 
+    override fun onSocketConnected(socket: BluetoothSocket) {
+        println(socket)
     }
 
     override fun onActivityResult(

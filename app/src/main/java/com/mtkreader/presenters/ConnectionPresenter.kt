@@ -1,6 +1,7 @@
 package com.mtkreader.presenters
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.commons.Const
@@ -10,6 +11,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import java.util.*
 
 class ConnectionPresenter(private val view: ConnectionContract.View) : BasePresenter(view),
     ConnectionContract.Presenter, KoinComponent {
@@ -35,8 +37,8 @@ class ConnectionPresenter(private val view: ConnectionContract.View) : BasePrese
     override fun observeDevices() {
         addDisposable(
             bluetoothManager.observeDevices()
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.computation())
                 .subscribe { device ->
                     if (device != null)
                         view.onObservedDevice(device)
@@ -50,5 +52,13 @@ class ConnectionPresenter(private val view: ConnectionContract.View) : BasePrese
         view.onConnectedDevices(bluetoothManager.bondedDevices)
     }
 
+    override fun connectToDevice(device: BluetoothDevice) {
+        addDisposable(
+            bluetoothManager.connectAsClient(device, UUID.fromString(Const.BluetoothConstants.UUID))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(view::onSocketConnected, this::onErrorOccurred)
+        )
+    }
 
 }

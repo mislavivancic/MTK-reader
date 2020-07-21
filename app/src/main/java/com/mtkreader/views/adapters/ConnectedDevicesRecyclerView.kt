@@ -2,6 +2,7 @@ package com.mtkreader.views.adapters
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothProfile
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +10,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mtkreader.R
 import kotlinx.android.synthetic.main.connected_device_item.view.*
 
-class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
+class ConnectedDevicesRecyclerView(
+    private val context: Context,
+    private val layoutInflater: LayoutInflater
+) :
     RecyclerView.Adapter<ConnectedDevicesRecyclerView.ConnectedDeviceViewHolder>() {
 
     interface OnItemClickListener {
@@ -30,7 +34,7 @@ class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConnectedDeviceViewHolder {
         val view = layoutInflater.inflate(R.layout.connected_device_item, parent, false)
-        return ConnectedDeviceViewHolder(view, onClickListener)
+        return ConnectedDeviceViewHolder(context, view, onClickListener)
     }
 
     override fun getItemCount(): Int = devices.size
@@ -40,6 +44,7 @@ class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
 
 
     class ConnectedDeviceViewHolder(
+        private val context: Context,
         private val view: View,
         private val onClickListener: OnItemClickListener?
     ) : RecyclerView.ViewHolder(view) {
@@ -48,7 +53,8 @@ class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
             with(device) {
                 view.iv_device.setImageResource(provideTypeIcon(type))
                 view.tv_device_name.text = name
-                view.tv_device_adress.text = address
+                view.tv_device_adress.text =
+                    String.format(context.resources.getString(R.string.square_bracket), address)
 
                 view.setOnClickListener { onClickListener?.onClick(this) }
             }
