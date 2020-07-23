@@ -49,8 +49,9 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$project.ext.navigationComponentVersion"
 
 
-    // recyclerView animations
+    // animations
     implementation "jp.wasabeef:recyclerview-animators:$project.ext.recyclerViewAnimationsVersion"
+    implementation "com.airbnb.android:lottie:$project.ext.lottieAnimationsVersion"
 
 
 }

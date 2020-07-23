@@ -21,4 +21,14 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_fragment_title" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/av_connecting"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:background="@color/white"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/bt_connecting" />
 </androidx.constraintlayout.widget.ConstraintLayout>

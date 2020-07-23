@@ -57,7 +57,7 @@ class ConnectionPresenter(private val view: ConnectionContract.View) : BasePrese
             bluetoothManager.connectAsClient(device, UUID.fromString(Const.BluetoothConstants.UUID))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(view::onSocketConnected, this::onErrorOccurred)
+                .subscribe(view::onSocketConnected, view::onError)
         )
     }
 

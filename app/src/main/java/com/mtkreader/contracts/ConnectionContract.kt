@@ -16,6 +16,7 @@ interface ConnectionContract {
         fun onConnectedDevices(devices: Set<BluetoothDevice>?)
         fun onSocketConnected(socket: BluetoothSocket)
 
+        fun onError(throwable: Throwable)
     }
 
     interface Presenter : AutoDisposePresenter {

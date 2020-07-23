@@ -2,6 +2,7 @@ package com.mtkreader.views.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.app.Dialog
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Intent
@@ -19,6 +20,7 @@ import com.mtkreader.contracts.ConnectionContract
 import com.mtkreader.presenters.ConnectionPresenter
 import com.mtkreader.utils.PermissionUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
+import com.mtkreader.views.dialogs.ConnectingDialog
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import kotlinx.android.synthetic.main.fragment_connect.*
 
@@ -32,6 +34,7 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
 
     private val bluetoothDevices = mutableListOf<BluetoothDevice>()
     private lateinit var connectedDevicesAdapter: ConnectedDevicesRecyclerView
+    private lateinit var connectingDialog: Dialog
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -90,10 +93,18 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
 
     override fun onClick(device: BluetoothDevice) {
         presenter.connectToDevice(device)
+        connectingDialog = ConnectingDialog(requireContext())
+        connectingDialog.show()
     }
 
     override fun onSocketConnected(socket: BluetoothSocket) {
+        connectingDialog.dismiss()
         println(socket)
+    }
+
+    override fun onError(throwable: Throwable) {
+        connectingDialog.dismiss()
+        displayErrorPopup(throwable)
     }
 
     override fun onActivityResult(

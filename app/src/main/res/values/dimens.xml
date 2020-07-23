@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Dialog Dimens -->
-    <dimen name="dialog_corner_radius">20dp</dimen>
+    <dimen name="dialog_corner_radius">25dp</dimen>
+    <dimen name="button_corner_radius">10dp</dimen>
     <dimen name="dialog_element_vertical_margin">15dp</dimen>
     <dimen name="dialog_padding">50dp</dimen>
 
@@ -18,4 +19,5 @@
     <dimen name="small_margin">5dp</dimen>
     <dimen name="cardview_radius">15dp</dimen>
     <dimen name="cardview_elevation">1dp</dimen>
+    <dimen name="connecting_animation_width_height">200dp</dimen>
 </resources>

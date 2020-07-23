@@ -29,6 +29,7 @@ allprojects {
         navigationComponentVersion = "2.3.0"
 
         recyclerViewAnimationsVersion = "3.0.0"
+        lottieAnimationsVersion = "3.4.1"
     }
 
 }
