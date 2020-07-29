@@ -10,6 +10,7 @@
     <dimen name="rv_item_padding">15dp</dimen>
 
     <!-- TextView Dimens -->
+    <dimen name="large_text_size">25sp</dimen>
     <dimen name="medium_text_size">14sp</dimen>
     <dimen name="small_text_size">12sp</dimen>
 

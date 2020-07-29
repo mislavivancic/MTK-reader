@@ -2,7 +2,9 @@ package com.mtkreader.presenters
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.content.Intent
+import com.github.ivbaranov.rxbluetooth.BluetoothConnection
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BasePresenter
@@ -58,6 +60,17 @@ class ConnectionPresenter(private val view: ConnectionContract.View) : BasePrese
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(view::onSocketConnected, view::onError)
+        )
+    }
+
+    override fun readStream(socket: BluetoothSocket) {
+        val connection = BluetoothConnection(socket)
+
+        addDisposable(
+            connection.observeByteStream()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(view::onReceiveBytes, view::onError)
         )
     }
 

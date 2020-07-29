@@ -15,6 +15,7 @@ interface ConnectionContract {
         fun onObservedDevice(device: BluetoothDevice)
         fun onConnectedDevices(devices: Set<BluetoothDevice>?)
         fun onSocketConnected(socket: BluetoothSocket)
+        fun onReceiveBytes(byte: Byte)
 
         fun onError(throwable: Throwable)
     }
@@ -24,5 +25,6 @@ interface ConnectionContract {
         fun observeDevices()
         fun getConnectedDevices()
         fun connectToDevice(device: BluetoothDevice)
+        fun readStream(socket: BluetoothSocket)
     }
 }

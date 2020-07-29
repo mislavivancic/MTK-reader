@@ -18,4 +18,12 @@ object Const {
     object BluetoothConstants {
         const val UUID = "00001101-0000-1000-8000-00805f9b34fb"
     }
+
+    object DeviceConstants {
+        const val NAME = "HELM"
+
+        const val FIRST_INIT = "2F3F210D0A"
+        const val SECOND_INIT = "063034360D0A"
+        const val ACK = "015503560D0A"
+    }
 }

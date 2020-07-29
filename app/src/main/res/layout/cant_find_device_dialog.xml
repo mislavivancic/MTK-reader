@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryTrans"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/LargeTextViewStyleBoldWhite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/can_t_find_your_device" />
+
+    <TextView
+        style="@style/MediumTextViewStyleWhite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pair_with_device_using_code" />
+
+    <TextView
+        style="@style/LargeTextViewStyleBoldWhite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/_1902" />
+
+    <Button
+        android:id="@+id/btn_dismiss"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dismiss"
+        android:textAllCaps="false"
+        android:textColor="@color/white" />
+</LinearLayout>

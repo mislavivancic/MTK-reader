@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,8 +19,10 @@ import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.commons.base.ErrorDialog
 import com.mtkreader.contracts.ConnectionContract
 import com.mtkreader.presenters.ConnectionPresenter
+import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.PermissionUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
+import com.mtkreader.views.dialogs.CantFindDeviceDialog
 import com.mtkreader.views.dialogs.ConnectingDialog
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import kotlinx.android.synthetic.main.fragment_connect.*
@@ -35,6 +38,7 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
     private val bluetoothDevices = mutableListOf<BluetoothDevice>()
     private lateinit var connectedDevicesAdapter: ConnectedDevicesRecyclerView
     private lateinit var connectingDialog: Dialog
+    private val data = mutableListOf<Byte>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -88,6 +92,10 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
                 adapter = AlphaInAnimationAdapter(connectedDevicesAdapter)
             }
 
+            val device = devices.find { it.name.toUpperCase().contains(Const.DeviceConstants.NAME) }
+
+            if (device == null)
+                CantFindDeviceDialog(requireContext()).show()
         }
     }
 
@@ -99,7 +107,17 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
 
     override fun onSocketConnected(socket: BluetoothSocket) {
         connectingDialog.dismiss()
+        presenter.readStream(socket)
+        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.FIRST_INIT)
+        Thread.sleep(5000)
+        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
+        Thread.sleep(2000)
+        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
         println(socket)
+    }
+
+    override fun onReceiveBytes(byte: Byte) {
+        Log.i(TAG, byte.toString())
     }
 
     override fun onError(throwable: Throwable) {
