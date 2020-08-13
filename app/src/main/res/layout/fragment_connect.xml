@@ -22,6 +22,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_fragment_title" />
 
+    <TextView
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_fragment_title"
+        android:id="@+id/tv_data_read"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="0dp" />
+
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/av_connecting"
         android:layout_width="match_parent"

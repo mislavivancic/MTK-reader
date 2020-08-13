@@ -1,12 +1,11 @@
 package com.mtkreader.utils
 
 import android.bluetooth.BluetoothSocket
-import com.mtkreader.commons.Const
 
 object CommunicationUtil {
 
     fun writeToSocket(socket: BluetoothSocket, data: String) {
-        socket.outputStream.write(hexStringToByteArray(Const.DeviceConstants.FIRST_INIT))
+        socket.outputStream.write(hexStringToByteArray(data))
     }
 
     private fun hexStringToByteArray(s: String): ByteArray {

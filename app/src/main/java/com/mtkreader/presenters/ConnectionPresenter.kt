@@ -68,8 +68,8 @@ class ConnectionPresenter(private val view: ConnectionContract.View) : BasePrese
 
         addDisposable(
             connection.observeByteStream()
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
                 .subscribe(view::onReceiveBytes, view::onError)
         )
     }
