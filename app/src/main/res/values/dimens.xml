@@ -19,6 +19,6 @@
     <dimen name="medium_margin">15dp</dimen>
     <dimen name="small_margin">5dp</dimen>
     <dimen name="cardview_radius">15dp</dimen>
-    <dimen name="cardview_elevation">1dp</dimen>
+    <dimen name="cardview_elevation">2dp</dimen>
     <dimen name="connecting_animation_width_height">200dp</dimen>
 </resources>

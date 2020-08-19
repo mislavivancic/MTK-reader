@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.mtkreader"
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -49,9 +49,9 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$project.ext.navigationComponentVersion"
 
 
-    // animations
+    // appearance
     implementation "jp.wasabeef:recyclerview-animators:$project.ext.recyclerViewAnimationsVersion"
     implementation "com.airbnb.android:lottie:$project.ext.lottieAnimationsVersion"
-
+    implementation "com.github.fornewid:neumorphism:$project.ext.neumorphismVersion"
 
 }

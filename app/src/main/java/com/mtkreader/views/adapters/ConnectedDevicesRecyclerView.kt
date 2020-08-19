@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.mtkreader.R
 import kotlinx.android.synthetic.main.connected_device_item.view.*
+import soup.neumorphism.ShapeType
 
 class ConnectedDevicesRecyclerView(
     private val context: Context,
@@ -45,7 +46,7 @@ class ConnectedDevicesRecyclerView(
 
     class ConnectedDeviceViewHolder(
         private val context: Context,
-        private val view: View,
+        val view: View,
         private val onClickListener: OnItemClickListener?
     ) : RecyclerView.ViewHolder(view) {
 
@@ -56,7 +57,11 @@ class ConnectedDevicesRecyclerView(
                 view.tv_device_adress.text =
                     String.format(context.resources.getString(R.string.square_bracket), address)
 
-                view.setOnClickListener { onClickListener?.onClick(this) }
+                view.setOnClickListener {
+                    view.cv_device.setShapeType(ShapeType.PRESSED)
+                    onClickListener?.onClick(this)
+                }
+
             }
 
         }
