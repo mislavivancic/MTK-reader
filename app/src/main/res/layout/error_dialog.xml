@@ -28,14 +28,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/iv_error" />
 
-    <soup.neumorphism.NeumorphButton
+    <Button
         android:id="@+id/btn_back"
-        style="@style/Widget.Neumorph.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/dialog_element_vertical_margin"
         android:text="@string/go_back"
         android:textAllCaps="false"
+        android:theme="@style/MtkButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_error_title" />

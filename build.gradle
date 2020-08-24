@@ -31,7 +31,6 @@ allprojects {
 
         recyclerViewAnimationsVersion = "3.0.0"
         lottieAnimationsVersion = "3.4.1"
-        neumorphismVersion = "0.2.0"
     }
 
 }

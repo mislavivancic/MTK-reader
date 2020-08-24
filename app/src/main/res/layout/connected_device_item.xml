@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <soup.neumorphism.NeumorphCardView
-        android:id="@+id/cv_device"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/small_margin"
@@ -14,8 +13,7 @@
         app:cardCornerRadius="@dimen/cardview_radius"
         app:cardElevation="@dimen/cardview_elevation"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:neumorph_shapeType="flat">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -37,7 +35,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/medium_margin"
-                android:text="HELSAMDLASM"
                 app:layout_constraintBottom_toTopOf="@id/tv_device_adress"
                 app:layout_constraintStart_toEndOf="@id/iv_device"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -48,12 +45,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/medium_margin"
-                android:text="!12312312312312"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/iv_device"
                 app:layout_constraintTop_toBottomOf="@id/tv_device_name" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </soup.neumorphism.NeumorphCardView>
+    </androidx.cardview.widget.CardView>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

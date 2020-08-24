@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.mtkreader.R
 import kotlinx.android.synthetic.main.connected_device_item.view.*
-import soup.neumorphism.ShapeType
 
 class ConnectedDevicesRecyclerView(
     private val context: Context,
@@ -58,7 +57,7 @@ class ConnectedDevicesRecyclerView(
                     String.format(context.resources.getString(R.string.square_bracket), address)
 
                 view.setOnClickListener {
-                    view.cv_device.setShapeType(ShapeType.PRESSED)
+                    //view.setBackgroundColor(context.resources.getColor(R.color.colorAccent))
                     onClickListener?.onClick(this)
                 }
 

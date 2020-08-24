@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.app.Dialog
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,11 +17,9 @@ import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.commons.base.ErrorDialog
 import com.mtkreader.contracts.ConnectionContract
 import com.mtkreader.presenters.ConnectionPresenter
-import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.PermissionUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
 import com.mtkreader.views.dialogs.CantFindDeviceDialog
-import com.mtkreader.views.dialogs.ConnectingDialog
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import kotlinx.android.synthetic.main.fragment_connect.*
 
@@ -37,9 +34,6 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
     private val bluetoothDevices = mutableListOf<BluetoothDevice>()
     private lateinit var connectedDevicesAdapter: ConnectedDevicesRecyclerView
     private lateinit var connectingDialog: Dialog
-    private val data = mutableListOf<Char>()
-    private lateinit var socket: BluetoothSocket
-    private var isReadingData = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,7 +64,7 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
 
     private fun initializeRoutes() {
         tv_fragment_title.setOnClickListener {
-            findNavController().navigate(R.id.navigateToReadingFragment)
+
         }
     }
 
@@ -101,59 +95,10 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
     }
 
     override fun onClick(device: BluetoothDevice) {
-        presenter.connectToDevice(device)
-        connectingDialog = ConnectingDialog(requireContext())
-        connectingDialog.show()
+        val deviceBundle = Bundle().apply { putParcelable(Const.Extras.DEVICE_EXTRA, device) }
+        findNavController().navigate(R.id.navigateToReadingFragment, deviceBundle)
     }
 
-    override fun onSocketConnected(socket: BluetoothSocket) {
-        this.socket = socket
-        rv_devices.visibility = View.GONE
-        tv_data_read.visibility = View.VISIBLE
-
-        connectingDialog.dismiss()
-        presenter.readStream(this.socket)
-
-        CommunicationUtil.writeToSocket(this.socket, Const.DeviceConstants.FIRST_INIT)
-    }
-
-    // TODO how to sync
-    override fun onReceiveBytes(byte: Byte) {
-        data.add(byte.toChar())
-        tv_data_read.append(byte.toChar().toString())
-        println("$byte -> ${byte.toChar()}")
-        if (data.contains(13.toByte().toChar()) && data.contains(10.toByte().toChar())) {
-            data.clear()
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
-        }
-        if (data.contains(6.toByte().toChar())) {
-            data.clear()
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
-            isReadingData = true
-        }
-    }
-
-    /*
-        override fun onSocketConnected(socket: BluetoothSocket) {
-        rv_devices.visibility = View.GONE
-        tv_data_read.visibility = View.VISIBLE
-
-        connectingDialog.dismiss()
-        presenter.readStream(socket)
-
-        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.FIRST_INIT)
-        Thread.sleep(5000)
-        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
-        Thread.sleep(2000)
-        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onReceiveBytes(byte: Byte) {
-        data.add(byte.toChar())
-        tv_data_read.append(byte.toChar().toString())
-    }
-     */
 
     override fun onError(throwable: Throwable) {
         connectingDialog.dismiss()

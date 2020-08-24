@@ -7,12 +7,16 @@
     <dimen name="dialog_padding">50dp</dimen>
 
     <!-- RecyclerView Dimens -->
-    <dimen name="rv_item_padding">15dp</dimen>
+    <dimen name="rv_item_padding">10dp</dimen>
 
     <!-- TextView Dimens -->
-    <dimen name="large_text_size">25sp</dimen>
-    <dimen name="medium_text_size">14sp</dimen>
     <dimen name="small_text_size">12sp</dimen>
+    <dimen name="medium_text_size">14sp</dimen>
+    <dimen name="large_text_size">25sp</dimen>
+
+    <dimen name="small_text_padding">5dp</dimen>
+    <dimen name="medium_text_padding">10dp</dimen>
+    <dimen name="large_text_padding">15dp</dimen>
 
 
     <!-- General Dimens -->

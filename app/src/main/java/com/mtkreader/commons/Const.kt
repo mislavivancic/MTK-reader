@@ -5,6 +5,11 @@ object Const {
         const val REQUEST_ENABLE_BT = 1
     }
 
+    object Extras {
+        const val SOCKET_EXTRA = "SOCKET_EXTRA"
+        const val DEVICE_EXTRA = "DEVICE_EXTRA"
+    }
+
     object PermissionCode {
         const val GRANTED = 0
         const val DENIED = -1
