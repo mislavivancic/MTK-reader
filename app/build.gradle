@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.mtkreader"
-        minSdkVersion 16
+        minSdkVersion 18
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -33,5 +33,24 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+
+    // RX
+    implementation "io.reactivex.rxjava2:rxjava:$project.ext.rxJavaVersion"
+    implementation "io.reactivex.rxjava2:rxandroid:$project.ext.rxAndroidVersion"
+    implementation "com.github.ivbaranov:rxbluetooth2:$project.ext.rxBluetoothVersion"
+
+    // koin - DI
+    implementation "org.koin:koin-android:$project.ext.koinVersion"
+    implementation "org.koin:koin-android-viewmodel:$project.ext.koinVersion"
+
+    // navigation-component
+    implementation "androidx.navigation:navigation-fragment-ktx:$project.ext.navigationComponentVersion"
+    implementation "androidx.navigation:navigation-ui-ktx:$project.ext.navigationComponentVersion"
+
+
+    // appearance
+    implementation "jp.wasabeef:recyclerview-animators:$project.ext.recyclerViewAnimationsVersion"
+    implementation "com.airbnb.android:lottie:$project.ext.lottieAnimationsVersion"
 
 }

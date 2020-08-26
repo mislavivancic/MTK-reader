@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">MTK Reader</string>
+
+    <!-- Formats for Strings -->
+    <string name="square_bracket">[ %s ]</string>
+
+    <!-- Dialog Strings -->
+    <string name="permission_denied">Permission Denied</string>
+    <string name="go_back">Go Back</string>
+
+
+    <!-- Guide Strings -->
+    <string name="can_t_find_your_device">Can\'t find your device?</string>
+    <string name="pair_with_device_using_code">Pair with device using code:</string>
+    <string name="_1902">1902</string>
+    <string name="dismiss">Dismiss</string>
 </resources>
