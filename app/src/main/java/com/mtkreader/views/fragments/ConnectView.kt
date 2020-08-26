@@ -23,7 +23,7 @@ import com.mtkreader.views.dialogs.CantFindDeviceDialog
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import kotlinx.android.synthetic.main.fragment_connect.*
 
-class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionContract.View,
+class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionContract.View,
     ConnectedDevicesRecyclerView.OnItemClickListener {
 
     companion object {
@@ -96,7 +96,7 @@ class ConnectFragment : BaseMVPFragment<ConnectionContract.Presenter>(), Connect
 
     override fun onClick(device: BluetoothDevice) {
         val deviceBundle = Bundle().apply { putParcelable(Const.Extras.DEVICE_EXTRA, device) }
-        findNavController().navigate(R.id.navigateToReadingFragment, deviceBundle)
+        findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
     }
 
 

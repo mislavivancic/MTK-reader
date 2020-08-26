@@ -3,24 +3,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_navigation_graph"
-    app:startDestination="@id/connectFragment">
+    app:startDestination="@id/connectView">
 
     <fragment
-        android:id="@+id/connectFragment"
-        android:name="com.mtkreader.views.fragments.ConnectFragment"
+        android:id="@+id/connectView"
+        android:name="com.mtkreader.views.fragments.ConnectView"
         android:label="ConnectFragment"
         tools:layout="@layout/fragment_connect">
         <action
-            android:id="@+id/navigateToReadingFragment"
-            app:destination="@id/readingFragment"
+            android:id="@+id/navigateToReadingView"
+            app:destination="@id/readingView"
             app:enterAnim="@anim/slide_in_from_left"
             app:exitAnim="@android:anim/slide_out_right"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@android:anim/slide_out_right" />
     </fragment>
     <fragment
-        android:id="@+id/readingFragment"
-        android:name="com.mtkreader.views.fragments.ReadingFragment"
+        android:id="@+id/readingView"
+        android:name="com.mtkreader.views.fragments.ReadingView"
         android:label="ReadingFragment"
-        tools:layout="@layout/fragment_reading" />
+        tools:layout="@layout/fragment_reading">
+        <action
+            android:id="@+id/navigateToDisplayDataView"
+            app:destination="@id/displayDataView"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/displayDataView"
+        android:name="com.mtkreader.views.fragments.DisplayDataView"
+        android:label="DisplayDataView"
+        tools:layout="@layout/fragment_display_data" />
+
+
 </navigation>

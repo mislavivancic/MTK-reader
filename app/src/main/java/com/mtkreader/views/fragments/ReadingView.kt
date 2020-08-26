@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseMVPFragment
@@ -19,7 +20,7 @@ import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.views.dialogs.ConnectingDialog
 import kotlinx.android.synthetic.main.fragment_reading.*
 
-class ReadingFragment : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View {
+class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View {
 
     companion object {
         private const val TAG = "READING_FRAGMENT"
@@ -90,7 +91,7 @@ class ReadingFragment : BaseMVPFragment<ReadingContract.Presenter>(), ReadingCon
     override fun onReceiveBytes(byte: Byte) {
         data.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
-        println("$byte -> ${byte.toChar()}")
+
         if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
             data.clear()
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
@@ -103,6 +104,12 @@ class ReadingFragment : BaseMVPFragment<ReadingContract.Presenter>(), ReadingCon
         if (data.contains(END_TOKEN)) {
             socket.close()
             presenter.closeConnection()
+
+            val dataBundle = Bundle().apply {
+                putCharArray(Const.Extras.DATA_EXTRA, data.toCharArray())
+            }
+            data.clear()
+            findNavController().navigate(R.id.navigateToDisplayDataView, dataBundle)
         }
     }
 

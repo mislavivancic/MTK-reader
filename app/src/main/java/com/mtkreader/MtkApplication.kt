@@ -9,9 +9,6 @@ class MtkApplication : Application() {
 
     private val mtkModule = module {
 
-        // services
-
-
         // utils
         single { RxBluetooth(this@MtkApplication) }
 

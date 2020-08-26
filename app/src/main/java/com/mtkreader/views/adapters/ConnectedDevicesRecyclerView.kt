@@ -45,7 +45,7 @@ class ConnectedDevicesRecyclerView(
 
     class ConnectedDeviceViewHolder(
         private val context: Context,
-        val view: View,
+        private val view: View,
         private val onClickListener: OnItemClickListener?
     ) : RecyclerView.ViewHolder(view) {
 
@@ -56,10 +56,7 @@ class ConnectedDevicesRecyclerView(
                 view.tv_device_adress.text =
                     String.format(context.resources.getString(R.string.square_bracket), address)
 
-                view.setOnClickListener {
-                    //view.setBackgroundColor(context.resources.getColor(R.color.colorAccent))
-                    onClickListener?.onClick(this)
-                }
+                view.setOnClickListener { onClickListener?.onClick(this) }
 
             }
 
