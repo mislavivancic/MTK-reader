@@ -10,6 +10,7 @@ import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.presenters.DisplayDataPresenter
+import com.mtkreader.utils.SharedPrefsUtils
 
 class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), DisplayDataContract.View {
 
@@ -20,6 +21,11 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         val dataArg = arguments?.getCharArray(Const.Extras.DATA_EXTRA)
         if (dataArg != null)
             data = dataArg
+        else {
+            val dataPrefs = SharedPrefsUtils.getReadData(requireContext())
+            if (dataPrefs != null)
+                data = dataPrefs
+        }
     }
 
     override fun onCreateView(

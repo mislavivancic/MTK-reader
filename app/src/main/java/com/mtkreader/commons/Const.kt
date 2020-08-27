@@ -5,10 +5,15 @@ object Const {
         const val REQUEST_ENABLE_BT = 1
     }
 
+
     object Extras {
         const val SOCKET_EXTRA = "SOCKET_EXTRA"
         const val DEVICE_EXTRA = "DEVICE_EXTRA"
         const val DATA_EXTRA = "DATA_EXTRA"
+    }
+
+    object SharedPrefKeys {
+        const val READ_DATA_KEY = "READ_DATA_KEY"
     }
 
     object PermissionCode {

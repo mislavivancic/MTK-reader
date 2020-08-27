@@ -12,6 +12,7 @@ class MtkApplication : Application() {
         // utils
         single { RxBluetooth(this@MtkApplication) }
 
+
     }
 
     override fun onCreate() {
