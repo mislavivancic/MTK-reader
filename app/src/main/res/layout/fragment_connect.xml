@@ -5,11 +5,12 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/tv_fragment_title"
+        android:id="@+id/tv_paired_devices"
+        style="@style/LargeTextViewStyleBold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Connect Fragment"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:padding="@dimen/small_text_padding"
+        android:text="@string/paired_devices"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -19,16 +20,19 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_fragment_title" />
+        app:layout_constraintBottom_toTopOf="@id/btn_display_old"
+        app:layout_constraintTop_toBottomOf="@id/tv_paired_devices" />
 
-    <TextView
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_fragment_title"
-        android:id="@+id/tv_data_read"
+    <Button
+        android:id="@+id/btn_display_old"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/display_last_reading"
+        android:textAllCaps="false"
+        android:theme="@style/MtkButton"
         android:visibility="gone"
-        android:layout_height="0dp" />
+        app:layout_constraintBottom_toBottomOf="parent" />
+
 
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/av_connecting"

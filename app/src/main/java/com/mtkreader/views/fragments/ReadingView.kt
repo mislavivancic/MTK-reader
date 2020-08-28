@@ -17,6 +17,7 @@ import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.ReadingContract
 import com.mtkreader.presenters.ReadingPresenter
 import com.mtkreader.utils.CommunicationUtil
+import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.dialogs.ConnectingDialog
 import kotlinx.android.synthetic.main.fragment_reading.*
 
@@ -34,6 +35,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
     private lateinit var connectedDevice: BluetoothDevice
     private lateinit var connectingDialog: Dialog
     private val data = mutableListOf<Char>()
+    private val readingData = mutableListOf<Char>()
     private lateinit var socket: BluetoothSocket
     private var isReadingData = false
 
@@ -90,6 +92,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
 
     override fun onReceiveBytes(byte: Byte) {
         data.add(byte.toChar())
+        readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
 
         if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
@@ -106,8 +109,9 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
             presenter.closeConnection()
 
             val dataBundle = Bundle().apply {
-                putCharArray(Const.Extras.DATA_EXTRA, data.toCharArray())
+                putCharArray(Const.Extras.DATA_EXTRA, readingData.toCharArray())
             }
+            SharedPrefsUtils.saveReadData(requireContext(), readingData.joinToString(""))
             data.clear()
             findNavController().navigate(R.id.navigateToDisplayDataView, dataBundle)
         }

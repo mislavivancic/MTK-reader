@@ -18,6 +18,7 @@ import com.mtkreader.commons.base.ErrorDialog
 import com.mtkreader.contracts.ConnectionContract
 import com.mtkreader.presenters.ConnectionPresenter
 import com.mtkreader.utils.PermissionUtils
+import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
 import com.mtkreader.views.dialogs.CantFindDeviceDialog
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
@@ -60,11 +61,14 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
         else
             PermissionUtils.requestCoarseLocationPermission(this)
 
+        if (SharedPrefsUtils.getReadData(requireContext()) != null)
+            btn_display_old.visibility = View.VISIBLE
+
     }
 
     private fun initializeRoutes() {
-        tv_fragment_title.setOnClickListener {
-
+        btn_display_old.setOnClickListener {
+            findNavController().navigate(R.id.navigateToDisplayDataView)
         }
     }
 

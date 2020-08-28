@@ -17,6 +17,13 @@
             app:exitAnim="@android:anim/slide_out_right"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/navigateToDisplayDataView"
+            app:destination="@id/displayDataView"
+            app:enterAnim="@anim/slide_in_from_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
     </fragment>
     <fragment
         android:id="@+id/readingView"
@@ -29,7 +36,8 @@
             app:enterAnim="@anim/slide_in_from_left"
             app:exitAnim="@android:anim/slide_out_right"
             app:popEnterAnim="@anim/slide_in_from_left"
-            app:popExitAnim="@android:anim/slide_out_right" />
+            app:popExitAnim="@android:anim/slide_out_right"
+            app:popUpTo="@id/connectView" />
     </fragment>
     <fragment
         android:id="@+id/displayDataView"

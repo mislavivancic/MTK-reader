@@ -14,4 +14,6 @@
     <string name="pair_with_device_using_code">Pair with device using code:</string>
     <string name="_1902">1902</string>
     <string name="dismiss">Dismiss</string>
+    <string name="paired_devices">Paired Devices</string>
+    <string name="display_last_reading">Display last reading</string>
 </resources>
