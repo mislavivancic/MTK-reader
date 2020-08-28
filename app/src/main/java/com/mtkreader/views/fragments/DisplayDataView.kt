@@ -26,6 +26,10 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
             if (dataPrefs != null)
                 data = dataPrefs
         }
+
+        if (!this::data.isInitialized) {
+            requireActivity().finish()
+        }
     }
 
     override fun onCreateView(
@@ -40,6 +44,8 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         super.onActivityCreated(savedInstanceState)
         initPresenter()
         initViews()
+
+        presenter.processData(data)
     }
 
     private fun initPresenter() {
@@ -47,4 +53,8 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
     }
 
     private fun initViews() {}
+
+    override fun displayData(dataString: String) {
+        println()
+    }
 }
