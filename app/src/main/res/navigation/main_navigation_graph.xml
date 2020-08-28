@@ -13,17 +13,17 @@
         <action
             android:id="@+id/navigateToReadingView"
             app:destination="@id/readingView"
-            app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@anim/slide_in_from_left"
-            app:popExitAnim="@android:anim/slide_out_right" />
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
         <action
             android:id="@+id/navigateToDisplayDataView"
             app:destination="@id/displayDataView"
-            app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@anim/slide_in_from_left"
-            app:popExitAnim="@android:anim/slide_out_right" />
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
     </fragment>
     <fragment
         android:id="@+id/readingView"
@@ -33,10 +33,10 @@
         <action
             android:id="@+id/navigateToDisplayDataView"
             app:destination="@id/displayDataView"
-            app:enterAnim="@anim/slide_in_from_left"
-            app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@anim/slide_in_from_left"
-            app:popExitAnim="@android:anim/slide_out_right"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@id/connectView" />
     </fragment>
     <fragment
