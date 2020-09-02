@@ -10,24 +10,32 @@ import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.presenters.DisplayDataPresenter
+import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.SharedPrefsUtils
 
 class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), DisplayDataContract.View {
 
-    private lateinit var data: CharArray
+    private lateinit var headerData: ByteArray
+    private lateinit var bodyData: ByteArray
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        val dataArg = arguments?.getCharArray(Const.Extras.DATA_EXTRA)
-        if (dataArg != null)
-            data = dataArg
-        else {
+
+        val dataArg = arguments?.getString(Const.Extras.DATA_EXTRA)
+        if (dataArg != null) {
+            val (head, body) = DataUtils.extractHeaderAndBody(dataArg)
+            headerData = head
+            bodyData = body
+        } else {
             val dataPrefs = SharedPrefsUtils.getReadData(requireContext())
-            if (dataPrefs != null)
-                data = dataPrefs
+            if (dataPrefs != null) {
+                val (head, body) = DataUtils.extractHeaderAndBody(dataPrefs)
+                headerData = head
+                bodyData = body
+            }
         }
 
-        if (!this::data.isInitialized) {
+        if (!this::bodyData.isInitialized) {
             requireActivity().finish()
         }
     }
@@ -45,7 +53,9 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         initPresenter()
         initViews()
 
-        presenter.processData(data)
+        println(bodyData.joinToString(""))
+
+        presenter.processData(bodyData)
     }
 
     private fun initPresenter() {

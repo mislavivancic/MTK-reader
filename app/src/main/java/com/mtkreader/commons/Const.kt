@@ -6,6 +6,10 @@ object Const {
     }
 
 
+    object Tokens {
+        const val END_TOKEN = 33.toByte().toChar()
+    }
+
     object Extras {
         const val SOCKET_EXTRA = "SOCKET_EXTRA"
         const val DEVICE_EXTRA = "DEVICE_EXTRA"

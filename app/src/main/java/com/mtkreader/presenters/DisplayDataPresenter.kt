@@ -15,11 +15,18 @@ class DisplayDataPresenter(private val view: DisplayDataContract.View) : BasePre
     private val processService: DisplayDataContract.ProcessService by inject()
 
 
-    override fun processData(data: CharArray) {
-        addDisposable(Single.fromCallable { displayService.generateHtml() }
+    override fun processData(data: ByteArray) {
+        val disposable = Single.fromCallable { processService.processData(data) }
             .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(view::displayData, view::displayErrorPopup))
+            .subscribe(this::generateHtml, view::displayErrorPopup)
+
+        addDisposable(disposable)
+    }
+
+
+    private fun generateHtml(data: String) {
+
     }
 
 

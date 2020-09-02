@@ -29,7 +29,6 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         private const val FIRST_LINE_TOKEN_FIRST = 13.toByte().toChar()
         private const val FIRST_LINE_TOKEN_SECOND = 10.toByte().toChar()
         private const val SECOND_LINE_TOKEN = 6.toByte().toChar()
-        private const val END_TOKEN = 33.toByte().toChar()
     }
 
     private lateinit var connectedDevice: BluetoothDevice
@@ -104,12 +103,13 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
             isReadingData = true
         }
-        if (data.contains(END_TOKEN)) {
+        if (data.contains(Const.Tokens.END_TOKEN)) {
             socket.close()
             presenter.closeConnection()
 
             val dataBundle = Bundle().apply {
-                putCharArray(Const.Extras.DATA_EXTRA, readingData.toCharArray())
+
+                putString(Const.Extras.DATA_EXTRA, readingData.joinToString(""))
             }
             SharedPrefsUtils.saveReadData(requireContext(), readingData.joinToString(""))
             data.clear()

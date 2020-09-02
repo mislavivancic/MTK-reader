@@ -13,13 +13,12 @@ object SharedPrefsUtils {
         ).edit().putString(Const.SharedPrefKeys.READ_DATA_KEY, data).apply()
     }
 
-    fun getReadData(context: Context): CharArray? {
+    fun getReadData(context: Context): String? {
         val prefs = context.getSharedPreferences(
             BuildConfig.APPLICATION_ID,
             Context.MODE_PRIVATE
         )
-        val data = prefs.getString(Const.SharedPrefKeys.READ_DATA_KEY, null)
-        return data?.toCharArray()
+        return prefs.getString(Const.SharedPrefKeys.READ_DATA_KEY, null)
     }
 
 
