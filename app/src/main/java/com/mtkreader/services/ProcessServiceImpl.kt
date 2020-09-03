@@ -2,11 +2,16 @@ package com.mtkreader.services
 
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.DisplayDataContract
+import com.mtkreader.data.reading.IntrlockStr
 import com.mtkreader.data.reading.Mgaddr
+import com.mtkreader.data.reading.Opprog
+import com.mtkreader.data.reading.Uni4byt
 import kotlin.experimental.or
 import kotlin.math.pow
 
 class ProcessServiceImpl : DisplayDataContract.ProcessService {
+
+    private var globalIndex = 0
 
     private val mline = ByteArray(256)
     private var m_Dateerr = 0
@@ -77,6 +82,45 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
 
     private fun unpackDatV9(dbuf: ByteArray, mgaddr: Mgaddr) {
 
+        var m_RelInterLock: List<IntrlockStr>
+        globalIndex = 0
+
+        when (mgaddr.group) {
+            0 -> {
+            }
+            3 -> m_RelInterLock = getRelInterLock(dbuf)
+            in 0..5 -> {
+                globalIndex = 0
+            }
+        }
+
+    }
+
+    private fun getTparPar(rel: Int, nProNum: Int, dbuf: ByteArray): List<List<Opprog>> {
+        val listOfOpprog = mutableListOf(Opprog())
+
+    }
+
+    private fun getRelInterLock(dbuf: ByteArray): List<IntrlockStr> {
+        val intrLockStrList = mutableListOf<IntrlockStr>()
+        for (rel in 0..3) {
+            val intrLockStr =
+                IntrlockStr(
+                    setOprelI(dbuf),
+                    setOprelI(dbuf),
+                    intArrayOf(setOprelI(dbuf), setOprelI(dbuf))
+                )
+            intrLockStrList.add(intrLockStr)
+        }
+        return intrLockStrList
+
+    }
+
+    private fun setOprelI(dbuf: ByteArray): Int {
+        val b1 = dbuf[globalIndex++]
+        val b0 = dbuf[globalIndex++]
+        val tempi = Uni4byt(byteArrayOf(b0, b1, 0, 0))
+        return tempi.i
     }
 
 

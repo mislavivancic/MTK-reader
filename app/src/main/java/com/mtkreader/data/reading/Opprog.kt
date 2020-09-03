@@ -1,3 +1,17 @@
 package com.mtkreader.data.reading
 
-data class Opprog(val AkTim: Int, val DanPr: Byte, val TPro: List<Tonoff>)
+class Opprog {
+
+
+    init {
+        var AkTim = 0
+        var DanPr: Byte = 0
+        val TPro = mutableListOf<Tonoff>()
+
+        for (i in 0..14) {
+            TPro.add(Tonoff(0))
+        }
+    }
+
+
+}
