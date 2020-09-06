@@ -1,3 +1,8 @@
 package com.mtkreader.data.reading
 
-data class Wiper(val status: Byte, val Tswdly: Int, val TWiper: Int, val TBlockPrePro: Int)
+class Wiper {
+    var status: Byte = 0
+    var Tswdly: Int = 0
+    var TWiper: Int = 0
+    var TBlockPrePro: Int = 0
+}
