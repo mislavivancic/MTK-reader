@@ -118,12 +118,35 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
                     2 -> {
                         val tlgAbsenceDat = getTlgAbsenceDat(dbuf)
                     }
+                    3 -> {
+                        val learningData = getLearningDat(dbuf)
+                    }
 
                 }
             }
         }
 
     }
+
+    private fun getLearningDat(dbuf: ByteArray): List<StrLoadMng> {
+        val strLoadMngs = mutableListOf<StrLoadMng>()
+        for (i in 0..3) {
+            val strLoadMng = getStrLoadMng(dbuf)
+            strLoadMngs.add(strLoadMng)
+        }
+
+        return strLoadMngs
+    }
+
+    private fun getStrLoadMng(dbuf: ByteArray): StrLoadMng {
+        return StrLoadMng().apply {
+            status2 = dbuf[globalIndex++]
+            relPos = dbuf[globalIndex++]
+            TPosMin = setOprel3I(dbuf)
+            TPosMax = setOprel3I(dbuf)
+        }
+    }
+
 
     private fun getTlgAbsenceDat(dbuf: ByteArray): List<TlgAbstr> {
         val tlgAbstrs = mutableListOf<TlgAbstr>()
