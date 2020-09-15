@@ -20,7 +20,6 @@ import com.mtkreader.presenters.ConnectionPresenter
 import com.mtkreader.utils.PermissionUtils
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
-import com.mtkreader.views.dialogs.CantFindDeviceDialog
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import kotlinx.android.synthetic.main.fragment_connect.*
 
@@ -91,10 +90,10 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
                 adapter = AlphaInAnimationAdapter(connectedDevicesAdapter)
             }
 
-            val device = devices.find { it.name.toUpperCase().contains(Const.DeviceConstants.NAME) }
-
-            if (device == null)
-                CantFindDeviceDialog(requireContext()).show()
+            // probably not needed (too specific)
+            //val device = devices.find { it.name.toUpperCase().contains(Const.DeviceConstants.NAME) }
+            //if (device == null)
+            //    CantFindDeviceDialog(requireContext()).show()
         }
     }
 

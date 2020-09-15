@@ -29,6 +29,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         private const val FIRST_LINE_TOKEN_FIRST = 13.toByte().toChar()
         private const val FIRST_LINE_TOKEN_SECOND = 10.toByte().toChar()
         private const val SECOND_LINE_TOKEN = 6.toByte().toChar()
+        private const val SECOND_LINE_TOKEN_OTHER = 127.toByte().toChar()
     }
 
     private lateinit var connectedDevice: BluetoothDevice
@@ -93,12 +94,12 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         data.add(byte.toChar())
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
-
+        println("${byte.toChar()} -> $byte ")
         if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
             data.clear()
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
         }
-        if (data.contains(SECOND_LINE_TOKEN) && !isReadingData) {
+        if ((data.contains(SECOND_LINE_TOKEN) || data.contains(SECOND_LINE_TOKEN_OTHER)) && !isReadingData) {
             data.clear()
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
             isReadingData = true

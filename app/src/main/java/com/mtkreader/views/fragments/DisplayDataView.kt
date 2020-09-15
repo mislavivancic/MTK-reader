@@ -55,7 +55,7 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
 
         println(bodyData.joinToString(""))
 
-        presenter.processData(bodyData)
+        presenter.processData(headerData, bodyData)
     }
 
     private fun initPresenter() {

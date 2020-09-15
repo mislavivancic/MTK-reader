@@ -1,13 +1,13 @@
 package com.mtkreader.data.reading
 
-data class CfgParHwsw(
-    val cBrparam: Byte,
-    val cID: Int,
-    val cPcbRev: Byte,
-    val cNrel: Byte,
-    val cRtc: Byte,
-    val cNprog: Byte,
-    val cNpar: Byte,
-    val cNsez: Byte,
-    val cNpraz: Byte
-)
+class CfgParHwsw {
+    var cBrparam: Byte = 0
+    var cID: Int = 0
+    var cPcbRev: Byte = 0
+    var cNrel: Byte = 0
+    var cRtc: Byte = 0
+    var cNprog: Byte = 0
+    var cNpar: Byte = 0
+    var cNsez: Byte = 0
+    var cNpraz: Byte = 0
+}

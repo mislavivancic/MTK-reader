@@ -1,3 +1,8 @@
 package com.mtkreader.data.reading
 
-data class Vadrr(val VAdrRA: Byte, val VAdrRB: Byte, val VAdrRC: Byte, val VAdrRD: Byte)
+class Vadrr {
+    var VAdrRA: Byte = 0
+    var VAdrRB: Byte = 0
+    var VAdrRC: Byte = 0
+    var VAdrRD: Byte = 0
+}

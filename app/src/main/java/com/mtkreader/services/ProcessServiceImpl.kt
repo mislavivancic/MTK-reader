@@ -16,8 +16,18 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
 
     private var isCheck = false
 
-    override fun processData(data: ByteArray): String {
+    //set before
+    private var mSoftwareVersionPri = 0
+    private var m_HWVerPri = 0
 
+    private var m_CFG: CfgParHwsw = CfgParHwsw()
+
+    override fun processData(header: ByteArray, data: ByteArray): String {
+
+        getVersions(header)
+
+        // check how it's initialized
+        mSoftwareVersionPri = 96
 
         mline[0] = 0
 
@@ -90,6 +100,10 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
             mPProgR4.add(Opprog())
         }
 
+        val mOp50Prij = Oprij50()
+        val mOpPrij = Oprij()
+        val mReallocs = mutableListOf<Rreallc>()
+
         var m_RelInterLock: List<IntrlockStr>
 
         globalIndex = 0
@@ -124,9 +138,162 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
 
                 }
             }
+
+
+            8 -> {
+                val oprijParV9 = getOprijParV9(mgaddr, dbuf, mOp50Prij, mOpPrij, mReallocs)
+            }
         }
 
     }
+
+    private fun getOprijParV9(
+        mgaddr: Mgaddr,
+        dbuf: ByteArray,
+        mOp50Prij: Oprij50,
+        mOpPrij: Oprij,
+        mReallocs: MutableList<Rreallc>
+    ) {
+        when (mgaddr.objectt) {
+            0 -> {
+                if (mSoftwareVersionPri >= 96)
+                    getKlDatVer96(dbuf, mOp50Prij, mOpPrij, mReallocs)
+            }
+            1 -> if (mSoftwareVersionPri >= 96)
+                getKl2VerDatVer96(dbuf, mOp50Prij, mOpPrij)
+            2 -> getDaljPar()
+        }
+    }
+
+    private fun getKl2VerDatVer96(dbuf: ByteArray, mOp50Prij: Oprij50, mOpPrij: Oprij) {
+        var inCik = false
+
+        if ((m_CFG.cID == 100) || (m_CFG.cID == 120))
+            inCik = true
+
+        if (inCik)
+            mOpPrij.VDuzAdr = dbuf[globalIndex++]
+
+        mOpPrij.PolUKRe = dbuf[globalIndex++]
+
+        if (m_CFG.cID == 100)
+            mOpPrij.VIdBr = dbuf[globalIndex++]
+
+        mOp50Prij.RTCSinh = dbuf[globalIndex++]
+
+        if (inCik)
+            mOp50Prij.WDaySinh = dbuf[globalIndex++]
+
+        if (m_CFG.cID == 100) {
+            globalIndex++
+            globalIndex++
+            globalIndex++
+            globalIndex++
+        } else if (m_CFG.cID == 130 || m_CFG.cID == 0x8C) {
+            globalIndex++
+            globalIndex++
+        }
+        val sinhTimes = mutableListOf<Int>()
+        for (i in 0..4) {
+            sinhTimes.add(setOprel4I(dbuf))
+        }
+        mOp50Prij.SinhTime = sinhTimes.toIntArray()
+
+        if (!inCik)
+            return
+
+        val b1 = dbuf[globalIndex++]
+        mOpPrij.VCRel1Tu = dbuf[globalIndex++]
+        mOpPrij.VC1R1 = setOprelI(dbuf)
+
+        val b2 = dbuf[globalIndex++]
+        mOpPrij.VCRel2Tu = dbuf[globalIndex++]
+        mOpPrij.VC1R2 = setOprelI(dbuf)
+
+        val b3 = dbuf[globalIndex++]
+        mOpPrij.VCRel3Tu = dbuf[globalIndex++]
+        mOpPrij.VC1R3 = setOprelI(dbuf)
+
+        val b4 = dbuf[globalIndex++]
+        mOpPrij.VCRel4Tu = dbuf[globalIndex++]
+        mOpPrij.VC1R4 = setOprelI(dbuf)
+
+        mOpPrij.CRelXSw = byteArrayOf(b1, b2, b3, b4)
+
+
+        if (m_CFG.cID === 120 || m_HWVerPri == Const.Data.TIP_PS)
+            return
+
+        mOpPrij.VAdrR1 = setVerAdrVer9(dbuf)
+        mOpPrij.VAdrR2 = setVerAdrVer9(dbuf)
+        mOpPrij.VAdrR3 = setVerAdrVer9(dbuf)
+        mOpPrij.VAdrR4 = setVerAdrVer9(dbuf)
+
+    }
+
+    private fun setVerAdrVer9(dbuf: ByteArray): Vadrr {
+        val vadrr = Vadrr()
+        val adrxx = dbuf[globalIndex++]
+        return Vadrr().apply {
+            VAdrRA = if (adrxx == 0.toByte()) 0 else getAdrNr(adrxx)
+            VAdrRB = dbuf[globalIndex++]
+            VAdrRC = dbuf[globalIndex++]
+            VAdrRD = dbuf[globalIndex++]
+        }
+    }
+
+    private fun getAdrNr(xxadr: Byte): Byte {
+        var i: Byte = 0
+        while (i < 8) {
+            if (xxadr == Const.Data.bVtmask[i.toInt()]) {
+                return ++i
+            }
+            i++
+        }
+        return 0.toByte()
+    }
+
+    private fun getKlDatVer96(
+        dbuf: ByteArray,
+        mOp50Prij: Oprij50,
+        mOpPrij: Oprij,
+        mReallocs: MutableList<Rreallc>
+    ) {
+        getKlDatVer9(dbuf, mOpPrij, mReallocs)
+        mOp50Prij.apply {
+            CPWBRTIME = setOprelI(dbuf)
+            CLOGENFLGS = intArrayOf(setOprelI(dbuf), setOprelI(dbuf), setOprelI(dbuf))
+        }
+    }
+
+    private fun getKlDatVer9(
+        dbuf: ByteArray,
+        mOpPrij: Oprij,
+        mReallocs: MutableList<Rreallc>
+    ) {
+        mOpPrij.apply {
+            KlOpR1 = setDlyRelDv9(dbuf)
+            KlOpR2 = setDlyRelDv9(dbuf)
+            KlOpR3 = setDlyRelDv9(dbuf)
+            KlOpR4 = setDlyRelDv9(dbuf)
+        }
+
+        for (i in 0..3) {
+            val reallc = Rreallc()
+            reallc.rel_on = dbuf[globalIndex++]
+            reallc.rel_off = dbuf[globalIndex++]
+            mReallocs.add(reallc)
+        }
+
+    }
+
+    private fun setDlyRelDv9(dbuf: ByteArray): Klopr {
+        return Klopr().apply {
+            KRelDela = setOprel4I(dbuf)
+            KRelDelb = setOprel4I(dbuf)
+        }
+    }
+
 
     private fun getLearningDat(dbuf: ByteArray): List<StrLoadMng> {
         val strLoadMngs = mutableListOf<StrLoadMng>()
@@ -288,6 +455,15 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         return tempi.i
     }
 
+    private fun setOprel4I(dbuf: ByteArray): Int {
+        val b3 = dbuf[globalIndex++]
+        val b2 = dbuf[globalIndex++]
+        val b1 = dbuf[globalIndex++]
+        val b0 = dbuf[globalIndex++]
+        val tempi = Uni4byt(byteArrayOf(b0, b1, b2, b3))
+        return tempi.i
+    }
+
 
     private fun hasNextLine(data: ByteArray): Boolean {
         var i = 0
@@ -323,4 +499,86 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         isCheck = false
         return ch
     }
+
+    private fun getVersions(header: ByteArray) {
+        val headString = header.toString(Charsets.UTF_8)
+
+        var char: Char
+
+        for ((cnt, version) in Const.Data.CTipPrij.withIndex()) {
+            if (headString.contains(version, true)) {
+                m_HWVerPri = cnt
+                val indexOfVersionStart = headString.indexOf("V")
+                char = headString.get(indexOfVersionStart + 1)
+                if (char.isDigit())
+                    mSoftwareVersionPri = (char - '0') * 10
+                char = headString.get(indexOfVersionStart + 3)
+                if (char.isDigit())
+                    mSoftwareVersionPri += (char - '0')
+                break
+            }
+        }
+
+        val startIndexOfParams = headString.indexOf(";")
+
+        val buff = strCopyHexToBuf(headString, startIndexOfParams + 1)
+        m_CFG.cBrparam = buff[0]
+        val a: Int = buff[1].toInt() and 0xFF
+        val b: Int = buff[2].toInt() and 0xFF
+        m_CFG.cID = 256 * a + b
+
+        m_CFG.cPcbRev = buff[3]
+        m_CFG.cNrel = buff[4]
+        m_CFG.cRtc = buff[5]
+        m_CFG.cNprog = buff[6]
+        m_CFG.cNpar = buff[7]
+
+
+    }
+
+    private fun strCopyHexToBuf(headString: String, index: Int): List<Byte> {
+        val buf = mutableListOf<Byte>()
+
+        val len = (headString.length - index) / 2
+        var i = 0
+
+        var nIndex = index
+
+        var lb: Byte
+        var hb: Byte
+
+        var glIndex = 0
+
+        while (i++ < len) {
+            hb = headString[nIndex++].toByte()
+            lb = headString[nIndex++].toByte()
+
+            if (hb == ')'.toByte() || lb == ')'.toByte()) {
+                break
+            }
+            if (hb == '\r'.toByte() || lb == '\r'.toByte()) {
+                break
+            }
+
+            hb = HextoD(hb, lb)
+            buf.add(hb)
+        }
+        return buf
+    }
+
+
+    private fun HextoD(hb: Byte, lb: Byte): Byte {
+        var mb: Byte
+        mb = 0
+        if (hb >= '0'.toByte() && hb <= '9'.toByte() || hb >= 'A'.toByte() && hb <= 'F'.toByte() ||
+            lb >= '0'.toByte() && lb <= '9'.toByte() || lb >= 'A'.toByte() && lb <= 'F'.toByte()
+        ) {
+            mb =
+                if (hb >= 'A'.toByte()) ((hb - '7'.toByte()) * 16).toByte() else ((hb - '0'.toByte()) * 16).toByte()
+            mb =
+                if (lb >= 'A'.toByte()) (mb + (lb - '7'.toByte())).toByte() else (mb + (lb - '0'.toByte())).toByte()
+        }
+        return mb
+    }
+
 }

@@ -1,15 +1,15 @@
 package com.mtkreader.data.reading
 
-data class Oprij50(
-    val TlgRel1: Telegrel,
-    val TlgRel2: Telegrel,
-    val TlgRel3: Telegrel,
-    val TlgRel14: Telegrel,
-    val tlg: List<Tlg>,
-    val TlgVerAdr2: VadrTreiler,
-    val SinhTime: IntArray,
-    val RTCSinh: Byte,
-    val WDaySinh: Byte,
-    val CPWBRTIME: Int,
-    val CLOGENFLGS: IntArray
-)
+class Oprij50 {
+    var TlgRel1: Telegrel? = null
+    var TlgRel2: Telegrel? = null
+    var TlgRel3: Telegrel? = null
+    var TlgRel14: Telegrel? = null
+    var tlg: List<Tlg>? = null
+    var TlgVerAdr2: VadrTreiler? = null
+    var SinhTime: IntArray? = null
+    var RTCSinh: Byte = 0
+    var WDaySinh: Byte = 0
+    var CPWBRTIME: Int = 0
+    var CLOGENFLGS: IntArray? = null
+}

@@ -41,4 +41,31 @@ object Const {
         const val SECOND_INIT = "063034360D0A"
         const val ACK = "015503560D0A"
     }
+
+    object Data {
+        const val TIP_PS = 7
+        val bVtmask = byteArrayOf(
+            0x80.toByte(),
+            0x40.toByte(),
+            0x20.toByte(),
+            0x10.toByte(),
+            0x08.toByte(),
+            0x04.toByte(),
+            0x02.toByte(),
+            0x01.toByte()
+        )
+
+        val CTipPrij = arrayOf(
+            "-S ",
+            "-SN ",
+            "-SPA ",
+            "-PAS ",
+            "-PA ",
+            "-PASN ",
+            "-SPN ",
+            "-PS "
+        )
+
+
+    }
 }

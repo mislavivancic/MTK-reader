@@ -10,7 +10,7 @@ interface DisplayDataContract {
     }
 
     interface Presenter : AutoDisposePresenter {
-        fun processData(data: ByteArray)
+        fun processData(header: ByteArray, data: ByteArray)
     }
 
     interface DisplayService {
@@ -18,6 +18,6 @@ interface DisplayDataContract {
     }
 
     interface ProcessService {
-        fun processData(data: ByteArray): String
+        fun processData(header: ByteArray, data: ByteArray): String
     }
 }

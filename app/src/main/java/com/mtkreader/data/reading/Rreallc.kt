@@ -1,3 +1,6 @@
 package com.mtkreader.data.reading
 
-data class Rreallc(val rel_on: Byte, val rel_off: Byte)
+class Rreallc {
+    var rel_on: Byte = 0
+    var rel_off: Byte = 0
+}
