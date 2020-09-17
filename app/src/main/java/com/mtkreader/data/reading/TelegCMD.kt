@@ -1,3 +1,8 @@
 package com.mtkreader.data.reading
 
-data class TelegCMD(val AktiImp: ByteArray, val BrAkImp: Byte, val NeutImp: ByteArray, val Fn: Byte)
+class TelegCMD {
+    var AktiImp: ByteArray? = null
+    var BrAkImp: Byte = 0
+    var NeutImp: ByteArray? = null
+    var Fn: Byte = 0
+}

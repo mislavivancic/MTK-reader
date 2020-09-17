@@ -3,6 +3,7 @@ package com.mtkreader.services
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.data.reading.*
+import com.mtkreader.utils.DataUtils
 import kotlin.experimental.or
 import kotlin.math.pow
 
@@ -13,10 +14,12 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
     private val mline = ByteArray(256)
     private var m_Dateerr = 0
     private var m_cntxx = 1
+    private var mBrojRast = 0
+    private var mUtfPosto = 0.0
+    private val UTFREFP = 0.9
 
     private var isCheck = false
 
-    //set before
     private var mSoftwareVersionPri = 0
     private var m_HWVerPri = 0
 
@@ -103,6 +106,16 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         val mOp50Prij = Oprij50()
         val mOpPrij = Oprij()
         val mReallocs = mutableListOf<Rreallc>()
+        val mTelegSync = mutableListOf<Telegram>()
+        for (i in 0..4)
+            mTelegSync.add(Telegram())
+
+        val mTlgFnD = mutableListOf<Telegram>()
+        for (i in 0..7)
+            mTlgFnD.add(Telegram())
+
+        val mParFilteraCF = StrParFilVer9()
+        val mParFiltera = StrParFil()
 
         var m_RelInterLock: List<IntrlockStr>
 
@@ -141,11 +154,238 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
 
 
             8 -> {
-                val oprijParV9 = getOprijParV9(mgaddr, dbuf, mOp50Prij, mOpPrij, mReallocs)
+                getOprijParV9(mgaddr, dbuf, mOp50Prij, mOpPrij, mReallocs)
+            }
+            9 -> {
+                getTlg50Par(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnD)
+            }
+            12 -> {
+                getFriRPar(dbuf, mParFilteraCF, mParFiltera)
             }
         }
 
     }
+
+    private fun getFriRPar(dbuf: ByteArray, mParFilteraCf: StrParFilVer9, mParFiltera: StrParFil) {
+        if (mSoftwareVersionPri >= 90) {
+            getFriRParVer9(dbuf, mParFilteraCf)
+        } else {
+            mParFiltera.apply {
+                NYM1 = dbuf[globalIndex++]
+                NYM2 = dbuf[globalIndex++]
+                YM_B1 = setOprelI(dbuf)
+                YM_B2 = setOprelI(dbuf)
+                UTHMIN = setOprelI(dbuf)
+                UTLMAX = setOprelI(dbuf)
+                PERIOD = setOprelI(dbuf)
+                FORMAT = dbuf[globalIndex++].toInt()
+                BROJ = dbuf[globalIndex++].toInt()
+                mBrojRast = setOprelI(dbuf)
+            }
+        }
+    }
+
+    private fun getFriRParVer9(dbuf: ByteArray, mParFilteraCf: StrParFilVer9) {
+        mParFilteraCf.apply {
+            NYM1 = dbuf[globalIndex++]
+            NYM2 = dbuf[globalIndex++]
+            K_V = setOprelI(dbuf)
+            REZ = setOprelI(dbuf)
+            UTHMIN = setOprelI(dbuf)
+            UTLMAX = setOprelI(dbuf)
+            PERIOD = setOprelI(dbuf)
+            FORMAT = setOprelI(dbuf)
+            BROJ = dbuf[globalIndex++].toInt()
+            globalIndex++
+            mBrojRast = setOprelI(dbuf)
+            setUfPosto(this)
+        }
+    }
+
+    private fun setUfPosto(mParFilteraCf: StrParFilVer9) {
+        val broj = mParFilteraCf.BROJ
+        if (broj >= 0) {
+            var KvUt = mParFilteraCf.K_V
+            if (KvUt == 0)
+                KvUt = DataUtils.getTbParFilteraVer9()[broj].K_V
+
+            val utth = mParFilteraCf.UTHMIN.toDouble()
+            var uthMin = utth / KvUt.toDouble()
+
+            uthMin *= 1.002
+            var utlMax = mParFilteraCf.UTLMAX.toDouble() / KvUt.toDouble()
+            utlMax *= 1.002
+
+            var uthMinRef = 0.0
+            val ith = getFrUTHDefVer9(broj)
+            if (ith != 0) {
+                uthMinRef = ith.toDouble()
+                mUtfPosto = (utth * UTFREFP) / uthMinRef
+            } else
+                mUtfPosto = 0.0
+
+        }
+
+    }
+
+    private fun getFrUTHDefVer9(broj: Int): Int {
+        var uth = 0
+        if (broj >= 0)
+            uth = DataUtils.getTbParFilteraVer9()[broj].UTHMIN
+
+        return uth
+    }
+
+    private fun getTlg50Par(
+        mgaddr: Mgaddr,
+        dbuf: ByteArray,
+        mOp50Prij: Oprij50,
+        mTelegSync: List<Telegram>,
+        mTlgFnd: List<Telegram>
+    ) {
+        if (mSoftwareVersionPri >= 96)
+            getTlg50ParV96(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnd)
+    }
+
+    private fun getTlg50ParV96(
+        mgaddr: Mgaddr,
+        dbuf: ByteArray,
+        mOp50Prij: Oprij50,
+        mTelegSync: List<Telegram>,
+        mTlgFnd: List<Telegram>
+    ) {
+        if (m_CFG.cID >= 0x8C) {
+            getTlgID50ParV96(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnd)
+        } else {
+            when (mgaddr.objectt) {
+                0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)
+                1 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel2)
+                2 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel3)
+                3 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel4)
+            }
+        }
+    }
+
+    private fun getTlgID50ParV96(
+        mgaddr: Mgaddr,
+        dbuf: ByteArray,
+        mOp50Prij: Oprij50,
+        mTelegSync: List<Telegram>,
+        mTlgFnd: List<Telegram>
+    ) {
+        when (mgaddr.objectt) {
+            0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)
+            1 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel2)
+            2 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel3)
+            3 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel4)
+            4 -> {
+                storeDataTlgFn(dbuf, mOp50Prij.tlg[0].tel1)
+                storeDataTlgFn(dbuf, mOp50Prij.tlg[1].tel1)
+                storeDataTlgFn(dbuf, mOp50Prij.tlg[2].tel1)
+            }
+            5 -> {
+                storeDataTlgFn(dbuf, mOp50Prij.tlg[3].tel1)
+                storeDataTlgFn(dbuf, mOp50Prij.tlg[4].tel1)
+            }
+            6 -> {
+                storeDataTlgFn(dbuf, mOp50Prij.tlg[5].tel1)
+                storeDataTlgFn(dbuf, mOp50Prij.tlg[6].tel1)
+                storeDataTlgFn(dbuf, mOp50Prij.tlg[7].tel1)
+            }
+            8 -> {
+                storeDataTlgFn(dbuf, mTelegSync[0])
+                storeDataTlgFn(dbuf, mTelegSync[1])
+            }
+            9 -> {
+                storeDataTlgFn(dbuf, mTelegSync[2])
+                storeDataTlgFn(dbuf, mTelegSync[3])
+                storeDataTlgFn(dbuf, mTelegSync[4])
+
+            }
+            10 -> {
+                storeDataTlgFn(dbuf, mTlgFnd[0])
+                storeDataTlgFn(dbuf, mTlgFnd[1])
+                storeDataTlgFn(dbuf, mTlgFnd[2])
+            }
+            11 -> {
+                storeDataTlgFn(dbuf, mTlgFnd[3])
+                storeDataTlgFn(dbuf, mTlgFnd[4])
+            }
+            12 -> {
+                storeDataTlgFn(dbuf, mTlgFnd[5])
+                storeDataTlgFn(dbuf, mTlgFnd[6])
+                storeDataTlgFn(dbuf, mTlgFnd[7])
+            }
+
+        }
+
+
+    }
+
+    private fun storeDataTlgFn(dbuf: ByteArray, fn: Telegram) {
+        val byteBuffer = mutableListOf<Byte>()
+        for (i in 0..6) {
+            byteBuffer.add(dbuf[globalIndex++])
+        }
+        fn.Cmd.AktiImp = byteBuffer.toByteArray()
+        byteBuffer.clear()
+        fn.Cmd.BrAkImp = dbuf[globalIndex++]
+
+        for (i in 0..6)
+            byteBuffer.add(dbuf[globalIndex++])
+        fn.Cmd.NeutImp = byteBuffer.toByteArray()
+        byteBuffer.clear()
+        fn.Cmd.Fn = dbuf[globalIndex++]
+
+        val temp: Int = dbuf[globalIndex++].toInt()
+        var tempUp: Int = dbuf[globalIndex++].toInt()
+        tempUp = tempUp shl 8
+        fn.ID = temp or tempUp
+    }
+
+    private fun storeDataTlgRel(dbuf: ByteArray, tlgRel: Telegrel) {
+        val byteBuffer = mutableListOf<Byte>()
+        for (i in 0..6)
+            byteBuffer.add(dbuf[globalIndex++])
+        tlgRel.Uk.AktiImp = byteBuffer.toByteArray()
+        byteBuffer.clear()
+
+        tlgRel.Uk.BrAkImp = dbuf[globalIndex++]
+
+        for (i in 0..6)
+            byteBuffer.add(dbuf[globalIndex++])
+
+        tlgRel.Uk.NeutImp = byteBuffer.toByteArray()
+        byteBuffer.clear()
+
+        tlgRel.Uk.Fn = dbuf[globalIndex++]
+
+
+        for (i in 0..6)
+            byteBuffer.add(dbuf[globalIndex++])
+        tlgRel.Isk.AktiImp = byteBuffer.toByteArray()
+        byteBuffer.clear()
+
+        tlgRel.Isk.BrAkImp = dbuf[globalIndex++]
+
+        for (i in 0..6)
+            byteBuffer.add(dbuf[globalIndex++])
+        tlgRel.Isk.NeutImp = byteBuffer.toByteArray()
+        byteBuffer.clear()
+
+        tlgRel.Isk.Fn = dbuf[globalIndex++]
+
+        val temp: Int = dbuf[globalIndex++].toInt()
+        var tempUp: Int = dbuf[globalIndex++].toInt()
+        tempUp = tempUp shl 8
+
+        tlgRel.ID = temp or tempUp
+
+        println()
+
+
+    }
+
 
     private fun getOprijParV9(
         mgaddr: Mgaddr,

@@ -1,3 +1,7 @@
 package com.mtkreader.data.reading
 
-data class Telegrel(val Uk: TelegCMD, val Isk: TelegCMD, val ID: Int)
+class Telegrel {
+    var Uk: TelegCMD = TelegCMD()
+    var Isk: TelegCMD = TelegCMD()
+    var ID: Int = 0
+}

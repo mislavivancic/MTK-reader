@@ -1,3 +1,7 @@
 package com.mtkreader.data.reading
 
-data class VadrTreiler(val VaildVAdr: Byte, val DuzAdr: Byte, val TlgAdr: Telegram)
+class VadrTreiler {
+    var VaildVAdr: Byte = 0
+    var DuzAdr: Byte = 0
+    var TlgAdr: Telegram = Telegram()
+}

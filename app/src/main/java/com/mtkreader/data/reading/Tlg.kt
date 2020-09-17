@@ -1,3 +1,6 @@
 package com.mtkreader.data.reading
 
-data class Tlg(val tel1: Telegram, val tel2: Telegram)
+class Tlg {
+    var tel1: Telegram = Telegram()
+    var tel2: Telegram = Telegram()
+}

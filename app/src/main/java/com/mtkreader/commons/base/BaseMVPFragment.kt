@@ -22,6 +22,7 @@ open class BaseMVPFragment<T> : Fragment(), ErrorHandlingFragment where T : Auto
 
 
     override fun displayErrorPopup(throwable: Throwable) {
+        throwable.printStackTrace()
         ErrorDialog(requireContext(), throwable.localizedMessage).show()
     }
 }
