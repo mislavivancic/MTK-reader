@@ -4,7 +4,7 @@ import android.app.Application
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.services.DisplayServiceImpl
-import com.mtkreader.services.ProcessServiceImpl
+import com.mtkreader.services.ProcessDataServiceImpl
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -14,7 +14,7 @@ class MtkApplication : Application() {
 
         // services
         single<DisplayDataContract.DisplayService> { DisplayServiceImpl() }
-        single<DisplayDataContract.ProcessService> { ProcessServiceImpl() }
+        single<DisplayDataContract.ProcessService> { ProcessDataServiceImpl() }
 
         // utils
         single { RxBluetooth(this@MtkApplication) }

@@ -7,7 +7,26 @@ import com.mtkreader.utils.DataUtils
 import kotlin.experimental.or
 import kotlin.math.pow
 
-class ProcessServiceImpl : DisplayDataContract.ProcessService {
+class ProcessDataServiceImpl : DisplayDataContract.ProcessService {
+
+    // data to be filled
+    private lateinit var wipers: List<Wiper>
+    private lateinit var pOnPOffRDat: List<PonPoffStr>
+    private lateinit var tlgAbsenceDat: List<TlgAbstr>
+    private lateinit var learningData: List<StrLoadMng>
+    private lateinit var mRelInterLock: List<IntrlockStr>
+    private val mPProgR1 = mutableListOf<Opprog>()
+    private val mPProgR2 = mutableListOf<Opprog>()
+    private val mPProgR3 = mutableListOf<Opprog>()
+    private val mPProgR4 = mutableListOf<Opprog>()
+    private val mOpPrij = Oprij()
+    private val mOp50Prij = Oprij50()
+    private val mReallocs = mutableListOf<Rreallc>()
+    private val mTelegSync = mutableListOf<Telegram>()
+    private val mTlgFnD = mutableListOf<Telegram>()
+    private val mParFilteraCF = StrParFilVer9()
+    private val mParFiltera = StrParFil()
+
 
     private var globalIndex = 0
 
@@ -29,9 +48,7 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
 
         getVersions(header)
 
-        // check how it's initialized
-        mSoftwareVersionPri = 96
-
+        initData()
         mline[0] = 0
 
         while (hasNextLine(data)) {
@@ -41,13 +58,23 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
                 break
         }
 
-
+        generateHtml(
+            wipers,
+            pOnPOffRDat,
+            tlgAbsenceDat,
+            learningData,
+            mPProgR1,
+            mPProgR2,
+            mPProgR3,
+            mPProgR4,
+            mOpPrij
+        )
         return ""
     }
 
     private fun getLineData() {
         var i = 0
-        val m_gaddr: Mgaddr = Mgaddr(0)
+        val m_gaddr = Mgaddr(0)
         var bb: Char
 
         while (i < 5) {
@@ -91,39 +118,11 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
     }
 
     private fun unpackDatV9(dbuf: ByteArray, mgaddr: Mgaddr) {
-
-        val mPProgR1 = mutableListOf<Opprog>()
-        val mPProgR2 = mutableListOf<Opprog>()
-        val mPProgR3 = mutableListOf<Opprog>()
-        val mPProgR4 = mutableListOf<Opprog>()
-        for (i in 0..15) {
-            mPProgR1.add(Opprog())
-            mPProgR2.add(Opprog())
-            mPProgR3.add(Opprog())
-            mPProgR4.add(Opprog())
-        }
-
-        val mOp50Prij = Oprij50()
-        val mOpPrij = Oprij()
-        val mReallocs = mutableListOf<Rreallc>()
-        val mTelegSync = mutableListOf<Telegram>()
-        for (i in 0..4)
-            mTelegSync.add(Telegram())
-
-        val mTlgFnD = mutableListOf<Telegram>()
-        for (i in 0..7)
-            mTlgFnD.add(Telegram())
-
-        val mParFilteraCF = StrParFilVer9()
-        val mParFiltera = StrParFil()
-
-        var m_RelInterLock: List<IntrlockStr>
-
         globalIndex = 0
 
-
         when (mgaddr.group) {
-            3 -> m_RelInterLock = getRelInterLock(dbuf)
+            3 -> mRelInterLock = getRelInterLock(dbuf)
+
             in 1..4 -> {
                 globalIndex = 0
                 val oPProg = getTparPar(dbuf)
@@ -136,34 +135,47 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
             }
             5 -> {
                 when (mgaddr.objectt) {
-                    0 -> {
-                        val wipers = getWipers(dbuf)
-                    }
-                    1 -> {
-                        val pOnPOffRDat = getPonPoffRDat(dbuf)
-                    }
-                    2 -> {
-                        val tlgAbsenceDat = getTlgAbsenceDat(dbuf)
-                    }
-                    3 -> {
-                        val learningData = getLearningDat(dbuf)
-                    }
-
+                    0 -> wipers = getWipers(dbuf)
+                    1 -> pOnPOffRDat = getPonPoffRDat(dbuf)
+                    2 -> tlgAbsenceDat = getTlgAbsenceDat(dbuf)
+                    3 -> learningData = getLearningDat(dbuf)
                 }
             }
 
 
-            8 -> {
-                getOprijParV9(mgaddr, dbuf, mOp50Prij, mOpPrij, mReallocs)
-            }
-            9 -> {
-                getTlg50Par(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnD)
-            }
-            12 -> {
-                getFriRPar(dbuf, mParFilteraCF, mParFiltera)
-            }
+            8 -> getOprijParV9(mgaddr, dbuf, mOp50Prij, mOpPrij, mReallocs)
+            9 -> getTlg50Par(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnD)
+            12 -> getFriRPar(dbuf, mParFilteraCF, mParFiltera)
         }
 
+    }
+
+    private fun initData() {
+        for (i in 0..15) {
+            mPProgR1.add(Opprog())
+            mPProgR2.add(Opprog())
+            mPProgR3.add(Opprog())
+            mPProgR4.add(Opprog())
+        }
+        for (i in 0..4)
+            mTelegSync.add(Telegram())
+
+        for (i in 0..7)
+            mTlgFnD.add(Telegram())
+
+    }
+
+    private fun generateHtml(
+        wipers: List<Wiper>,
+        ponPoffstrs: List<PonPoffStr>,
+        tlgAbstrs: List<TlgAbstr>,
+        strLoadMngs: List<StrLoadMng>,
+        mPProgR1: List<Opprog>,
+        mPProgR2: List<Opprog>,
+        mPProgR3: List<Opprog>,
+        mPProgR4: List<Opprog>,
+        oprij: Oprij
+    ) {
     }
 
     private fun getFriRPar(dbuf: ByteArray, mParFilteraCf: StrParFilVer9, mParFiltera: StrParFil) {
@@ -316,10 +328,7 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
                 storeDataTlgFn(dbuf, mTlgFnd[6])
                 storeDataTlgFn(dbuf, mTlgFnd[7])
             }
-
         }
-
-
     }
 
     private fun storeDataTlgFn(dbuf: ByteArray, fn: Telegram) {
@@ -380,10 +389,6 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         tempUp = tempUp shl 8
 
         tlgRel.ID = temp or tempUp
-
-        println()
-
-
     }
 
 
@@ -395,15 +400,13 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         mReallocs: MutableList<Rreallc>
     ) {
         when (mgaddr.objectt) {
-            0 -> {
-                if (mSoftwareVersionPri >= 96)
-                    getKlDatVer96(dbuf, mOp50Prij, mOpPrij, mReallocs)
-            }
+            0 -> if (mSoftwareVersionPri >= 96)
+                getKlDatVer96(dbuf, mOp50Prij, mOpPrij, mReallocs)
+
             1 -> if (mSoftwareVersionPri >= 96)
                 getKl2VerDatVer96(dbuf, mOp50Prij, mOpPrij)
-            2 -> {
-                getDaljPar(dbuf, mOpPrij)
-            }
+
+            2 -> getDaljPar(dbuf, mOpPrij)
         }
     }
 
@@ -425,7 +428,6 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
                 StaR4PwON_OFF = dbuf[globalIndex++]
             }
         }
-
     }
 
     private fun getKl2VerDatVer96(dbuf: ByteArray, mOp50Prij: Oprij50, mOpPrij: Oprij) {
@@ -484,7 +486,7 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         mOpPrij.CRelXSw = byteArrayOf(b1, b2, b3, b4)
 
 
-        if (m_CFG.cID === 120 || m_HWVerPri == Const.Data.TIP_PS)
+        if (m_CFG.cID == 120 || m_HWVerPri == Const.Data.TIP_PS)
             return
 
         mOpPrij.VAdrR1 = setVerAdrVer9(dbuf)
@@ -495,7 +497,6 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
     }
 
     private fun setVerAdrVer9(dbuf: ByteArray): Vadrr {
-        val vadrr = Vadrr()
         val adrxx = dbuf[globalIndex++]
         return Vadrr().apply {
             VAdrRA = if (adrxx == 0.toByte()) 0 else getAdrNr(adrxx)
@@ -564,7 +565,6 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
             val strLoadMng = getStrLoadMng(dbuf)
             strLoadMngs.add(strLoadMng)
         }
-
         return strLoadMngs
     }
 
@@ -584,7 +584,6 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
             val tlgAbstr = getTlgAbstr(dbuf)
             tlgAbstrs.add(tlgAbstr)
         }
-
         return tlgAbstrs
     }
 
@@ -653,25 +652,22 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         val x = Unitimbyt()
         var nrTpar = 8
 
-        val m_SWVerPri = 0x60
-        val m_HWVerPri = 7
         val TIP_SPA = 2
         val NR_TPAR_SPA = 5
         val NR_TPAR_MAX = 14
 
 
-        nrTpar = if (m_SWVerPri >= 90 && m_HWVerPri == TIP_SPA)
+        nrTpar = if (mSoftwareVersionPri >= 90 && m_HWVerPri == TIP_SPA)
             NR_TPAR_SPA
-        else if (m_SWVerPri >= 40 && m_SWVerPri < 96)
+        else if (mSoftwareVersionPri in 40..95)
             NR_TPAR_MAX
-        else {
+        else
             11
-            //nrTpar = m_CFG.cNpar;
-        }
+
 
         x.b[1] = dbuf[globalIndex++]
 
-        if (m_SWVerPri >= 40)
+        if (mSoftwareVersionPri >= 40)
             x.b[0] = dbuf[globalIndex++]
 
         x.updateI()
@@ -750,18 +746,6 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         return false
     }
 
-    private fun HtoB(ch: Char): Char {
-        if (ch in '0'..'9') {
-            isCheck = true
-            return (ch - '0').toChar()
-        }
-        if (ch in 'A'..'F') {
-            isCheck = true
-            return (ch - 'A' + 0xA).toChar()
-        }
-        isCheck = false
-        return ch
-    }
 
     private fun getVersions(header: ByteArray) {
         val headString = header.toString(Charsets.UTF_8)
@@ -795,9 +779,9 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         m_CFG.cRtc = buff[5]
         m_CFG.cNprog = buff[6]
         m_CFG.cNpar = buff[7]
-
-
     }
+
+    // HELPER METHODS
 
     private fun strCopyHexToBuf(headString: String, index: Int): List<Byte> {
         val buf = mutableListOf<Byte>()
@@ -810,18 +794,15 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         var lb: Byte
         var hb: Byte
 
-        var glIndex = 0
-
         while (i++ < len) {
             hb = headString[nIndex++].toByte()
             lb = headString[nIndex++].toByte()
 
-            if (hb == ')'.toByte() || lb == ')'.toByte()) {
+            if (hb == ')'.toByte() || lb == ')'.toByte())
                 break
-            }
-            if (hb == '\r'.toByte() || lb == '\r'.toByte()) {
+
+            if (hb == '\r'.toByte() || lb == '\r'.toByte())
                 break
-            }
 
             hb = HextoD(hb, lb)
             buf.add(hb)
@@ -829,6 +810,18 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
         return buf
     }
 
+    private fun HtoB(ch: Char): Char {
+        if (ch in '0'..'9') {
+            isCheck = true
+            return (ch - '0').toChar()
+        }
+        if (ch in 'A'..'F') {
+            isCheck = true
+            return (ch - 'A' + 0xA).toChar()
+        }
+        isCheck = false
+        return ch
+    }
 
     private fun HextoD(hb: Byte, lb: Byte): Byte {
         var mb: Byte
