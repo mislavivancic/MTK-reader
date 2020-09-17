@@ -161,8 +161,31 @@ class ProcessServiceImpl : DisplayDataContract.ProcessService {
             }
             1 -> if (mSoftwareVersionPri >= 96)
                 getKl2VerDatVer96(dbuf, mOp50Prij, mOpPrij)
-            2 -> getDaljPar()
+            2 -> {
+                getDaljPar(dbuf, mOpPrij)
+            }
         }
+    }
+
+    private fun getDaljPar(dbuf: ByteArray, mOpPrij: Oprij) {
+        mOpPrij.apply {
+            VOpRe.VakProR1 = setOprelI(dbuf)
+            VOpRe.VakProR2 = setOprelI(dbuf)
+            VOpRe.VakProR3 = setOprelI(dbuf)
+            VOpRe.VakProR4 = setOprelI(dbuf)
+
+            VOpRe.StaPrij = dbuf[globalIndex++]
+
+            if (mSoftwareVersionPri < 95) {
+                mOpPrij.ParFlags = dbuf[globalIndex++]
+
+                StaR1PwON_OFF = dbuf[globalIndex++]
+                StaR2PwON_OFF = dbuf[globalIndex++]
+                StaR3PwON_OFF = dbuf[globalIndex++]
+                StaR4PwON_OFF = dbuf[globalIndex++]
+            }
+        }
+
     }
 
     private fun getKl2VerDatVer96(dbuf: ByteArray, mOp50Prij: Oprij50, mOpPrij: Oprij) {

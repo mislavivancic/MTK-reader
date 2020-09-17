@@ -1,9 +1,9 @@
 package com.mtkreader.data.reading
 
-data class Voprel(
-    val StaPrij: Byte,
-    val VakProR1: Int,
-    val VakProR2: Int,
-    val VakProR3: Int,
-    val VakProR4: Int
-)
+class Voprel {
+    var StaPrij: Byte = 0
+    var VakProR1: Int = 0
+    var VakProR2: Int = 0
+    var VakProR3: Int = 0
+    var VakProR4: Int = 0
+}

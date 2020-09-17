@@ -20,7 +20,7 @@ class Oprij {
     var VC1R3: Int = 0
     var VC1R4: Int = 0
     var CRelXSw: ByteArray? = null
-    var VOpRe: Voprel? = null
+    var VOpRe: Voprel = Voprel()
     var VIdBr: Byte = 0
     var ParFlags: Byte = 0
     var StaR1PwON_OFF: Byte = 0
