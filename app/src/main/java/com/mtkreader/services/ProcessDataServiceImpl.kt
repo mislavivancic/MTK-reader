@@ -1,13 +1,23 @@
 package com.mtkreader.services
 
+import android.content.Context
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.data.reading.*
 import com.mtkreader.utils.DataUtils
+import com.mtkreader.utils.HtmlCss.css
+import com.mtkreader.utils.HtmlTags.body
+import com.mtkreader.utils.HtmlTags.bodyC
+import com.mtkreader.utils.HtmlTags.divC
+import com.mtkreader.utils.HtmlTags.divContainter
+import com.mtkreader.utils.HtmlTags.htmlC
+import org.koin.core.KoinComponent
+import org.koin.core.inject
+import java.io.OutputStreamWriter
 import kotlin.experimental.or
 import kotlin.math.pow
 
-class ProcessDataServiceImpl : DisplayDataContract.ProcessService {
+class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent {
 
     // data to be filled
     private lateinit var wipers: List<Wiper>
@@ -175,7 +185,45 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService {
         mPProgR3: List<Opprog>,
         mPProgR4: List<Opprog>,
         oprij: Oprij
+    ): String {
+        val context: Context by inject()
+        val readFileName = "${System.currentTimeMillis()}.html"
+        val htmlWriter =
+            OutputStreamWriter(context.openFileOutput(readFileName, Context.MODE_PRIVATE))
+        htmlWriter.write(css)
+        htmlWriter.write("$body$divContainter")
+        generateContent(
+            htmlWriter,
+            wipers,
+            ponPoffstrs,
+            tlgAbstrs,
+            strLoadMngs,
+            mPProgR1,
+            mPProgR2,
+            mPProgR3,
+            mPProgR4,
+            oprij
+        )
+        htmlWriter.write("$divC$bodyC$htmlC")
+
+        val fileContent = readFromFile(readFileName, context)
+        return fileContent
+    }
+
+    private fun generateContent(
+        writer: OutputStreamWriter,
+        wipers: List<Wiper>,
+        ponPoffstrs: List<PonPoffStr>,
+        tlgAbstrs: List<TlgAbstr>,
+        strLoadMngs: List<StrLoadMng>,
+        mPProgR1: List<Opprog>,
+        mPProgR2: List<Opprog>,
+        mPProgR3: List<Opprog>,
+        mPProgR4: List<Opprog>,
+        oprij: Oprij
     ) {
+        writer.write("<h2>General</h2>")
+
     }
 
     private fun getFriRPar(dbuf: ByteArray, mParFilteraCf: StrParFilVer9, mParFiltera: StrParFil) {

@@ -19,6 +19,8 @@ class MtkApplication : Application() {
         // utils
         single { RxBluetooth(this@MtkApplication) }
 
+        single { this@MtkApplication }
+
 
     }
 
