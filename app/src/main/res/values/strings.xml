@@ -16,4 +16,9 @@
     <string name="dismiss">Dismiss</string>
     <string name="paired_devices">Paired Devices</string>
     <string name="display_last_reading">Display last reading</string>
+
+
+    <!-- Data Strings -->
+    <string name="general">General</string>
+    <string name="device_type">Device type</string>
 </resources>

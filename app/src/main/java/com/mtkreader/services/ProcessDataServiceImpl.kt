@@ -1,5 +1,7 @@
 package com.mtkreader.services
 
+import android.content.Context
+import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.data.reading.*
@@ -7,12 +9,25 @@ import com.mtkreader.utils.Css
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.HtmlTags.body
 import com.mtkreader.utils.HtmlTags.bodyC
+import com.mtkreader.utils.HtmlTags.h2
+import com.mtkreader.utils.HtmlTags.h2C
 import com.mtkreader.utils.HtmlTags.htmlC
+import com.mtkreader.utils.HtmlTags.table
+import com.mtkreader.utils.HtmlTags.tableC
+import com.mtkreader.utils.HtmlTags.td
+import com.mtkreader.utils.HtmlTags.tdC
+import com.mtkreader.utils.HtmlTags.th
+import com.mtkreader.utils.HtmlTags.thC
+import com.mtkreader.utils.HtmlTags.tr
+import com.mtkreader.utils.HtmlTags.trC
 import org.koin.core.KoinComponent
+import org.koin.core.inject
 import kotlin.experimental.or
 import kotlin.math.pow
 
 class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent {
+
+    val context: Context by inject()
 
     // data to be filled
     private lateinit var wipers: List<Wiper>
@@ -182,7 +197,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     ): String {
         val htmlBuilder = StringBuilder()
         htmlBuilder.append(Css.css)
-        htmlBuilder.append("$body")
+        htmlBuilder.append(body)
         generateContent(
             htmlBuilder,
             wipers,
@@ -212,8 +227,35 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mPProgR4: List<Opprog>,
         oprij: Oprij
     ) {
-        builder.append("<h2>General</h2>")
+        builder.append(h2 + getString(R.string.general) + h2C)
+        builder.append(table)
 
+
+        var str = ""
+
+        str += Const.Data.CTipPrij[m_HWVerPri]
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.device_type) + thC)
+        builder.append(
+            td +
+                    String.format(
+                        "MTK-%d-%s-V-%d",
+                        m_HWVerPri + 1,
+                        str,
+                        mSoftwareVersionPri
+                    )
+                    + tdC
+        )
+        builder.append(trC)
+
+        builder.append(tableC)
+
+    }
+
+
+    private fun getString(resId: Int): String {
+        return context.resources.getString(resId)
     }
 
     private fun getFriRPar(dbuf: ByteArray, mParFilteraCf: StrParFilVer9, mParFiltera: StrParFil) {

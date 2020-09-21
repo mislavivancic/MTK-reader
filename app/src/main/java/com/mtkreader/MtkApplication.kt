@@ -1,6 +1,7 @@
 package com.mtkreader
 
 import android.app.Application
+import android.content.Context
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.services.DisplayServiceImpl
@@ -19,7 +20,7 @@ class MtkApplication : Application() {
         // utils
         single { RxBluetooth(this@MtkApplication) }
 
-        single { this@MtkApplication }
+        single<Context> { this@MtkApplication }
 
 
     }
