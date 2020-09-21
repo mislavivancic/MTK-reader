@@ -19,15 +19,8 @@ class DisplayDataPresenter(private val view: DisplayDataContract.View) : BasePre
         val disposable = Single.fromCallable { processService.processData(header, data) }
             .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::generateHtml, view::displayErrorPopup)
+            .subscribe(view::displayData, view::displayErrorPopup)
 
         addDisposable(disposable)
     }
-
-
-    private fun generateHtml(data: String) {
-
-    }
-
-
 }

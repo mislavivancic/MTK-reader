@@ -1,19 +1,14 @@
 package com.mtkreader.services
 
-import android.content.Context
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.data.reading.*
+import com.mtkreader.utils.Css
 import com.mtkreader.utils.DataUtils
-import com.mtkreader.utils.HtmlCss.css
 import com.mtkreader.utils.HtmlTags.body
 import com.mtkreader.utils.HtmlTags.bodyC
-import com.mtkreader.utils.HtmlTags.divC
-import com.mtkreader.utils.HtmlTags.divContainter
 import com.mtkreader.utils.HtmlTags.htmlC
 import org.koin.core.KoinComponent
-import org.koin.core.inject
-import java.io.OutputStreamWriter
 import kotlin.experimental.or
 import kotlin.math.pow
 
@@ -68,7 +63,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                 break
         }
 
-        generateHtml(
+        return generateHtml(
             wipers,
             pOnPOffRDat,
             tlgAbsenceDat,
@@ -79,7 +74,6 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             mPProgR4,
             mOpPrij
         )
-        return ""
     }
 
     private fun getLineData() {
@@ -186,14 +180,11 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mPProgR4: List<Opprog>,
         oprij: Oprij
     ): String {
-        val context: Context by inject()
-        val readFileName = "${System.currentTimeMillis()}.html"
-        val htmlWriter =
-            OutputStreamWriter(context.openFileOutput(readFileName, Context.MODE_PRIVATE))
-        htmlWriter.write(css)
-        htmlWriter.write("$body$divContainter")
+        val htmlBuilder = StringBuilder()
+        htmlBuilder.append(Css.css)
+        htmlBuilder.append("$body")
         generateContent(
-            htmlWriter,
+            htmlBuilder,
             wipers,
             ponPoffstrs,
             tlgAbstrs,
@@ -204,14 +195,13 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             mPProgR4,
             oprij
         )
-        htmlWriter.write("$divC$bodyC$htmlC")
+        htmlBuilder.append("$bodyC$htmlC")
 
-        val fileContent = readFromFile(readFileName, context)
-        return fileContent
+        return htmlBuilder.toString()
     }
 
     private fun generateContent(
-        writer: OutputStreamWriter,
+        builder: java.lang.StringBuilder,
         wipers: List<Wiper>,
         ponPoffstrs: List<PonPoffStr>,
         tlgAbstrs: List<TlgAbstr>,
@@ -222,7 +212,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mPProgR4: List<Opprog>,
         oprij: Oprij
     ) {
-        writer.write("<h2>General</h2>")
+        builder.append("<h2>General</h2>")
 
     }
 

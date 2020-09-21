@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebViewClient
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseMVPFragment
@@ -12,6 +13,7 @@ import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.presenters.DisplayDataPresenter
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.SharedPrefsUtils
+import kotlinx.android.synthetic.main.fragment_display_data.*
 
 class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), DisplayDataContract.View {
 
@@ -62,9 +64,21 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         presenter = DisplayDataPresenter(this)
     }
 
-    private fun initViews() {}
+    private fun initViews() {
+        webView.apply {
+            settings.javaScriptEnabled = true
+            webViewClient = WebViewClient()
+            setInitialScale(1)
+            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = true
+            settings.setSupportZoom(true)
+            settings.builtInZoomControls = true
+            settings.displayZoomControls = false
+        }
+    }
 
     override fun displayData(dataString: String) {
-        println()
+        webView.loadData(dataString, "text/html", "UTF-8")
+
     }
 }
