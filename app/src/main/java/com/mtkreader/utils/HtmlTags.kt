@@ -29,7 +29,7 @@ object HtmlTags {
     val thcol4 = "<th colspan=\"4\">"
     val thcol8 = "<th colspan=\"8\">"
     val td = "<td>"
-    val tdC = "<tdC>"
+    val tdC = "</td>"
     val tdImpNeAkt = "<td class=\"impNeAkt\">"
     val tdImpAkt = "<td class=\"impAkt\">"
     val tdImpNeutr = "<td class=\"impNeutr\">"
