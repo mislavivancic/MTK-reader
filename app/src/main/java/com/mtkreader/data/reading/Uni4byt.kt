@@ -1,9 +1,11 @@
 package com.mtkreader.data.reading
 
-class Uni4byt(val b: ByteArray) {
+class Uni4byt {
     var i = 0
+    var b: ByteArray? = null
 
-    init {
+    constructor(b: ByteArray) {
+        this.b = b
         var mask1 = 0
         mask1 = b[3].toInt()
         mask1 = mask1 shl 32
@@ -24,5 +26,15 @@ class Uni4byt(val b: ByteArray) {
         mask4 = mask4 and 0x000000FF
 
         i = mask1 or mask2 or mask3 or mask4
+    }
+
+    constructor(i: Int) {
+        this.i = i
+        val b0 = (i and 0xFF).toByte()
+        val b1 = (i shr 8 and 0xFF).toByte()
+        val b2 = (i shr 16 and 0xFF).toByte()
+        val b3 = (i shr 24 and 0xFF).toByte()
+        this.b = byteArrayOf(b0, b1, b2, b3)
+
     }
 }

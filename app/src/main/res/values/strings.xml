@@ -21,4 +21,77 @@
     <!-- Data Strings -->
     <string name="general">General</string>
     <string name="device_type">Device type</string>
+    <string name="hdo_frequency">HDO frequency</string>
+    <string name="raster">Raster</string>
+    <string-array name="rra">
+        <item>Semagyr 50a</item>
+        <item>Ricontic b</item>
+        <item>Pulsadis(EdF)</item>
+        <item>Inematic 2000</item>
+        <item>ZPA-I-I</item>
+        <item>ZPA-I-Ik</item>
+        <item>CEZ 50D</item>
+        <item>CEZ 50K</item>
+    </string-array>
+    <string name="sensitivity">Sensitivity</string>
+    <string name="tel_raster_time_base">Tel. raster time base</string>
+    <string name="network50hz">Network(50Hz)</string>
+    <string name="clock">Clock</string>
+    <string name="rtc_time_base">RTC time base</string>
+    <string name="quartz">Quartz 32768 Hz</string>
+    <string-array name="rtcloss">
+        <item>None</item>
+        <item>a</item>
+        <item>b</item>
+        <item>Same as PWON</item>
+        <item>Continue with 50Hz</item>
+    </string-array>
+    <string name="rtc_loss_action">RTC Loss action</string>
+    <string name="address_length_teleg">Address length of telegram DIN–43861–301</string>
+    <string name="sync_teleg_day">synchronization telegram - day >> time</string>
+    <string name="id">ID</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="day_cycle_active">24h cycle - active</string>
+    <string name="day_cycle_delay">24h cycle - delay</string>
+    <string name="track_relay_position">Track relay position after time synchronization</string>
+    <string name="power_bridge_time">Power bridging time</string>
+    <string name="relay_settings">Relay settings</string>
+    <string name="relay_num">Relay %d</string>
+    <string name="relay_installed">Relay installed(active)</string>
+    <string name="inverted_logic">Inverted logic</string>
+    <string name="relay_switching_assignment">Relay switching assignment</string>
+    <string name="relay_num_a">Relay %d a</string>
+    <string name="relay_num_b">Relay %d b</string>
+    <string name="switching_delay">Switching delay</string>
+    <string name="delay_a">Delay a(hh:mm:ss)</string>
+    <string name="delay_b">Delay b(hh:mm:ss)</string>
+    <string name="random">Random</string>
+    <string name="fixed">Fixed</string>
+    <string name="classic_telegram">Classic telegram</string>
+    <string name="telegram">Telegram</string>
+    <string name="name">Name</string>
+    <string name="a">A</string>
+    <string name="b">B</string>
+    <string name="v">V</string>
+    <string name="z">Z</string>
+    <string name="unknown">Unknown</string>
+    <string name="plus">+</string>
+    <string name="minus">-</string>
+    <string name="additional_telegrams">Additional telegrams</string>
+    <string name="sync_telegrams">Synchronization telegrams</string>
+    <string name="sync_telegrams_dow">Synchronization telegrams - day of the week</string>
+
+    <string-array name="dan_sync_tg">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+        <item>Time only</item>
+    </string-array>
+
+
 </resources>

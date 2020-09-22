@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import android.webkit.WebViewClient
 import com.mtkreader.R
 import com.mtkreader.commons.Const
@@ -68,12 +69,14 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         webView.apply {
             settings.javaScriptEnabled = true
             webViewClient = WebViewClient()
-            setInitialScale(1)
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
             settings.setSupportZoom(true)
             settings.builtInZoomControls = true
             settings.displayZoomControls = false
+            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = true
+            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL
         }
     }
 

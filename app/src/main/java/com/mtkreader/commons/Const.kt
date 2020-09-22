@@ -43,6 +43,17 @@ object Const {
     }
 
     object Data {
+        const val TIM_LOSS_RTC_POS = 0x02
+        const val SINH_REL_POS_MASK = 0x40
+
+
+        const val TIP_S = 0
+        const val TIP_SN = 1
+        const val TIP_SPA = 2
+        const val TIP_PAS = 3
+        const val TIP_PA = 4
+        const val TIP_PASN = 5
+        const val TIP_SPN = 6
         const val TIP_PS = 7
         val bVtmask = byteArrayOf(
             0x80.toByte(),

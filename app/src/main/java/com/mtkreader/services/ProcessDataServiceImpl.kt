@@ -3,10 +3,19 @@ package com.mtkreader.services
 import android.content.Context
 import com.mtkreader.R
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.Const.Data.TIP_PA
+import com.mtkreader.commons.Const.Data.TIP_PASN
+import com.mtkreader.commons.Const.Data.TIP_PS
+import com.mtkreader.commons.Const.Data.TIP_S
+import com.mtkreader.commons.Const.Data.TIP_SN
+import com.mtkreader.commons.Const.Data.TIP_SPA
+import com.mtkreader.commons.Const.Data.TIP_SPN
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.data.reading.*
 import com.mtkreader.utils.Css
 import com.mtkreader.utils.DataUtils
+import com.mtkreader.utils.HtmlTags.b
+import com.mtkreader.utils.HtmlTags.bC
 import com.mtkreader.utils.HtmlTags.body
 import com.mtkreader.utils.HtmlTags.bodyC
 import com.mtkreader.utils.HtmlTags.h2
@@ -16,8 +25,14 @@ import com.mtkreader.utils.HtmlTags.table
 import com.mtkreader.utils.HtmlTags.tableC
 import com.mtkreader.utils.HtmlTags.td
 import com.mtkreader.utils.HtmlTags.tdC
+import com.mtkreader.utils.HtmlTags.tdImpAkt
+import com.mtkreader.utils.HtmlTags.tdImpNeAkt
+import com.mtkreader.utils.HtmlTags.tdImpNeutr
 import com.mtkreader.utils.HtmlTags.th
 import com.mtkreader.utils.HtmlTags.thC
+import com.mtkreader.utils.HtmlTags.thcol2
+import com.mtkreader.utils.HtmlTags.thcol4
+import com.mtkreader.utils.HtmlTags.thcol8
 import com.mtkreader.utils.HtmlTags.tr
 import com.mtkreader.utils.HtmlTags.trC
 import org.koin.core.KoinComponent
@@ -28,6 +43,25 @@ import kotlin.math.pow
 class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent {
 
     val context: Context by inject()
+
+    // move this elsewhere
+
+    var fVis_VersacomPS = false
+    var fVis_Versacom = false
+    var fVis_Uklsat = false
+    var fVis_Prazdani = false
+    var fVis_Sezone = false
+    var fVis_Asat = false
+    var fVis_RefPrij = false
+    var fVis_TBAS = false
+    var fVis_DUZADR = false
+    var fVis_Realoc = false
+    var fVis_Cz95P = false
+    var fVis_Cz96P = false
+
+    var IsCZRaster = false
+    var IsCZ44raster = false
+
 
     // data to be filled
     private lateinit var wipers: List<Wiper>
@@ -78,6 +112,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                 break
         }
 
+        setupFlags()
         return generateHtml(
             wipers,
             pOnPOffRDat,
@@ -89,6 +124,27 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             mPProgR4,
             mOpPrij
         )
+    }
+
+    private fun setupFlags() {
+        fVis_VersacomPS = m_HWVerPri != TIP_PS
+        fVis_VersacomPS = m_HWVerPri != TIP_PS
+        fVis_Versacom = m_HWVerPri != TIP_S && m_HWVerPri != TIP_SN && m_HWVerPri != TIP_SPN
+        fVis_Uklsat =
+            m_HWVerPri == TIP_SPA || m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN
+        fVis_Prazdani =
+            mSoftwareVersionPri >= 94 && (m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN)
+        fVis_Sezone =
+            fVis_Versacom && m_HWVerPri != TIP_PA || fVis_Uklsat && mSoftwareVersionPri >= 95
+        fVis_Sezone = fVis_Sezone && mSoftwareVersionPri >= 80 && m_HWVerPri != TIP_PS
+        fVis_Asat = m_HWVerPri == TIP_PASN || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN
+        fVis_RefPrij = m_HWVerPri != TIP_S && m_HWVerPri != TIP_SN
+        fVis_TBAS = m_HWVerPri != TIP_PA
+        fVis_DUZADR = m_HWVerPri != TIP_SPN
+        fVis_Realoc = mSoftwareVersionPri >= 82
+
+        fVis_Cz95P = mSoftwareVersionPri >= 95
+        fVis_Cz96P = mSoftwareVersionPri >= 96
     }
 
     private fun getLineData() {
@@ -227,32 +283,540 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mPProgR4: List<Opprog>,
         oprij: Oprij
     ) {
+        generateGeneral(builder)
+
+
+        generateRelaySettings(builder, oprij)
+
+        if (fVis_Realoc)
+            generateRelaySwitchAssignement(builder)
+
+        if (fVis_RefPrij) {
+            generateSwitchingDelay(builder, oprij)
+            generateClassicTelegram(builder)
+        }
+
+        if (fVis_Cz96P) {
+            generateAdditionalTelegram(builder)
+        }
+
+        if (fVis_RefPrij && fVis_Cz95P) {
+            generateTelegramSync(builder)
+            generateSyncTelegramDoW(builder)
+
+        }
+    }
+
+    private fun generateTelegramSync(builder: java.lang.StringBuilder) {
+        builder.append(h2 + getString(R.string.sync_telegrams) + h2C)
+        builder.append(table)
+        getRasterHeadStringH(builder)
+        getRasterHeadStringTop(builder)
+        getRasterHeadStringBottom(builder)
+        for (i in 0..4)
+            getRasterStringSync(builder, mTelegSync[i].Cmd, i)
+
+        builder.append(tableC)
+    }
+
+    private fun generateSyncTelegramDoW(builder: java.lang.StringBuilder) {
+        builder.append(h2 + getString(R.string.sync_telegrams_dow) + h2C)
+        builder.append(table)
+        getRasterHeadStringH(builder)
+        getRasterHeadStringTop(builder)
+        getRasterHeadStringBottom(builder)
+
+        for (i in 0..7)
+            getRasterString(builder, mTlgFnD[i].Cmd, i, 'a')
+
+        builder.append(tableC)
+    }
+
+    private fun generateAdditionalTelegram(builder: java.lang.StringBuilder) {
+        builder.append(h2 + getString(R.string.additional_telegrams) + h2C)
+        builder.append(table)
+        getRasterHeadStringH(builder)
+        getRasterHeadStringTop(builder)
+        getRasterHeadStringBottom(builder)
+
+        getRasterString(builder, mOp50Prij.tlg[0].tel1.Cmd, 1, 'a')
+        getRasterString(builder, mOp50Prij.tlg[1].tel1.Cmd, 1, 'b')
+
+        getRasterString(builder, mOp50Prij.tlg[2].tel1.Cmd, 1, 'a')
+        getRasterString(builder, mOp50Prij.tlg[3].tel1.Cmd, 1, 'b')
+
+        getRasterString(builder, mOp50Prij.tlg[4].tel1.Cmd, 1, 'a')
+        getRasterString(builder, mOp50Prij.tlg[5].tel1.Cmd, 1, 'b')
+
+        getRasterString(builder, mOp50Prij.tlg[6].tel1.Cmd, 1, 'a')
+        getRasterString(builder, mOp50Prij.tlg[7].tel1.Cmd, 1, 'b')
+
+        builder.append(tableC)
+    }
+
+    private fun generateClassicTelegram(builder: java.lang.StringBuilder) {
+        builder.append(h2 + getString(R.string.classic_telegram) + h2C)
+        builder.append(table)
+        getRasterHeadStringH(builder)
+        getRasterHeadStringTop(builder)
+        getRasterHeadStringBottom(builder)
+
+        getRasterString(builder, mOp50Prij.TlgRel1.Uk, 1, 'a')
+        getRasterString(builder, mOp50Prij.TlgRel1.Isk, 1, 'b')
+
+        getRasterString(builder, mOp50Prij.TlgRel2.Uk, 1, 'a')
+        getRasterString(builder, mOp50Prij.TlgRel2.Isk, 1, 'b')
+
+        getRasterString(builder, mOp50Prij.TlgRel3.Uk, 1, 'a')
+        getRasterString(builder, mOp50Prij.TlgRel3.Isk, 1, 'b')
+
+        getRasterString(builder, mOp50Prij.TlgRel4.Uk, 1, 'a')
+        getRasterString(builder, mOp50Prij.TlgRel4.Isk, 1, 'b')
+
+        builder.append(tableC)
+    }
+
+
+    private fun getRasterString(builder: StringBuilder, t: TelegCMD, num: Int, ch: Char) {
+        builder.append(tr)
+        builder.append(th + getString(R.string.unknown) + thC)
+        builder.append(th + String.format("R%d %c", num, ch) + thC)
+        for (iBimp in 0..49) {
+            val nBitNumber = iBimp % 8
+            val nByteNumber = iBimp / 8
+
+            val N = t.NeutImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
+            val A = t.AktiImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
+
+            if (IsCZ44raster && iBimp == 44)
+                break
+
+            if (A != 0 && N != 0)
+                builder.append(tdImpNeAkt + b + getString(R.string.plus) + bC + tdC)
+            else if (A == 0 && N != 0)
+                builder.append(tdImpAkt + b + getString(R.string.minus) + bC + tdC)
+            else
+                builder.append(tdImpNeutr + tdC)
+        }
+        builder.append(trC)
+    }
+
+    private fun getRasterStringSync(builder: StringBuilder, t: TelegCMD, x: Int) {
+        builder.append(tr)
+        builder.append(th + getString(R.string.unknown) + thC)
+        builder.append(th + getSyncTime(mOp50Prij.SinhTime?.get(x)!!, m_HWVerPri) + thC)
+
+        for (iBimp in 0..49) {
+            val nBitNumber = iBimp % 8
+            val nByteNumber = iBimp / 8
+
+            val N = t.NeutImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
+            val A = t.AktiImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
+            if (IsCZ44raster && iBimp == 44)
+                break
+
+            if (A != 0 && N != 0)
+                builder.append(tdImpNeAkt + b + getString(R.string.plus) + bC + tdC)
+            else if (A == 0 && N != 0)
+                builder.append(tdImpAkt + b + getString(R.string.minus) + bC + tdC)
+            else
+                builder.append(tdImpNeutr + tdC)
+        }
+        builder.append(trC)
+    }
+
+    private fun getSyncTime(t: Int, ver: Int): String? {
+        val datstr: String
+        val tstr: String
+        val stime: Int
+        var tmpi: Int
+        if (ver == TIP_PA) {
+            stime = t and 0x000FFFFF
+            datstr = String.format(
+                "%02d:%02d:%02d",
+                stime / 60 / 60 % 24,
+                stime / 60 % 60,
+                stime % 60
+            )
+            tmpi = stime / 60 / 60 / 24
+            if (t and 0x00800000 == 0) {
+                tmpi = 7
+            }
+        } else {
+            val rtctime = Uni4byt(t)
+            datstr = String.format(
+                "%02d:%02d:%02d",
+                rtctime.b?.get(2)!!.toInt() and 0x1F,
+                rtctime.b?.get(1)!!.toInt(),
+                rtctime.b?.get(0)!!.toInt()
+            )
+            tmpi = rtctime.b!![2].toInt() shr 5
+            if (tmpi == 0) {
+                tmpi = 7
+            } else {
+                tmpi--
+            }
+        }
+        tstr = String.format("%s>> %s", getStringArray(R.array.dan_sync_tg, tmpi % 8), datstr)
+        return tstr
+    }
+
+    private fun getRasterHeadStringH(builder: StringBuilder) {
+        builder.append(tr)
+
+        builder.append(th + getString(R.string.name) + thC)
+        builder.append(th + getString(R.string.telegram) + thC)
+        builder.append(thcol4 + getString(R.string.a) + thC)
+        builder.append(thcol8 + getString(R.string.b) + thC)
+        for (i in 4..19)
+            builder.append(thcol2 + String.format("DP%d", i - 3) + thC)
+        builder.append(trC)
+    }
+
+    private fun getRasterHeadStringTop(builder: StringBuilder) {
+        builder.append(tr)
+        builder.append(th + thC)
+        builder.append(th + thC)
+
+        for (i in 1..4)
+            builder.append(th + i + thC)
+
+
+        for (i in 1..8)
+            builder.append(th + i + thC)
+
+        for (i in 14..45 step 2) {
+            builder.append(th + getString(R.string.z) + thC)
+            builder.append(th + getString(R.string.v) + thC)
+        }
+
+        builder.append(trC)
+    }
+
+    private fun getRasterHeadStringBottom(builder: StringBuilder) {
+        builder.append(tr)
+        builder.append(th + thC)
+        builder.append(th + thC)
+
+        for (i in 1..44) {
+            builder.append(th + i + thC)
+        }
+        builder.append(trC)
+    }
+
+    private fun generateSwitchingDelay(
+        builder: java.lang.StringBuilder,
+        oprij: Oprij
+    ) {
+        builder.append(h2 + getString(R.string.switching_delay) + h2C)
+        builder.append(table)
+        builder.append(tr)
+
+        builder.append(th + thC)
+        for (i in 1..4)
+            builder.append(th + String.format(getString(R.string.relay_num), i) + thC)
+
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.delay_a) + thC)
+        builder.append(td + getZatez(oprij.KlOpR1?.KRelDela, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR2?.KRelDela, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR3?.KRelDela, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR4?.KRelDela, 't') + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.delay_a) + thC)
+        builder.append(td + getZatez(oprij.KlOpR1?.KRelDela, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR2?.KRelDela, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR3?.KRelDela, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR4?.KRelDela, 'm') + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.delay_b) + thC)
+        builder.append(td + getZatez(oprij.KlOpR1?.KRelDelb, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR2?.KRelDelb, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR3?.KRelDelb, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR4?.KRelDelb, 't') + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.delay_b) + thC)
+        builder.append(td + getZatez(oprij.KlOpR1?.KRelDelb, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR2?.KRelDelb, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR3?.KRelDelb, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR4?.KRelDelb, 'm') + tdC)
+        builder.append(trC)
+
+        builder.append(tableC)
+    }
+
+    private fun generateRelaySwitchAssignement(builder: java.lang.StringBuilder) {
+        builder.append(h2 + getString(R.string.relay_switching_assignment) + h2C)
+        builder.append(table)
+        builder.append(tr)
+        builder.append(th + thC)
+        builder.append(thcol4 + getString(R.string.relay_switching_assignment) + thC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + thC)
+        for (i in 1..4)
+            builder.append(th + String.format(getString(R.string.relay_num), i) + thC)
+        builder.append(trC)
+
+        var x = 3
+        for (i in 0..3) {
+            builder.append(tr)
+            builder.append(th + String.format(getString(R.string.relay_num_a), i + 1) + thC)
+            builder.append(td + getPPRealoc(i, 1, mReallocs[i].rel_on.toInt()) + tdC)
+            builder.append(td + getPPRealoc(i, 2, mReallocs[i].rel_on.toInt()) + tdC)
+            builder.append(td + getPPRealoc(i, 3, mReallocs[i].rel_on.toInt()) + tdC)
+            builder.append(td + getPPRealoc(i, 4, mReallocs[i].rel_on.toInt()) + tdC)
+            builder.append(trC)
+
+            x++
+
+            builder.append(tr)
+            builder.append(th + String.format(getString(R.string.relay_num_b), i + 1) + thC)
+            builder.append(td + getPPRealoc(i, 1, mReallocs[i].rel_off.toInt()) + tdC)
+            builder.append(td + getPPRealoc(i, 2, mReallocs[i].rel_off.toInt()) + tdC)
+            builder.append(td + getPPRealoc(i, 3, mReallocs[i].rel_off.toInt()) + tdC)
+            builder.append(td + getPPRealoc(i, 4, mReallocs[i].rel_off.toInt()) + tdC)
+            builder.append(trC)
+
+            x++
+        }
+        builder.append(tableC)
+    }
+
+    private fun getPPRealoc(i: Int, n: Int, y: Int): String? {
+        val z = y.toByte()
+        val k = 2 * (4 - n)
+        val msk = y shr k and 0x03
+        var r = ""
+        if (i + 1 == n) r = "/" else if (msk == 0x00) r = "" else if (msk == 0x01) r =
+            "b" else if (msk == 0x02) r = "a" else if (msk == 0x03) r = ""
+        return r
+    }
+
+    private fun getZatez(zz: Int?, NT: Char): String? {
+        if (zz == null)
+            return ""
+        var zz = zz
+        var r = ""
+        if (NT == 'm') r = if (zz and 0xC00000 != 0) {
+            getString(R.string.random)
+        } else {
+            getString(R.string.fixed)
+        }
+        if (NT == 't') {
+            zz = zz and 0x0FFFFF
+            r = String.format(
+                "%02d:%02d:%02d",
+                zz / 3600,
+                zz % 3600 / 60,
+                zz % 3600 % 60
+            )
+        }
+        return r
+    }
+
+    private fun generateRelaySettings(
+        builder: java.lang.StringBuilder,
+        oprij: Oprij
+    ) {
+        builder.append(h2 + getString(R.string.relay_settings) + h2C)
+        builder.append(table)
+        builder.append(tr)
+        builder.append(th + thC)
+        for (i in 1..4)
+            builder.append(th + String.format(getString(R.string.relay_num), i) + thC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.relay_installed) + thC)
+        for (i in 0..3) {
+            val mask = 0x80 shr i
+            if ((oprij.VOpRe.StaPrij.toInt() and mask) != 0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.no) + tdC)
+        }
+        builder.append(trC)
+        builder.append(tr)
+        builder.append(th + getString(R.string.inverted_logic) + thC)
+        for (i in 0..3) {
+            val mask = 0x80 shr i
+            if ((oprij.PolUKRe.toInt() and mask) != 0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.no) + tdC)
+        }
+        builder.append(trC)
+        builder.append(tableC)
+    }
+
+    private fun generateGeneral(builder: java.lang.StringBuilder) {
         builder.append(h2 + getString(R.string.general) + h2C)
         builder.append(table)
 
-
-        var str = ""
-
-        str += Const.Data.CTipPrij[m_HWVerPri]
+        val mTip = 1
+        val version = Const.Data.CTipPrij[m_HWVerPri]
 
         builder.append(tr)
         builder.append(th + getString(R.string.device_type) + thC)
         builder.append(
             td +
-                    String.format(
-                        "MTK-%d-%s-V-%d",
-                        m_HWVerPri + 1,
-                        str,
-                        mSoftwareVersionPri
-                    )
+                    String.format("MTK-%d-%s-V-%d", mTip + 1, version, mSoftwareVersionPri)
                     + tdC
         )
         builder.append(trC)
 
-        builder.append(tableC)
+        if (fVis_RefPrij) {
+            builder.append(tr)
+            builder.append(th + getString(R.string.hdo_frequency) + thC)
 
+            if (mSoftwareVersionPri >= 90) {
+                if (mParFilteraCF.BROJ >= 0)
+                    builder.append(
+                        td + String.format(
+                            "%4.2f Hz",
+                            DataUtils.tbparfiltera98mhz()[mParFilteraCF.BROJ].fre
+                        )
+                                + tdC
+                    )
+            } else
+                if (mParFiltera.BROJ >= 0)
+                    if (mSoftwareVersionPri < 80)
+                        builder.append(
+                            td + String.format(
+                                "%4.2f Hz",
+                                DataUtils.tbParFiltera()[mParFiltera.BROJ].fre
+                            ) + tdC
+                        )
+                    else
+                        builder.append(
+                            td + String.format(
+                                "%4.2f Hz",
+                                DataUtils.tbparfiltera98mhz()[mParFiltera.BROJ].fre
+                            ) + tdC
+                        )
+
+            builder.append(trC)
+
+            builder.append(tr)
+            builder.append(th + getString(R.string.raster) + thC)
+            builder.append(td + getStringArray(R.array.rra, mBrojRast) + tdC)
+            IsCZ44raster = mBrojRast == 4 || mBrojRast == 5
+            IsCZRaster = mBrojRast in 4..7
+            builder.append(trC)
+
+            builder.append(tr)
+            builder.append(th + getString(R.string.sensitivity) + thC)
+            builder.append(td + String.format("%4.2f %%", mUtfPosto) + tdC)
+            builder.append(trC)
+
+            builder.append(tr)
+            builder.append(th + getString(R.string.tel_raster_time_base) + thC)
+
+            if ((mOp50Prij.RTCSinh.toInt() and 0x80) != 0)
+                builder.append(td + getString(R.string.network50hz) + tdC)
+            else
+                builder.append(td + getString(R.string.clock) + tdC)
+            builder.append(trC)
+        }
+
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.rtc_time_base) + thC)
+
+        if ((mOp50Prij.RTCSinh.toInt() and 0x03) != 0)
+            builder.append(td + getString(R.string.quartz) + tdC)
+        else
+            builder.append(td + getString(R.string.network50hz) + tdC)
+        builder.append(trC)
+
+
+        if (!fVis_VersacomPS) {
+            builder.append(tr)
+            builder.append(th + getString(R.string.rtc_loss_action) + thC)
+
+            var inx: Int = (mOp50Prij.RTCSinh.toInt() shr Const.Data.TIM_LOSS_RTC_POS and 0x0F)
+
+            if (inx > 3)
+                inx = 0
+            builder.append(td + getStringArray(R.array.rtcloss, inx) + tdC)
+
+            builder.append(trC)
+        }
+
+        if (fVis_RefPrij) {
+            if (fVis_VersacomPS) {
+                builder.append(tr)
+                builder.append(th + getString(R.string.address_length_teleg) + thC)
+                builder.append(td + String.format("%d", mOpPrij.VDuzAdr) + tdC)
+                builder.append(trC)
+
+                builder.append(tr)
+                builder.append(th + getString(R.string.id) + thC)
+                builder.append(td + String.format("%d", mOpPrij.VIdBr) + tdC)
+                builder.append(trC)
+
+            }
+
+            if (!fVis_Cz95P) {
+                builder.append(tr)
+                builder.append(th + getString(R.string.sync_teleg_day) + thC)
+                builder.append(td + String.format("%d", mOpPrij.VDuzAdr) + tdC)
+                builder.append(trC)
+
+                builder.append(tr)
+                builder.append(th + getString(R.string.day_cycle_active) + thC)
+                val dataStr =
+                    if ((mOpPrij.ParFlags.toInt() and 0x1) != 0)
+                        getString(R.string.yes)
+                    else getString(R.string.no)
+                builder.append(td + dataStr + tdC)
+                builder.append(trC)
+
+                builder.append(tr)
+                builder.append(th + getString(R.string.day_cycle_delay) + thC)
+
+                val delay = String.format("%02d:%02d", mOpPrij.Dly24H / 60, mOpPrij.Dly24H % 60)
+                builder.append(td + delay + tdC)
+                builder.append(trC)
+            } else {
+                builder.append(tr)
+                builder.append(th + getString(R.string.track_relay_position) + thC)
+
+                val dataStr =
+                    if ((mOp50Prij.RTCSinh.toInt() and Const.Data.SINH_REL_POS_MASK) != 0)
+                        getString(R.string.yes)
+                    else getString(R.string.no)
+
+                builder.append(td + dataStr + tdC)
+                builder.append(trC)
+            }
+
+        }
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.power_bridge_time) + thC)
+
+        val timeBridge = (mOp50Prij.CPWBRTIME * 5.0 / 1000.0).toFloat()
+        builder.append(td + String.format("%.2f s", timeBridge) + tdC)
+        builder.append(trC)
+
+
+        builder.append(tableC)
     }
 
+    private fun getStringArray(resId: Int, index: Int): String {
+        return context.resources.getStringArray(resId)[index]
+    }
 
     private fun getString(resId: Int): String {
         return context.resources.getString(resId)
