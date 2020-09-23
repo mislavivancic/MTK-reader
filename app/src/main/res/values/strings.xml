@@ -93,5 +93,26 @@
         <item>Time only</item>
     </string-array>
 
+    <string name="work_sched_test_1">Work Schedulestest1</string>
+    <string name="time_pair_test2">Time pair test2</string>
+    <string name="t_atest3">T - atest3</string>
+    <string name="t_btest3">T - b test4</string>
+
+
+    <string-array name="a_days">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+        <item>Ho.</item>
+    </string-array>
+
+    <string name="work_schedules">Work Schedules</string>
+    <string name="active">Active</string>
+
+    <string name="work_schedules_time_pairs">Work schedules - Time pairs Relay</string>
 
 </resources>

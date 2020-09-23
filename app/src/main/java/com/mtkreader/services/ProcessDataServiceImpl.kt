@@ -91,6 +91,10 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     private var mUtfPosto = 0.0
     private val UTFREFP = 0.9
 
+    private var cntWork1 = 0
+    private var cntWork2 = 0
+    private var cntWork3 = 0
+
     private var isCheck = false
 
     private var mSoftwareVersionPri = 0
@@ -196,7 +200,6 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         globalIndex = 0
 
         when (mgaddr.group) {
-            3 -> mRelInterLock = getRelInterLock(dbuf)
 
             in 1..4 -> {
                 globalIndex = 0
@@ -204,7 +207,11 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                 when (mgaddr.group) {
                     1 -> mPProgR1.add(mgaddr.objectt, oPProg)
                     2 -> mPProgR2.add(mgaddr.objectt, oPProg)
-                    3 -> mPProgR3.add(mgaddr.objectt, oPProg)
+                    3 -> {
+                        mRelInterLock = getRelInterLock(dbuf)
+                        globalIndex = 0
+                        mPProgR3.add(mgaddr.objectt, oPProg)
+                    }
                     4 -> mPProgR4.add(mgaddr.objectt, oPProg)
                 }
             }
@@ -304,6 +311,299 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             generateTelegramSync(builder)
             generateSyncTelegramDoW(builder)
 
+        }
+
+        var buildersWorkSchedTimePairs: List<StringBuilder>? = null
+        if (fVis_Versacom)
+            buildersWorkSchedTimePairs = showTimePairs(mPProgR1, mPProgR2, mPProgR3, mPProgR4)
+
+        val buildersWorkSchedTimeDays =
+            arrayListOf(StringBuilder(), StringBuilder(), StringBuilder(), StringBuilder())
+
+        for (relay in 0..3) {
+            if (oprij.VOpRe.StaPrij.toInt() and (0x80 shr relay) == 0)
+                continue
+            getRelAkProg(relay, buildersWorkSchedTimeDays)
+        }
+
+        for (i in 0..3) {
+            builder.append(h2 + getString(R.string.work_schedules_time_pairs) + (i + 1) + h2C)
+            builder.append(buildersWorkSchedTimeDays[i].toString())
+            builder.append(buildersWorkSchedTimePairs?.get(i).toString())
+        }
+    }
+
+    private fun getRelAkProg(relay: Int, builders: List<StringBuilder>) {
+
+        val temp = mutableListOf("", "", "", "", "", "", "", "")
+        builders[relay].append(table)
+        builders[relay].append(tr)
+        builders[relay].append(th + getString(R.string.work_schedules) + thC)
+        builders[relay].append(th + getString(R.string.active) + thC)
+
+        for (i in 0..7)
+            builders[relay].append(th + getStringArray(R.array.a_days, i) + thC)
+        builders[relay].append(trC)
+
+        for (pItem in 0..15) {
+            when (relay) {
+                0 -> {
+                    if (mPProgR1[pItem].AkTim != 0) {
+                        builders[relay].append(tr)
+                        builders[relay].append(td + (pItem + 1) + tdC)
+                        val yesNo =
+                            if ((DataUtils.getIVtmask(pItem) and mOpPrij.VOpRe.VakProR1) != 0)
+                                getString(R.string.yes)
+                            else
+                                getString(R.string.no)
+                        builders[relay].append(td + yesNo + tdC)
+
+
+                        for (iItem in 7 downTo 0) {
+                            if ((DataUtils.getBVtmask(iItem) and mPProgR1[pItem].DanPr.toInt()) != 0) {
+                                temp[iItem] = "+"
+                            } else {
+                                temp[iItem] = "-"
+                            }
+                        }
+
+                        for (i in 7 downTo 0)
+                            builders[relay].append(td + temp[i] + tdC)
+
+                        builders[relay].append(trC)
+                    }
+                }
+                1 -> {
+
+                    if (mPProgR2[pItem].AkTim != 0) {
+                        builders[relay].append(tr)
+                        builders[relay].append(td + (pItem + 1) + tdC)
+                        val yesNo =
+                            if ((DataUtils.getIVtmask(pItem) and mOpPrij.VOpRe.VakProR1) != 0)
+                                getString(R.string.yes)
+                            else
+                                getString(R.string.no)
+                        builders[relay].append(td + yesNo + tdC)
+
+
+                        for (iItem in 7 downTo 0) {
+                            if ((DataUtils.getBVtmask(iItem) and mPProgR2[pItem].DanPr.toInt()) != 0) {
+                                temp[iItem] = "+"
+                            } else {
+                                temp[iItem] = "-"
+                            }
+                        }
+
+                        for (i in 7 downTo 0)
+                            builders[relay].append(td + temp[i] + tdC)
+
+                        builders[relay].append(trC)
+                    }
+
+
+                }
+
+                2 -> {
+                    if (mPProgR3[pItem].AkTim != 0) {
+                        builders[relay].append(tr)
+                        builders[relay].append(td + (pItem + 1) + tdC)
+                        val yesNo =
+                            if ((DataUtils.getIVtmask(pItem) and mOpPrij.VOpRe.VakProR1) != 0)
+                                getString(R.string.yes)
+                            else
+                                getString(R.string.no)
+                        builders[relay].append(td + yesNo + tdC)
+
+
+                        for (iItem in 7 downTo 0) {
+                            if ((DataUtils.getBVtmask(iItem) and mPProgR3[pItem].DanPr.toInt()) != 0) {
+                                temp[iItem] = "+"
+                            } else {
+                                temp[iItem] = "-"
+                            }
+                        }
+
+                        for (i in 7 downTo 0)
+                            builders[relay].append(td + temp[i] + tdC)
+
+                        builders[relay].append(trC)
+                    }
+                }
+
+                3 -> {
+                    if (mPProgR4[pItem].AkTim != 0) {
+                        builders[relay].append(tr)
+                        builders[relay].append(td + (pItem + 1) + tdC)
+                        val yesNo =
+                            if ((DataUtils.getIVtmask(pItem) and mOpPrij.VOpRe.VakProR1) != 0)
+                                getString(R.string.yes)
+                            else
+                                getString(R.string.no)
+                        builders[relay].append(td + yesNo + tdC)
+
+
+                        for (iItem in 7 downTo 0) {
+                            if ((DataUtils.getBVtmask(iItem) and mPProgR4[pItem].DanPr.toInt()) != 0) {
+                                temp[iItem] = "+"
+                            } else {
+                                temp[iItem] = "-"
+                            }
+                        }
+
+                        for (i in 7 downTo 0)
+                            builders[relay].append(td + temp[i] + tdC)
+
+                        builders[relay].append(trC)
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    private fun showTimePairs(
+        mPProgR1: List<Opprog>,
+        mPProgR2: List<Opprog>,
+        mPProgR3: List<Opprog>,
+        mPProgR4: List<Opprog>
+    ): List<StringBuilder> {
+        val buildersWorkSchedTimePairs =
+            arrayListOf(StringBuilder(), StringBuilder(), StringBuilder(), StringBuilder())
+        for (relay in 0..3) {
+            buildersWorkSchedTimePairs[relay].append(table)
+            buildersWorkSchedTimePairs[relay].append(tr)
+            buildersWorkSchedTimePairs[relay].append(th + getString(R.string.work_sched_test_1) + thC)
+            buildersWorkSchedTimePairs[relay].append(th + getString(R.string.time_pair_test2) + thC)
+            buildersWorkSchedTimePairs[relay].append(th + getString(R.string.t_atest3) + thC)
+            buildersWorkSchedTimePairs[relay].append(th + getString(R.string.t_btest3) + thC)
+            buildersWorkSchedTimePairs[relay].append(trC)
+
+            for (rp in 0..15)
+                getRelVremPar(
+                    buildersWorkSchedTimePairs[relay],
+                    relay,
+                    rp,
+                    mPProgR1,
+                    mPProgR2,
+                    mPProgR3,
+                    mPProgR4
+                )
+            buildersWorkSchedTimePairs[relay].append(tableC)
+        }
+        return buildersWorkSchedTimePairs
+    }
+
+    private fun getRelVremPar(
+        builder: StringBuilder,
+        relay: Int,
+        rp: Int,
+        mPProgR1: List<Opprog>,
+        mPProgR2: List<Opprog>,
+        mPProgR3: List<Opprog>,
+        mPProgR4: List<Opprog>
+    ) {
+        var count = 0
+
+        when (relay) {
+            0 -> {
+                for (itemIndex in 0..m_CFG.cNpar) {
+                    if ((mPProgR1[rp].AkTim and DataUtils.getIVtmask(itemIndex)) != 0) {
+                        builder.append(tr)
+                        count++
+                        if (count == 1) {
+                            builder.append(td + (cntWork1 + 1) + tdC)
+                            cntWork1++
+                        } else
+                            builder.append(td + tdC)
+
+                        builder.append(td + String.format("%02d", itemIndex + 1) + tdC)
+                        builder.append(
+                            td + String.format(
+                                "%02d:%02d",
+                                (mPProgR1[rp].TPro[itemIndex].Ton) / 60,
+                                (mPProgR1[rp].TPro[itemIndex].Ton) % 60
+                            )
+                                    + tdC
+                        )
+                        builder.append(
+                            td + String.format(
+                                "%02d:%02d",
+                                (mPProgR1[rp].TPro[itemIndex].Toff) / 60,
+                                (mPProgR1[rp].TPro[itemIndex].Toff) % 60
+                            )
+                                    + tdC
+                        )
+                        builder.append(trC)
+                    }
+                }
+            }
+            1 -> {
+                for (itemIndex in 0..m_CFG.cNpar) {
+
+                    if ((mPProgR2[rp].AkTim and DataUtils.getIVtmask(itemIndex)) != 0) {
+                        builder.append(tr)
+                        count++
+                        if (count == 1) {
+                            builder.append(td + (cntWork2 + 1) + tdC)
+                            cntWork2++
+                        } else
+                            builder.append(td + tdC)
+
+                        builder.append(td + String.format("%02d", itemIndex + 1) + tdC)
+                        builder.append(
+                            td + String.format(
+                                "%02d:%02d",
+                                (mPProgR2[rp].TPro[itemIndex].Ton) / 60,
+                                (mPProgR2[rp].TPro[itemIndex].Ton) % 60
+                            )
+                                    + tdC
+                        )
+                        builder.append(
+                            td + String.format(
+                                "%02d:%02d",
+                                (mPProgR2[rp].TPro[itemIndex].Toff) / 60,
+                                (mPProgR2[rp].TPro[itemIndex].Toff) % 60
+                            )
+                                    + tdC
+                        )
+                        builder.append(trC)
+                    }
+                }
+
+            }
+            2 -> {
+                for (itemIndex in 0..m_CFG.cNpar) {
+                    if ((mPProgR3[rp].AkTim and DataUtils.getIVtmask(itemIndex)) != 0) {
+                        builder.append(tr)
+                        count++
+                        if (count == 1) {
+                            builder.append(td + (cntWork3 + 1) + tdC)
+                            cntWork3++
+                        } else
+                            builder.append(td + tdC)
+
+                        builder.append(td + String.format("%02d", itemIndex + 1) + tdC)
+                        builder.append(
+                            td + String.format(
+                                "%02d:%02d",
+                                (mPProgR3[rp].TPro[itemIndex].Ton) / 60,
+                                (mPProgR3[rp].TPro[itemIndex].Ton) % 60
+                            )
+                                    + tdC
+                        )
+                        builder.append(
+                            td + String.format(
+                                "%02d:%02d",
+                                (mPProgR3[rp].TPro[itemIndex].Toff) / 60,
+                                (mPProgR3[rp].TPro[itemIndex].Toff) % 60
+                            )
+                                    + tdC
+                        )
+                        builder.append(trC)
+                    }
+                }
+            }
         }
     }
 

@@ -75,4 +75,30 @@ object DataUtils {
             StrParFil(26, 26, 0, 0, 0x120, 0x80, 0x058A, 3, 15, 433.3333333)
         )
     }
+
+    fun getIVtmask(index: Int): Int {
+        return intArrayOf(
+            0x8000,
+            0x4000,
+            0x2000,
+            0x1000,
+            0x0800,
+            0x0400,
+            0x0200,
+            0x0100,
+            0x0080,
+            0x0040,
+            0x0020,
+            0x0010,
+            0x0008,
+            0x0004,
+            0x0002,
+            0x0001
+        )[index]
+    }
+
+    fun getBVtmask(index: Int): Int {
+        return intArrayOf(0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01)[index]
+
+    }
 }
