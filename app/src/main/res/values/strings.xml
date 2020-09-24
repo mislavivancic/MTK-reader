@@ -124,5 +124,13 @@
     <string name="duration_in_position">Duration in position</string>
     <string name="xx">XX</string>
 
+    <string name="learn_functions">Learn Functions</string>
+    <string name="learn_period">Learn Period</string>
+    <string name="position">Position</string>
+    <string name="min">Min</string>
+    <string name="max">Max</string>
+    <string name="day_h">24 h</string>
+    <string name="seven_days">7 days</string>
+
 
 </resources>

@@ -307,12 +307,60 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         if (fVis_RefPrij && fVis_Cz95P) {
             generateTelegramSync(builder)
             generateSyncTelegramDoW(builder)
-
         }
+
         generateWorkSchedules(mPProgR1, mPProgR2, mPProgR3, mPProgR4, oprij, builder)
-
-
         generateWiperAndClosedLoop(builder, wipers)
+        generateLearnFunctions(builder, strLoadMngs)
+
+    }
+
+    private fun generateLearnFunctions(
+        builder: java.lang.StringBuilder,
+        strLoadMngs: List<StrLoadMng>
+    ) {
+        builder.append(h2 + getString(R.string.learn_functions) + h2C)
+        builder.append(table)
+        builder.append(tr)
+        builder.append(th + thC)
+        for (i in 1..4)
+            builder.append(th + String.format(getString(R.string.relay_num), i) + thC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.learn_period) + thC)
+        for (i in 0..3)
+            if ((strLoadMngs[i].status2.toInt() and Const.Data.LEARN_7DAYS_MASK) == 0)
+                builder.append(td + getString(R.string.day_h) + tdC)
+            else
+                builder.append(td + getString(R.string.seven_days) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.position) + thC)
+
+        for (i in 0..3)
+            if ((strLoadMngs[i].relPos.toInt() and Const.Data.LEARN_R_ON_MASK) != 0)
+                builder.append(td + getString(R.string.a) + tdC)
+            else if ((strLoadMngs[i].relPos.toInt() and Const.Data.LEARN_R_OFF_MASK) != 0)
+                builder.append(td + getString(R.string.b) + tdC)
+            else
+                builder.append(td + getString(R.string.xx) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.min) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMfromInt(strLoadMngs[i].TPosMin) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.max) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMfromInt(strLoadMngs[i].TPosMax) + tdC)
+        builder.append(trC)
+
+        builder.append(tableC)
     }
 
     private fun generateWiperAndClosedLoop(builder: StringBuilder, wipers: List<Wiper>) {
@@ -406,6 +454,20 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         time /= 60
         mm = time % 60
         hh = time / 60
+        return String.format("%02d:%02d:%02d", hh, mm, ss)
+    }
+
+    private fun getHMfromInt(time: Int): String {
+        var time = time
+        val hh: Int
+        val mm: Int
+        val ss: Int
+        if (time >= 24 * 60) {
+            time = 0
+        }
+        mm = time % 60
+        hh = time / 60
+        ss = 0
         return String.format("%02d:%02d:%02d", hh, mm, ss)
     }
 
