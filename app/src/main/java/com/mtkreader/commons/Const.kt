@@ -59,6 +59,44 @@ object Const {
         const val LEARN_R_OFF_MASK = 0x20
 
 
+        const val SNE_POFF = 0x0001
+        const val SNE_PON = 0x0002
+        const val SNE_RTC_ST = 0x0004
+        const val SNE_RTC_OF = 0x0008
+        const val SNE_SHT = 0x0010 //
+
+        const val SNE_SHD = 0x0020 //
+
+        const val SNE_RTC_BL = 0x0040 //
+
+        const val SNE_RTC_OOK = 0x0080
+        const val SNE_LSINH = 0x0100 //
+
+        const val SNE_WPAROK = 0x0400 //
+
+        const val SNE_WPARERR = 0x0800 //
+
+
+        const val OPT_LOG_MYTLG = 0x4000
+        const val OPT_LOG_TLG = 0x8000
+        const val OPT_LOG_REPTLG = 0x2000
+
+        const val REL_ON = 0x0001
+        const val REL_OFF = 0x0002
+        const val REL_PROBLOCK = 0x0004
+        const val REL_PROUNBLOCK = 0x0008
+        const val REL_WIP_S = 0x0010
+        const val REL_WIP_R = 0x0020
+        const val REL_TA_S = 0x0040
+        const val REL_TA_R = 0x0080
+        const val PRO_REL_X = 0x0100
+        const val TEL_REL_X = 0x0200
+        const val CLP_REL_X = 0x0400
+        const val PON_REL_X = 0x0800
+
+        const val PRO_REL_ON = 0x0101
+        const val PRO_REL_OFF = 0x0102
+
         const val TIP_S = 0
         const val TIP_SN = 1
         const val TIP_SPA = 2

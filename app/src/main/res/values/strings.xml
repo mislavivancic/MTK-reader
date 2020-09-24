@@ -133,4 +133,92 @@
     <string name="seven_days">7 days</string>
 
 
+    <string name="telegram_absence">Telegram Absence</string>
+    <string name="on_timer_restart">On timer restart event disables work schedule</string>
+    <string name="action">Action</string>
+    <string name="absence_time">Absence Time</string>
+    <string name="learn_function_disabled">Learn function disabled</string>
+    <string name="arrival_and_loss_of_supply">Arrival and loss of supply</string>
+    <string name="stop_learn_and_wiper_functions">Stop learn and wiper functions</string>
+    <string name="power_supply_loss_time">Power supply loss time</string>
+    <string name="loss_of_supply_short">Loss of supply(short) - action</string>
+    <string name="loss_of_supply_long_ignore">Loss of supply(long) - ignore action</string>
+    <string name="loss_of_supply_long_action">Loss of supply(long) - action</string>
+    <string name="switch_delay_min">Switching delay - min</string>
+    <string name="switch_delay_max">Switching delay - max</string>
+
+    <string-array name="rst">
+        <item>----</item>
+        <item>Valid start impulse</item>
+        <item>Valid telegram</item>
+        <item>Telegram for this receiver</item>
+        <item>Telegram for this relay</item>
+    </string-array>
+
+    <string-array name="act">
+        <item>----</item>
+        <item>a</item>
+        <item>b</item>
+        <item>Enable work schedule</item>
+        <item>Disable work schedule</item>
+        <item>Switch to work sched.</item>
+        <item>Switch to loop schedule</item>
+    </string-array>
+
+    <string-array name="poffS">
+        <item>None</item>
+        <item>a</item>
+        <item>b</item>
+        <item>a with delayed sched.</item>
+        <item>b with delayed sched.</item>
+        <item>As before power loss</item>
+        <item>Switch to work sched.</item>
+        <item>Enable work sched.</item>
+        <item>Disable work sched.</item>
+        <item>Cyclic switching</item>
+    </string-array>
+
+    <string-array name="poffL">
+        <item>None</item>
+        <item>a</item>
+        <item>b</item>
+        <item>a with delayed sched.</item>
+        <item>b with delayed sched.</item>
+        <item>As before power loss</item>
+    </string-array>
+
+    <string-array name="poffAct">
+        <item>None</item>
+        <item>a</item>
+        <item>b</item>
+    </string-array>
+
+
+    <string name="event_log">Event Log</string>
+    <string name="common_log">Common Log</string>
+    <string name="power_on_off_time">Power on/off time</string>
+    <string name="synchronization_telegram_time">Synchronization telegram - time</string>
+    <string name="synchronization_telegram_day">Synchronization telegram - day</string>
+    <string name="local_change_of_time">Local change of time</string>
+    <string name="rtc_log">RTC Log</string>
+    <string name="relay_log">Relay Log</string>
+    <string name="rtc_stop">RTC Stop</string>
+    <string name="oscillator_fail">Oscillator fail</string>
+    <string name="battery_low">Battery low</string>
+    <string name="relay_switched_by_telegram">Relay switched by telegram</string>
+    <string name="relay_switched_by_program">Relay switched by telegram</string>
+    <string name="start_wiper">Start Wiper</string>
+    <string name="end_wiper">End Wiper</string>
+    <string name="telegram_absence_start">Telegram absence start</string>
+    <string name="telegram_absence_restart">Telegram absence restart</string>
+    <string name="work_schedule_disabled">Work schedule disabled</string>
+    <string name="work_schedule_enabled">Work schedule enabled</string>
+    <string name="telegram_log">Telegram log</string>
+    <string name="log_all_telegrams">Log all telegrams</string>
+    <string name="log_all_telegrams_for_this_rec">Log all telegrams for this receiver</string>
+    <string name="log_only_telegrams">Log only telegrams which change the state</string>
+
+
+    <string name="logic_function">Logic function</string>
+
 </resources>

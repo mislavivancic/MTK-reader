@@ -312,7 +312,310 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         generateWorkSchedules(mPProgR1, mPProgR2, mPProgR3, mPProgR4, oprij, builder)
         generateWiperAndClosedLoop(builder, wipers)
         generateLearnFunctions(builder, strLoadMngs)
+        generateTalegramAbsence(builder, tlgAbstrs)
+        generateArrivalAndLossOfSupply(builder, ponPoffstrs)
+        generateEventLog(builder)
 
+        builder.append(h2 + getString(R.string.logic_function) + h2C)
+        builder.append(table)
+        for (rel in 0..5) {
+            // val cfg = mRelInterLock[rel].PcCnfg[0]
+            //val res =
+        }
+        builder.append(tableC)
+    }
+
+
+    private fun generateEventLog(builder: java.lang.StringBuilder) {
+        val mLogEnFlags = arrayOf(mOp50Prij.CLOGENFLGS?.get(0), mOp50Prij.CLOGENFLGS?.get(1))
+
+        builder.append(h2 + getString(R.string.event_log) + h2C)
+        builder.append(table)
+
+        builder.append(tr + thcol2 + getString(R.string.common_log) + thC + trC)
+        var yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.SNE_POFF)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+
+        builder.append(tr + td + getString(R.string.power_on_off_time) + tdC + td + yesNo + tdC + trC)
+
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.SNE_SHT)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.synchronization_telegram_time) + tdC + td + yesNo + tdC + trC)
+
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.SNE_SHD)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.synchronization_telegram_day) + tdC + td + yesNo + tdC + trC)
+
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.SNE_LSINH)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.local_change_of_time) + tdC + td + yesNo + tdC + trC)
+
+
+        builder.append(tr + thcol2 + getString(R.string.rtc_log) + thC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.SNE_RTC_OF)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.oscillator_fail) + tdC + td + yesNo + tdC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.SNE_RTC_ST)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.rtc_stop) + tdC + td + yesNo + tdC + trC)
+
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.SNE_RTC_BL)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.battery_low) + tdC + td + yesNo + tdC + trC)
+
+
+        builder.append(tr + thcol2 + getString(R.string.relay_log) + thC + trC)
+
+
+        yesNo =
+            if ((mLogEnFlags[1]?.and(Const.Data.REL_ON)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.relay_switched_by_telegram) + tdC + td + yesNo + tdC + trC)
+
+
+        yesNo =
+            if ((mLogEnFlags[1]?.and(Const.Data.PRO_REL_X)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.relay_switched_by_program) + tdC + td + yesNo + tdC + trC)
+
+
+        yesNo =
+            if ((mLogEnFlags[1]?.and(Const.Data.REL_WIP_S)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.start_wiper) + tdC + td + yesNo + tdC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[1]?.and(Const.Data.REL_WIP_R)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.end_wiper) + tdC + td + yesNo + tdC + trC)
+
+
+        yesNo =
+            if ((mLogEnFlags[1]?.and(Const.Data.REL_TA_S)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.telegram_absence_start) + tdC + td + yesNo + tdC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[1]?.and(Const.Data.REL_TA_R)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.telegram_absence_restart) + tdC + td + yesNo + tdC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[1]?.and(Const.Data.REL_PROBLOCK)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.work_schedule_disabled) + tdC + td + yesNo + tdC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[1]?.and(Const.Data.REL_PROUNBLOCK)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.work_schedule_enabled) + tdC + td + yesNo + tdC + trC)
+
+
+        builder.append(tr + thcol2 + getString(R.string.telegram_log) + thC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.OPT_LOG_TLG)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.log_all_telegrams) + tdC + td + yesNo + tdC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.OPT_LOG_MYTLG)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.log_all_telegrams_for_this_rec) + tdC + td + yesNo + tdC + trC)
+
+        yesNo =
+            if ((mLogEnFlags[0]?.and(Const.Data.OPT_LOG_REPTLG)) != 0) getString(R.string.yes) else getString(
+                R.string.no
+            )
+        builder.append(tr + td + getString(R.string.log_only_telegrams) + tdC + td + yesNo + tdC + trC)
+
+        builder.append(tableC)
+    }
+
+    private fun generateArrivalAndLossOfSupply(
+        builder: java.lang.StringBuilder,
+        ponPoffstrs: List<PonPoffStr>
+    ) {
+        builder.append(h2 + getString(R.string.arrival_and_loss_of_supply) + h2C)
+        builder.append(table)
+        builder.append(tr)
+        builder.append(th + thC)
+        for (i in 1..4)
+            builder.append(th + String.format(getString(R.string.relay_num), i) + thC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.stop_learn_and_wiper_functions) + thC)
+        for (i in 0..3)
+            if ((ponPoffstrs[i].OnPonExe.toInt() and Const.Data.PON_DISLRN_I_W_MASK) != 0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.no) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.power_supply_loss_time) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(ponPoffstrs[i].Tlng) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.loss_of_supply_short) + thC)
+        for (i in 0..3) {
+            val ss = ponPoffstrs[i].OnPonExe.toInt() and 0x7F
+            if (ss < 10)
+                builder.append(td + getStringArray(R.array.poffS, ss) + tdC)
+            else
+                builder.append(td + getString(R.string.xx) + tdC)
+        }
+        builder.append(trC)
+
+        val ign = mutableListOf(0, 0, 0, 0)
+        builder.append(tr)
+        builder.append(th + getString(R.string.loss_of_supply_long_ignore) + thC)
+        for (i in 0..3)
+            if ((ponPoffstrs[i].lperIgno.toInt() and Const.Data.PON_LPERIOD_DIS_MASK) != 0) {
+                builder.append(td + getString(R.string.yes) + tdC)
+                ign[i] = 1
+            } else
+                builder.append(td + getString(R.string.no) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.loss_of_supply_long_action) + thC)
+        for (i in 0..3) {
+            val ss = ponPoffstrs[i].lOnPonExe.toInt()
+            if (ign[i] == 1) {
+                builder.append("$td/$tdC")
+                continue
+            }
+            if (ss < 6)
+                builder.append(td + getStringArray(R.array.poffL, ss) + tdC)
+            else
+                builder.append(td + getString(R.string.xx) + tdC)
+        }
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.switch_delay_min) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(ponPoffstrs[i].TminSwdly) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.switch_delay_max) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(ponPoffstrs[i].TrndSwdly) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.scheduled_switching_activation_delay) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(ponPoffstrs[i].TBlockPrePro) + tdC)
+        builder.append(trC)
+
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.action) + thC)
+        for (i in 0..3) {
+            val ss = ponPoffstrs[i].OnPoffExe.toInt()
+            if (ss < 3)
+                builder.append(td + getStringArray(R.array.poffAct, ss) + tdC)
+            else
+                builder.append(td + getString(R.string.xx) + tdC)
+        }
+        builder.append(trC)
+
+        builder.append(tableC)
+    }
+
+    private fun generateTalegramAbsence(
+        builder: java.lang.StringBuilder,
+        tlgAbstrs: List<TlgAbstr>
+    ) {
+        builder.append(h2 + getString(R.string.telegram_absence) + h2C)
+        builder.append(table)
+        builder.append(tr)
+        builder.append(th + thC)
+        for (i in 1..4)
+            builder.append(th + String.format(getString(R.string.relay_num), i) + thC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.absence_time) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(tlgAbstrs[i].TDetect) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.absence_time) + thC)
+        for (i in 0..3)
+            if (tlgAbstrs[i].RestOn < 0x0F)
+                builder.append(td + getStringArray(R.array.rst, tlgAbstrs[i].RestOn.toInt()) + tdC)
+            else
+                builder.append(td + getString(R.string.xx) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.on_timer_restart) + thC)
+        for (i in 0..3)
+            if ((tlgAbstrs[i].OnRes.toInt() and 0x01) != 0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.no) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.action) + thC)
+        for (i in 0..3) {
+            val ss = (tlgAbstrs[i].OnTaExe.toInt() and 0x0F)
+            if (ss < 0x0F)
+                builder.append(td + getStringArray(R.array.act, ss) + tdC)
+            else
+                builder.append(td + getString(R.string.xx) + tdC)
+        }
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.learn_function_disabled) + thC)
+        for (i in 0..3)
+            if ((tlgAbstrs[i].OnTaExe.toInt() and Const.Data.TLGA_ON_DISLRN) != 0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.no) + tdC)
+        builder.append(trC)
+
+        builder.append(tableC)
     }
 
     private fun generateLearnFunctions(
