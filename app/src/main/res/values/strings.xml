@@ -114,5 +114,15 @@
     <string name="active">Active</string>
 
     <string name="work_schedules_time_pairs">Work schedules - Time pairs Relay</string>
+    <string name="wiper_and_closed_loop">Wiper and Closed Loop</string>
+    <string name="wiper_enable">Wiper Enable</string>
+    <string name="retrigerable">Retrigerable</string>
+    <string name="activation_command">Activation command</string>
+    <string name="wiper_time">Wiper Time</string>
+    <string name="scheduled_switching_activation_delay">Scheduled switching activation delay</string>
+    <string name="loop_enable">Loop Enable</string>
+    <string name="duration_in_position">Duration in position</string>
+    <string name="xx">XX</string>
+
 
 </resources>

@@ -312,6 +312,101 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         generateWorkSchedules(mPProgR1, mPProgR2, mPProgR3, mPProgR4, oprij, builder)
 
 
+        generateWiperAndClosedLoop(builder, wipers)
+    }
+
+    private fun generateWiperAndClosedLoop(builder: StringBuilder, wipers: List<Wiper>) {
+
+        builder.append(h2 + getString(R.string.wiper_and_closed_loop) + h2C)
+        builder.append(table)
+        builder.append(tr)
+        builder.append(th + thC)
+        for (i in 1..4)
+            builder.append(th + String.format(getString(R.string.relay_num), i) + thC)
+        builder.append(trC)
+        builder.append(tr)
+        builder.append(th + getString(R.string.wiper_enable) + thC)
+        for (i in 0..3)
+            if ((wipers[i].status.toInt() and Const.Data.WIPER_DISEB_MASK) == 0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.no) + tdC)
+
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.retrigerable) + thC)
+        for (i in 0..3)
+            if ((wipers[i].status.toInt() and Const.Data.WIPPER_RETRIG_MASK) != 0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.no) + tdC)
+
+
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.activation_command) + thC)
+        for (i in 0..3)
+            if ((wipers[i].status.toInt() and Const.Data.WIPER_ON_MASK) != 0)
+                builder.append(td + getString(R.string.a) + tdC)
+            else if ((wipers[i].status.toInt() and Const.Data.WIPER_OFF_MASK) != 0)
+                builder.append(td + getString(R.string.b) + tdC)
+            else
+                builder.append(td + getString(R.string.xx) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.switching_delay) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(wipers[i].Tswdly) + tdC)
+
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.wiper_time) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(0) + tdC)
+
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.scheduled_switching_activation_delay) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(wipers[i].TBlockPrePro) + tdC)
+
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.loop_enable) + thC)
+        for (i in 0..3)
+            if ((wipers[i].status.toInt() and Const.Data.LOOP_DISEB_MASK) == 0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.no) + tdC)
+        builder.append(trC)
+
+        builder.append(tr)
+        builder.append(th + getString(R.string.duration_in_position) + thC)
+        for (i in 0..3)
+            builder.append(td + getHMSfromInt(wipers[i].TWiper) + tdC)
+        builder.append(trC)
+
+        builder.append(tableC)
+    }
+
+    private fun getHMSfromInt(time: Int): String {
+        var time = time
+        val hh: Int
+        val mm: Int
+        val ss: Int
+        if (time >= 24 * 3600) {
+            time = 0
+        }
+        ss = time % 60
+        time /= 60
+        mm = time % 60
+        hh = time / 60
+        return String.format("%02d:%02d:%02d", hh, mm, ss)
     }
 
     private fun generateWorkSchedules(

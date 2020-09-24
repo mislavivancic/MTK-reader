@@ -46,6 +46,18 @@ object Const {
         const val TIM_LOSS_RTC_POS = 0x02
         const val SINH_REL_POS_MASK = 0x40
 
+        const val WIPER_DISEB_MASK = 0x80
+        const val WIPPER_RETRIG_MASK = 0x01
+        const val WIPER_ON_MASK = 0x40
+        const val WIPER_OFF_MASK = 0x20
+        const val LOOP_DISEB_MASK = 0x08
+        const val PON_DISLRN_I_W_MASK = 0x80
+        const val PON_LPERIOD_DIS_MASK = 0x80
+        const val TLGA_ON_DISLRN = 0x80
+        const val LEARN_7DAYS_MASK = 0x10
+        const val LEARN_R_ON_MASK = 0x40
+        const val LEARN_R_OFF_MASK = 0x20
+
 
         const val TIP_S = 0
         const val TIP_SN = 1
