@@ -58,6 +58,7 @@
     <string name="power_bridge_time">Power bridging time</string>
     <string name="relay_settings">Relay settings</string>
     <string name="relay_num">Relay %d</string>
+    <string name="relay_num_char">Relay %d %s</string>
     <string name="relay_installed">Relay installed(active)</string>
     <string name="inverted_logic">Inverted logic</string>
     <string name="relay_switching_assignment">Relay switching assignment</string>
@@ -220,5 +221,10 @@
 
 
     <string name="logic_function">Logic function</string>
+    <string name="not">NOT</string>
+    <string name="none">none</string>
+
+    <string name="and">and</string>
+    <string name="or">or</string>
 
 </resources>

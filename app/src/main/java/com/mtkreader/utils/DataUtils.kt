@@ -1,5 +1,6 @@
 package com.mtkreader.utils
 
+import com.mtkreader.data.reading.LadderNets
 import com.mtkreader.data.reading.StrParFil
 import com.mtkreader.data.reading.StrParFilVer9
 
@@ -100,5 +101,105 @@ object DataUtils {
     fun getBVtmask(index: Int): Int {
         return intArrayOf(0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01)[index]
 
+    }
+
+    fun getPLCfg(index: Int): LadderNets {
+        return arrayOf(
+            LadderNets(
+                1, byteArrayOf(0, 0, 0, 0),
+                byteArrayOf(0, 0, 0, 0),
+                booleanArrayOf(true, true, true, true),
+                booleanArrayOf(true, true, true, true),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                2,
+                byteArrayOf(15, 0, 0, 0),
+                byteArrayOf(15, 0, 0, 0),
+                booleanArrayOf(true, false, false, false),
+                booleanArrayOf(true, false, false, false),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                3,
+                byteArrayOf(0, 0, 15, 0),
+                byteArrayOf(0, 0, 15, 0),
+                booleanArrayOf(false, false, true, false),
+                booleanArrayOf(false, false, true, false),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                4,
+                byteArrayOf(15, 15, 0, 0),
+                byteArrayOf(15, 15, 0, 0),
+                booleanArrayOf(false, false, true, false),
+                booleanArrayOf(true, false, true, false),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                5,
+                byteArrayOf(0, 0, 15, 15),
+                byteArrayOf(0, 0, 15, 15),
+                booleanArrayOf(true, false, false, false),
+                booleanArrayOf(true, false, true, false),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                6,
+                byteArrayOf(15, 0, 15, 0),
+                byteArrayOf(15, 0, 15, 0),
+                booleanArrayOf(true, false, true, false),
+                booleanArrayOf(true, false, true, false),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                7,
+                byteArrayOf(15, 15, 15, 0),
+                byteArrayOf(15, 15, 15, 0),
+                booleanArrayOf(false, false, true, false),
+                booleanArrayOf(true, false, true, false),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                8,
+                byteArrayOf(15, 0, 15, 15),
+                byteArrayOf(15, 0, 15, 15),
+                booleanArrayOf(true, false, false, false),
+                booleanArrayOf(true, false, true, false),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                9,
+                byteArrayOf(15, 0, 15, 15),
+                byteArrayOf(15, 0, 15, 15),
+                booleanArrayOf(true, false, true, true),
+                booleanArrayOf(false, false, false, false),
+                booleanArrayOf(false, true, false, false)
+            ),
+            LadderNets(
+                10,
+                byteArrayOf(15, 15, 15, 0),
+                byteArrayOf(15, 15, 15, 0),
+                booleanArrayOf(true, true, true, false),
+                booleanArrayOf(false, false, false, false),
+                booleanArrayOf(false, false, false, true)
+            ),
+            LadderNets(
+                13,
+                byteArrayOf(15, 15, 15, 15),
+                byteArrayOf(15, 15, 15, 15),
+                booleanArrayOf(true, true, true, true),
+                booleanArrayOf(false, false, false, false),
+                booleanArrayOf(false, false, false, false)
+            ),
+            LadderNets(
+                14,
+                byteArrayOf(15, 15, 15, 15),
+                byteArrayOf(15, 15, 15, 15),
+                booleanArrayOf(false, false, false, false),
+                booleanArrayOf(false, false, false, false),
+                booleanArrayOf(false, false, false, false)
+            )
+        )[index]
     }
 }

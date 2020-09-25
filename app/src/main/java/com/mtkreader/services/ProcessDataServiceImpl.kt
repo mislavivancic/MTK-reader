@@ -319,10 +319,166 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         builder.append(h2 + getString(R.string.logic_function) + h2C)
         builder.append(table)
         for (rel in 0..5) {
-            // val cfg = mRelInterLock[rel].PcCnfg[0]
-            //val res =
+            val cfg = mRelInterLock[rel].PcCnfg[0]
+            val res = unPackLadderString(rel, cfg)
+            if (rel < 3) {
+                builder.append(
+                    tr + th + String.format(
+                        getString(R.string.relay_num_char),
+                        rel + 1,
+                        getString(R.string.a)
+                    ) + thC + td + res + tdC + trC
+                )
+            } else {
+                builder.append(
+                    tr + th + String.format(
+                        getString(R.string.relay_num_char),
+                        rel % 3 + 1,
+                        getString(R.string.b)
+                    ) + thC + td + res + tdC + trC
+                )
+            }
         }
         builder.append(tableC)
+    }
+
+    private fun unPackLadderString(rel: Int, pccNfg: Int): String {
+        val state = mutableListOf(0.toByte(), 0.toByte(), 0.toByte(), 0.toByte())
+        val varRel = mutableListOf(0.toByte(), 0.toByte(), 0.toByte(), 0.toByte())
+        val rr = mutableListOf("", "", "", "")
+
+
+        var tmp = (pccNfg shr 13) and 0x07
+        if (tmp != 0) {
+            varRel[0] = (tmp and 0x3).toByte()
+            state[0] = if ((tmp and 0x04) != 0) 0 else 0
+            val str = if ((tmp and 0x04) != 0) getString(R.string.not) else ""
+            val num = tmp and 0x3
+            rr[0].format("%sR%d", str, num)
+        }
+
+        tmp = (pccNfg shr 10) and 0x07
+        if (tmp != 0) {
+            varRel[2] = (tmp and 0x3).toByte()
+            state[2] = if ((tmp and 0x04) != 0) 0 else 0
+            val str = if ((tmp and 0x04) != 0) getString(R.string.not) else ""
+            val num = tmp and 0x3
+            rr[2].format("%sR%d", str, num)
+        }
+        tmp = (pccNfg shr 7) and 0x07
+        if (tmp != 0) {
+            varRel[1] = (tmp and 0x3).toByte()
+            state[1] = if ((tmp and 0x04) != 0) 0 else 0
+            val str = if ((tmp and 0x04) != 0) getString(R.string.not) else ""
+            val num = tmp and 0x3
+            rr[1].format("%sR%d", str, num)
+        }
+        tmp = (pccNfg shr 13) and 0x07
+        if (tmp != 0) {
+            varRel[3] = (tmp and 0x3).toByte()
+            state[3] = if ((tmp and 0x04) != 0) 0 else 0
+            val str = if ((tmp and 0x04) != 0) getString(R.string.not) else ""
+            val num = tmp and 0x3
+            rr[3].format("%sR%d", str, num)
+        }
+
+        val idx = pccNfg and 0x0F
+        var isFound = false
+        var indexFound = 0
+        for (i in 0..11)
+            if (DataUtils.getPLCfg(i).Idx == idx) {
+                isFound = true
+                indexFound = i
+                break
+            }
+
+        val ladderStates = mutableListOf<LadderState>()
+        for (i in 0..7)
+            ladderStates.add(LadderState())
+
+        if (isFound) {
+            for (i in 0..3) {
+                ladderStates[0].m_RelState[i] =
+                    (DataUtils.getPLCfg(indexFound).RelState[i].toInt() and state[i].toInt()).toByte()
+                ladderStates[0].m_RelNr[i] =
+                    (DataUtils.getPLCfg(indexFound).RelNr[i].toInt() and varRel[i].toInt()).toByte()
+                ladderStates[0].m_isSeries[i] = DataUtils.getPLCfg(indexFound).isSeries[i]
+                ladderStates[0].m_notsernotpar[i] = DataUtils.getPLCfg(indexFound).notsernotpar[i]
+                ladderStates[0].m_conectshort[i] = DataUtils.getPLCfg(indexFound).conectshort[i]
+            }
+        }
+
+        var res = ""
+        var relst = 0
+        var relser = 0
+        for (i in 0..3) {
+            if (ladderStates[0].m_RelNr[i].toInt() != 0)
+                relst = relst or (1 shl i)
+            if (ladderStates[0].m_isSeries[i])
+                relser = relser or (1 shl i)
+        }
+
+        if (relst == 0)
+            res = getString(R.string.none).toUpperCase() + rr[0] + rr[1] + rr[2] + rr[3]
+        else if (relst == 0b0111) {
+            if (ladderStates[0].m_conectshort[3])
+                res = String.format(
+                    "(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} %s ",
+                    rr[0],
+                    rr[2],
+                    rr[1]
+                )
+            else
+                res = String.format(
+                    "(%s ${getString(R.string.or)} %s) ${getString(R.string.and)} %s ",
+                    rr[0],
+                    rr[1],
+                    rr[2]
+                )
+        } else if (relst == 0b1101) {
+            if (ladderStates[0].m_conectshort[1])
+                res = String.format(
+                    "(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} %s ",
+                    rr[0],
+                    rr[2],
+                    rr[3]
+                )
+            else
+                res = String.format(
+                    "%s ${getString(R.string.and)} (%s ${getString(R.string.or)} %s) ",
+                    rr[0],
+                    rr[2],
+                    rr[3]
+                )
+        } else if (relst == 0b0011)
+            res = String.format("%s ${getString(R.string.or)} %s", rr[0], rr[1])
+        else if (relst == 0b1100)
+            res = String.format("%s ${getString(R.string.or)} %s", rr[2], rr[3])
+        else if (relst == 0b0001)
+            res = String.format("%s", rr[0])
+        else if (relst == 0b0100)
+            res = String.format("%s", rr[2])
+        else if (relst == 0b0101)
+            res = String.format("%s ${getString(R.string.and)} %s", rr[0], rr[2])
+        else if (relst == 0b1111)
+            if (ladderStates[0].m_isSeries[0])
+                res = String.format(
+                    "(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} (%s ${getString(R.string.and)}  %s)",
+                    rr[0],
+                    rr[1],
+                    rr[2],
+                    rr[3]
+                )
+            else
+                res = String.format(
+                    "(%s ${getString(R.string.or)} %s) ${getString(R.string.and)} (%s ${getString(R.string.or)}  %s)",
+                    rr[0],
+                    rr[1],
+                    rr[2],
+                    rr[3]
+                )
+
+        return res
     }
 
 
@@ -1954,6 +2110,10 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                     setOprelI(dbuf),
                     intArrayOf(setOprelI(dbuf), setOprelI(dbuf))
                 )
+            intrLockStrList.add(intrLockStr)
+        }
+        for (rel in 0..3) {
+            val intrLockStr = IntrlockStr()
             intrLockStrList.add(intrLockStr)
         }
         return intrLockStrList
