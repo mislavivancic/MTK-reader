@@ -107,7 +107,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mline[0] = 0
 
         while (hasNextLine(data)) {
-            if (mline[0] != Const.Tokens.END_TOKEN.toByte())
+            if (mline[0] != Const.Tokens.PARAM_READ_END_TOKEN.toByte())
                 getLineData()
             else
                 break

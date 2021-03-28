@@ -7,6 +7,9 @@ object CommunicationUtil {
     fun writeToSocket(socket: BluetoothSocket, data: String) {
         socket.outputStream.write(hexStringToByteArray(data))
     }
+    fun writeToSocket(socket: BluetoothSocket, data: ByteArray) {
+        socket.outputStream.write(data)
+    }
 
     private fun hexStringToByteArray(s: String): ByteArray {
         val len = s.length

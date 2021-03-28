@@ -19,7 +19,6 @@ import com.mtkreader.presenters.ReadingPresenter
 import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.dialogs.ConnectingDialog
-import kotlinx.android.synthetic.main.fragment_connect.*
 import kotlinx.android.synthetic.main.fragment_reading.*
 
 class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View {
@@ -96,6 +95,11 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
         println("${byte.toChar()} -> $byte ")
+        handleTimeReading()
+        //handleParameterReading()
+    }
+
+    private fun handleParameterReading() {
         if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
             data.clear()
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
@@ -105,7 +109,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
             isReadingData = true
         }
-        if (data.contains(Const.Tokens.END_TOKEN)) {
+        if (data.contains(Const.Tokens.PARAM_READ_END_TOKEN)) {
             socket.close()
             presenter.closeConnection()
 
@@ -119,6 +123,30 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         }
     }
 
+    private fun handleTimeReading() {
+        if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
+            data.clear()
+            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
+        }
+
+        if ((data.contains(SECOND_LINE_TOKEN) || data.contains(SECOND_LINE_TOKEN_OTHER)) && !isReadingData) {
+            data.clear()
+            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.GET_TIME)
+            isReadingData = true
+        }
+        if (data.contains(Const.Tokens.GET_TIME_END_TOKEN)) {
+            socket.close()
+            presenter.closeConnection()
+
+            val dataBundle = Bundle().apply {
+
+                putString(Const.Extras.DATA_EXTRA, data.joinToString(""))
+            }
+            data.clear()
+            findNavController().navigate(R.id.navigateToDisplayTimeView, dataBundle)
+        }
+    }
+
     override fun onError(throwable: Throwable) {
         connectingDialog.dismiss()
         displayErrorPopup(throwable)
@@ -127,3 +155,4 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
     override fun provideFragment(): Fragment = this
 
 }
+

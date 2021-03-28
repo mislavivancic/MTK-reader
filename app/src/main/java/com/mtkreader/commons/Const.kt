@@ -7,7 +7,8 @@ object Const {
 
 
     object Tokens {
-        const val END_TOKEN = 33.toByte().toChar()
+        const val PARAM_READ_END_TOKEN = 33.toByte().toChar()
+        const val GET_TIME_END_TOKEN = ')'.toByte().toChar()
     }
 
     object Extras {
@@ -39,6 +40,7 @@ object Const {
 
         const val FIRST_INIT = "2F3F210D0A"
         const val SECOND_INIT = "063034360D0A"
+        const val GET_TIME = "0147740330"
         const val ACK = "015503560D0A"
     }
 
@@ -127,6 +129,11 @@ object Const {
             "-PS "
         )
 
-
+        val SOH = 0x01
+        val STHX = 0x02
+        val ETX = 0x03
+        val EOT = 0x04
+        val ACK = 0x06
+        val NAK = 0x15
     }
 }
