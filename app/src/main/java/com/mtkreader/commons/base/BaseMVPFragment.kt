@@ -1,6 +1,8 @@
 package com.mtkreader.commons.base
 
+import android.view.View
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.fragment_connect.*
 
 interface ErrorHandlingFragment {
     fun displayErrorPopup(throwable: Throwable)
@@ -23,6 +25,10 @@ open class BaseMVPFragment<T> : Fragment(), ErrorHandlingFragment where T : Auto
 
     override fun displayErrorPopup(throwable: Throwable) {
         throwable.printStackTrace()
-        ErrorDialog(requireContext(), throwable.localizedMessage).show()
+        ErrorDialog(
+            requireContext(), throwable.localizedMessage ?: ""
+        ) {
+            requireActivity().onBackPressed()
+        }.show()
     }
 }

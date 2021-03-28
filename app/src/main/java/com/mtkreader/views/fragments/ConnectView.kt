@@ -120,8 +120,8 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
             if (resultCode == Activity.RESULT_CANCELED) {
                 ErrorDialog(
                     requireContext(),
-                    Const.Error.BT_REQUIRED,
-                    View.OnClickListener { requireActivity().finish() }).show()
+                    Const.Error.BT_REQUIRED
+                ) { requireActivity().finish() }.show()
 
             }
         }
@@ -134,7 +134,7 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
     ) {
         if (requestCode == PermissionUtils.COARSE_LOCATION_REQUEST_CODE) {
             if (!permissions.contains(Manifest.permission.ACCESS_COARSE_LOCATION) || grantResults[0] == Const.PermissionCode.DENIED) {
-                ErrorDialog(requireContext()).show()
+                ErrorDialog(requireContext()) {}.show()
             } else {
                 presenter.initBluetooth()
             }

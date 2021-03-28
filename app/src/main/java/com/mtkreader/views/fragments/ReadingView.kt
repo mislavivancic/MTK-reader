@@ -19,6 +19,7 @@ import com.mtkreader.presenters.ReadingPresenter
 import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.dialogs.ConnectingDialog
+import kotlinx.android.synthetic.main.fragment_connect.*
 import kotlinx.android.synthetic.main.fragment_reading.*
 
 class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View {
@@ -119,6 +120,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
     }
 
     override fun onError(throwable: Throwable) {
+        connectingDialog.dismiss()
         displayErrorPopup(throwable)
     }
 
