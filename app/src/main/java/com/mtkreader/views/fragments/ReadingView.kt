@@ -13,13 +13,19 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.mtkreader.R
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.Const.Data.TIP_PA
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.ReadingContract
+import com.mtkreader.data.reading.TimeDate
 import com.mtkreader.presenters.ReadingPresenter
 import com.mtkreader.utils.CommunicationUtil
+import com.mtkreader.utils.DataUtils.HtoB
+import com.mtkreader.utils.DataUtils.getHardwareVersion
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.dialogs.ConnectingDialog
 import kotlinx.android.synthetic.main.fragment_reading.*
+import kotlin.experimental.and
+import kotlin.experimental.or
 
 class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View {
 
@@ -38,6 +44,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
     private val readingData = mutableListOf<Char>()
     private lateinit var socket: BluetoothSocket
     private var isReadingData = false
+    private var hardwareVersion = 0
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -110,6 +117,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
             isReadingData = true
         }
         if (data.contains(Const.Tokens.PARAM_READ_END_TOKEN)) {
+            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
             socket.close()
             presenter.closeConnection()
 
@@ -125,6 +133,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
 
     private fun handleTimeReading() {
         if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
+            hardwareVersion = getHardwareVersion(data.joinToString("").toByteArray())
             data.clear()
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
         }
@@ -135,6 +144,9 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
             isReadingData = true
         }
         if (data.contains(Const.Tokens.GET_TIME_END_TOKEN)) {
+            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
+            presenter.extractTimeData(requireContext(), data, hardwareVersion)
+
             socket.close()
             presenter.closeConnection()
 
@@ -143,8 +155,12 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
                 putString(Const.Extras.DATA_EXTRA, data.joinToString(""))
             }
             data.clear()
-            findNavController().navigate(R.id.navigateToDisplayTimeView, dataBundle)
+            //findNavController().navigate(R.id.navigateToDisplayTimeView, dataBundle)
         }
+    }
+
+    override fun displayTimeData(time: String) {
+        tv_current_time.text = String.format(getString(R.string.device_time_s), time)
     }
 
     override fun onError(throwable: Throwable) {
@@ -155,4 +171,3 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
     override fun provideFragment(): Fragment = this
 
 }
-

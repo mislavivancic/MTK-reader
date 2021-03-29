@@ -41,6 +41,7 @@ object Const {
         const val FIRST_INIT = "2F3F210D0A"
         const val SECOND_INIT = "063034360D0A"
         const val GET_TIME = "0147740330"
+        const val RESET = "01810382"
         const val ACK = "015503560D0A"
     }
 

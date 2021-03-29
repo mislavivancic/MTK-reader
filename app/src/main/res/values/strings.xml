@@ -226,5 +226,10 @@
 
     <string name="and">and</string>
     <string name="or">or</string>
+    <string name="device_time_s">Device time: %s</string>
 
+
+    <string name="day_time_format">%s-%02X:%02X:%02X</string>
+    <string name="date_time_format">%02X-%02X-%02X</string>
+    <string name="wrong_value_time">(Wrong value time: %02X-%02X:%02X:%02X  date:%02X-%02X-%02X)</string>
 </resources>
