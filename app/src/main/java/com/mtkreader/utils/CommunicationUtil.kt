@@ -5,9 +5,14 @@ import android.bluetooth.BluetoothSocket
 object CommunicationUtil {
 
     fun writeToSocket(socket: BluetoothSocket, data: String) {
+        println("MESSAGES Sent-> $data")
+        println("MESSAGES Sent-> ${hexStringToByteArray(data)}")
+        val a = hexStringToByteArray(data)
         socket.outputStream.write(hexStringToByteArray(data))
     }
+
     fun writeToSocket(socket: BluetoothSocket, data: ByteArray) {
+        println("MESSAGES Sent-> $data")
         socket.outputStream.write(data)
     }
 

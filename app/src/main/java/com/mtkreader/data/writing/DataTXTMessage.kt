@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class TextMessage(
+data class DataTXTMessage(
     var count: Int = 0,
     val status: Byte = 0,
     val type: Byte = 0,
@@ -16,7 +16,7 @@ data class TextMessage(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as TextMessage
+        other as DataTXTMessage
 
         if (count != other.count) return false
         if (status != other.status) return false

@@ -1,6 +1,7 @@
 package com.mtkreader.commons.base
 
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_connect.*
 
@@ -30,5 +31,9 @@ open class BaseMVPFragment<T> : Fragment(), ErrorHandlingFragment where T : Auto
         ) {
             requireActivity().onBackPressed()
         }.show()
+    }
+
+    fun toast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }

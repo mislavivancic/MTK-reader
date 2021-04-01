@@ -129,12 +129,15 @@ object Const {
             "-SPN ",
             "-PS "
         )
+        val COMPLETE = 2.toByte()
+        val SOH = 0x01.toByte()
+        val STX = 0x02.toByte()
+        val ETX = 0x03.toByte()
+        val EOT = 0x04.toByte()
+        val ACK = 0x06.toByte()
+        val NAK = 0x15.toByte()
 
-        val SOH = 0x01
-        val STHX = 0x02
-        val ETX = 0x03
-        val EOT = 0x04
-        val ACK = 0x06
-        val NAK = 0x15
+        val TIME_FORMAT = "G0(%02X%02X%02X%02X)"
+        val TIME_DATE_FORMAT = "G0(%02X%02X%02X%02X%02X%02X%02X)"
     }
 }

@@ -232,4 +232,8 @@
     <string name="day_time_format">%s-%02X:%02X:%02X</string>
     <string name="date_time_format">%02X-%02X-%02X</string>
     <string name="wrong_value_time">(Wrong value time: %02X-%02X:%02X:%02X  date:%02X-%02X-%02X)</string>
+
+    <string name="hour_min_sec">hour:minutes:seconds</string>
+    <string name="pick_time">Pick time</string>
+    <string name="set_time">Set time</string>
 </resources>

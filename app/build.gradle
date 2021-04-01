@@ -53,4 +53,6 @@ dependencies {
     implementation "jp.wasabeef:recyclerview-animators:$project.ext.recyclerViewAnimationsVersion"
     implementation "com.airbnb.android:lottie:$project.ext.lottieAnimationsVersion"
 
+    implementation 'com.kovachcode:timePickerWithSeconds:1.0.1'
+
 }
