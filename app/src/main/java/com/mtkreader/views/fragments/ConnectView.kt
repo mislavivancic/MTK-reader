@@ -22,6 +22,7 @@ import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import kotlinx.android.synthetic.main.fragment_connect.*
+import net.alexandroid.utils.mylogkt.logD
 
 class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionContract.View,
     ConnectedDevicesRecyclerView.OnItemClickListener {
@@ -99,7 +100,8 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
 
     override fun onClick(device: BluetoothDevice) {
         val deviceBundle = Bundle().apply { putParcelable(Const.Extras.DEVICE_EXTRA, device) }
-        findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
+        //findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
+        findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
     }
 
 

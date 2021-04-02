@@ -55,4 +55,6 @@ dependencies {
 
     implementation 'com.kovachcode:timePickerWithSeconds:1.0.1'
 
+    implementation 'net.alexandroid.utils:mylogkt:1.12'
+
 }

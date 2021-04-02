@@ -35,6 +35,11 @@ object Const {
         const val UUID = "00001101-0000-1000-8000-00805f9b34fb"
     }
 
+    object Logging {
+        const val SENT = "MESSAGE SENT"
+        const val RECEIVED = "MESSAGE RECEIVED"
+    }
+
     object DeviceConstants {
         const val NAME = "HELM"
 
@@ -140,4 +145,6 @@ object Const {
         val TIME_FORMAT = "G0(%02X%02X%02X%02X)"
         val TIME_DATE_FORMAT = "G0(%02X%02X%02X%02X%02X%02X%02X)"
     }
+
+
 }

@@ -9,6 +9,7 @@ import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BasePresenter
 import com.mtkreader.contracts.ReadingContract
+import com.mtkreader.contracts.TimeContract
 import com.mtkreader.data.DeviceDate
 import com.mtkreader.data.DeviceTime
 import com.mtkreader.data.reading.TimeDate
@@ -16,22 +17,31 @@ import com.mtkreader.data.writing.DataRXMessage
 import com.mtkreader.data.writing.DataTXTMessage
 import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.DataUtils
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import net.alexandroid.utils.mylogkt.logI
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
 import kotlin.experimental.or
 import kotlin.experimental.xor
 
-class ReadingPresenter(private val view: ReadingContract.View) : BasePresenter(view),
-    ReadingContract.Presenter, KoinComponent {
+class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
+    TimeContract.Presenter, KoinComponent {
+
+    companion object {
+        private const val TIME_QUERY_INTERVAL: Long = 1500
+    }
 
     private val bluetoothManager: RxBluetooth by inject()
+    private val service: TimeContract.Service by inject()
     private lateinit var connection: BluetoothConnection
     private lateinit var socket: BluetoothSocket
+    private val data = mutableListOf<Char>()
 
     override fun connectToDevice(device: BluetoothDevice) {
         addDisposable(
@@ -44,6 +54,7 @@ class ReadingPresenter(private val view: ReadingContract.View) : BasePresenter(v
 
     private fun onSocketConnected(socket: BluetoothSocket) {
         this.socket = socket
+        service.setSocket(socket)
         view.onSocketConnected(socket)
     }
 
@@ -61,6 +72,40 @@ class ReadingPresenter(private val view: ReadingContract.View) : BasePresenter(v
     override fun closeConnection() {
         connection.closeConnection()
         clear()
+    }
+
+
+    override fun getTime() {
+        addDisposable(
+            Observable.interval(0, TIME_QUERY_INTERVAL, TimeUnit.MILLISECONDS).doOnNext {
+                CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.GET_TIME)
+            }.subscribeOn(Schedulers.io())
+                .subscribe()
+        )
+    }
+
+    override fun extractTimeData(context: Context, data: List<Char>, hardwareVersion: Int) {
+        addDisposable(
+            service.extractTimeData(context, data, hardwareVersion)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(view::displayTimeData, view::onError)
+        )
+    }
+
+    override fun setTimeDate(time: DeviceTime, deviceDate: DeviceDate) {
+        addDisposable(
+            service.setTimeDate(time, deviceDate)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(view::onTimeWriteResult, view::onError)
+        )
+    }
+
+    override fun setReadData(data: List<Char>) {
+        this.data.clear()
+        this.data.addAll(data)
+        service.setReadData(data)
     }
 
 }
