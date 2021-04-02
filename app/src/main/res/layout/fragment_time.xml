@@ -43,10 +43,10 @@
                 android:textAllCaps="false" />
 
             <Button
-                android:id="@+id/btn_set_time"
+                android:id="@+id/btn_read_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/set_time" />
+                android:text="@string/read_time" />
         </LinearLayout>
 
         <TextView

@@ -9,7 +9,6 @@ import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import com.ikovac.timepickerwithseconds.MyTimePickerDialog
 import com.ikovac.timepickerwithseconds.TimePicker
 import com.mtkreader.R
@@ -65,7 +64,7 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         super.onActivityCreated(savedInstanceState)
         initializePresenter()
         initializeViews()
-        startReading()
+        //startReading()
     }
 
     private fun unpackExtras() {
@@ -107,8 +106,8 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
         logI("${byte.toChar()} -> $byte ", customTag = Const.Logging.RECEIVED)
-        handleTimeReading()
-        //initTimeWrite()
+        //handleTimeReading()
+        initTimeWrite()
     }
 
     private fun handleTimeReading() {
@@ -125,10 +124,12 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         }
         if (data.contains(Const.Tokens.GET_TIME_END_TOKEN)) {
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
-            presenter.extractTimeData(requireContext(), data, hardwareVersion)
+            val timeData = mutableListOf<Char>()
+            timeData.addAll(data)
+            presenter.extractTimeData(requireContext(), timeData, hardwareVersion)
 
-            socket.close()
-            presenter.closeConnection()
+            //socket.close()
+            //presenter.closeConnection()
 
             val dataBundle = Bundle().apply {
 
@@ -151,7 +152,7 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
             presenter.setTimeDate(time, deviceDate)
         }
         if (isReadingData && data.isNotEmpty()) {
-            presenter.setData(data)
+            presenter.setReadData(data)
             data.clear()
         }
 

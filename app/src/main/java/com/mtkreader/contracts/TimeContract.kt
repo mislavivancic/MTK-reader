@@ -8,6 +8,7 @@ import com.mtkreader.commons.base.AutoDisposePresenter
 import com.mtkreader.commons.base.ErrorHandlingFragment
 import com.mtkreader.data.DeviceDate
 import com.mtkreader.data.DeviceTime
+import io.reactivex.Single
 
 interface TimeContract {
 
@@ -27,7 +28,20 @@ interface TimeContract {
         fun closeConnection()
         fun extractTimeData(context: Context, data: List<Char>, hardwareVersion: Int)
         fun setTimeDate(time: DeviceTime, deviceDate: DeviceDate)
-        fun setData(data: List<Char>)
+        fun setReadData(data: List<Char>)
+    }
+
+    interface Service {
+        fun setSocket(socket: BluetoothSocket)
+        fun extractTimeData(
+            context: Context,
+            data: List<Char>,
+            hardwareVersion: Int
+        ): Single<String>
+
+        fun setTimeDate(time: DeviceTime, deviceDate: DeviceDate): Single<Boolean>
+        fun setReadData(data: List<Char>)
+
     }
 
 }
