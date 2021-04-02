@@ -100,7 +100,8 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
 
     override fun onClick(device: BluetoothDevice) {
         val deviceBundle = Bundle().apply { putParcelable(Const.Extras.DEVICE_EXTRA, device) }
-        findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
+        //findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
+        findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
     }
 
 

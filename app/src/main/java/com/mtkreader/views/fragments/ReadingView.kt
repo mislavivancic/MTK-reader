@@ -30,8 +30,7 @@ import kotlinx.android.synthetic.main.fragment_reading.*
 import net.alexandroid.utils.mylogkt.logD
 import net.alexandroid.utils.mylogkt.logI
 
-class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View,
-    MyTimePickerDialog.OnTimeSetListener {
+class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View {
 
     companion object {
         private const val TAG = "READING_FRAGMENT"
@@ -48,10 +47,8 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
     private val readingData = mutableListOf<Char>()
     private lateinit var socket: BluetoothSocket
     private var isReadingData = false
-    private var hardwareVersion = 0
     private lateinit var time: DeviceTime
     private lateinit var deviceDate: DeviceDate
-    private var readMessageData = DataRXMessage()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -87,9 +84,6 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
 
     private fun initializeViews() {
         tv_data_read.movementMethod = ScrollingMovementMethod()
-        btn_time_pick.setOnClickListener {
-            TimeUtils.provideTimePicker(requireContext(), this).show()
-        }
     }
 
     private fun startReading() {
@@ -112,9 +106,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
         logI("${byte.toChar()} -> $byte ", customTag = Const.Logging.RECEIVED)
-        handleTimeReading()
-        //initTimeWrite()
-        //handleParameterReading()
+        handleParameterReading()
     }
 
     private fun handleParameterReading() {
@@ -142,74 +134,8 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         }
     }
 
-    private fun handleTimeReading() {
-        if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
-            hardwareVersion = getHardwareVersion(data.joinToString("").toByteArray())
-            data.clear()
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
-        }
-
-        if ((data.contains(SECOND_LINE_TOKEN) || data.contains(SECOND_LINE_TOKEN_OTHER)) && !isReadingData) {
-            data.clear()
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.GET_TIME)
-            isReadingData = true
-        }
-        if (data.contains(Const.Tokens.GET_TIME_END_TOKEN)) {
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
-            presenter.extractTimeData(requireContext(), data, hardwareVersion)
-
-            socket.close()
-            presenter.closeConnection()
-
-            val dataBundle = Bundle().apply {
-
-                putString(Const.Extras.DATA_EXTRA, data.joinToString(""))
-            }
-            data.clear()
-            //findNavController().navigate(R.id.navigateToDisplayTimeView, dataBundle)
-        }
-    }
-
-    private fun initTimeWrite() {
-        if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
-            hardwareVersion = getHardwareVersion(data.joinToString("").toByteArray())
-            data.clear()
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
-        }
-        if ((data.contains(SECOND_LINE_TOKEN) || data.contains(SECOND_LINE_TOKEN_OTHER)) && !isReadingData) {
-            data.clear()
-            isReadingData = true
-            presenter.setTimeDate(time, deviceDate)
-        }
-        if (isReadingData && data.isNotEmpty()) {
-            presenter.setData(data)
-            data.clear()
-        }
-
-    }
-
-    override fun onTimeWriteResult(isSuccessful: Boolean) {
-        if (isSuccessful) toast(getString(R.string.setting_time_is_impossible))
-        else toast(getString(R.string.time_changed))
-
-    }
-
-
-    override fun displayTimeData(time: String) {
-        tv_current_time.text = String.format(getString(R.string.device_time_s), time)
-    }
-
-    override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int, seconds: Int) {
-        time = DeviceTime(hourOfDay, minute, seconds)
-        deviceDate = DeviceDate(date_picker.year, date_picker.month, date_picker.dayOfMonth)
-        startReading()
-    }
-
     override fun onError(throwable: Throwable) {
         connectingDialog.dismiss()
         displayErrorPopup(throwable)
     }
-
-    override fun provideFragment(): Fragment = this
-
 }

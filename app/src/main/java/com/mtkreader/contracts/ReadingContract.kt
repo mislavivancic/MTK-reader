@@ -13,13 +13,8 @@ import io.reactivex.subjects.PublishSubject
 interface ReadingContract {
 
     interface View : ErrorHandlingFragment {
-        fun provideFragment(): Fragment
-
         fun onSocketConnected(socket: BluetoothSocket)
         fun onReceiveBytes(byte: Byte)
-
-        fun displayTimeData(time: String)
-        fun onTimeWriteResult(isSuccessful: Boolean)
 
         fun onError(throwable: Throwable)
     }
@@ -28,8 +23,5 @@ interface ReadingContract {
         fun connectToDevice(device: BluetoothDevice)
         fun readStream(socket: BluetoothSocket)
         fun closeConnection()
-        fun extractTimeData(context: Context, data: List<Char>, hardwareVersion: Int)
-        fun setTimeDate(time: DeviceTime, deviceDate: DeviceDate)
-        fun setData(data: List<Char>)
     }
 }
