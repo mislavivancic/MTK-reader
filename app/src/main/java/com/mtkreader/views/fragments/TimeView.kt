@@ -13,6 +13,7 @@ import com.ikovac.timepickerwithseconds.MyTimePickerDialog
 import com.ikovac.timepickerwithseconds.TimePicker
 import com.mtkreader.R
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.Const.Data.ETX
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.TimeContract
 import com.mtkreader.data.DeviceDate
@@ -64,7 +65,7 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         super.onActivityCreated(savedInstanceState)
         initializePresenter()
         initializeViews()
-        //startReading()
+        startReading()
     }
 
     private fun unpackExtras() {
@@ -106,8 +107,8 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
         logI("${byte.toChar()} -> $byte ", customTag = Const.Logging.RECEIVED)
-        //handleTimeReading()
-        initTimeWrite()
+        //initTimeWrite()
+        handleTimeReading()
     }
 
     private fun handleTimeReading() {
@@ -119,24 +120,16 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
 
         if ((data.contains(SECOND_LINE_TOKEN) || data.contains(SECOND_LINE_TOKEN_OTHER)) && !isReadingData) {
             data.clear()
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.GET_TIME)
+            //CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.GET_TIME)
+            presenter.getTime()
             isReadingData = true
         }
         if (data.contains(Const.Tokens.GET_TIME_END_TOKEN)) {
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
+            //CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
             val timeData = mutableListOf<Char>()
-            timeData.addAll(data)
-            presenter.extractTimeData(requireContext(), timeData, hardwareVersion)
-
-            //socket.close()
-            //presenter.closeConnection()
-
-            val dataBundle = Bundle().apply {
-
-                putString(Const.Extras.DATA_EXTRA, data.joinToString(""))
-            }
+            timeData.addAll(data.filter { it != ETX.toChar() && it != 10.toChar() })
             data.clear()
-            //findNavController().navigate(R.id.navigateToDisplayTimeView, dataBundle)
+            presenter.extractTimeData(requireContext(), timeData, hardwareVersion)
         }
     }
 

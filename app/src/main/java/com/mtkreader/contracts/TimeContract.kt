@@ -26,6 +26,7 @@ interface TimeContract {
         fun connectToDevice(device: BluetoothDevice)
         fun readStream(socket: BluetoothSocket)
         fun closeConnection()
+        fun getTime()
         fun extractTimeData(context: Context, data: List<Char>, hardwareVersion: Int)
         fun setTimeDate(time: DeviceTime, deviceDate: DeviceDate)
         fun setReadData(data: List<Char>)
