@@ -1,18 +1,18 @@
 package com.mtkreader.utils
 
 import android.bluetooth.BluetoothSocket
+import com.mtkreader.commons.Const
+import net.alexandroid.utils.mylogkt.logI
 
 object CommunicationUtil {
 
     fun writeToSocket(socket: BluetoothSocket, data: String) {
-        println("MESSAGES Sent-> $data")
-        println("MESSAGES Sent-> ${hexStringToByteArray(data)}")
-        val a = hexStringToByteArray(data)
+        logI("${hexStringToByteArray(data)}", customTag = Const.Logging.SENT)
         socket.outputStream.write(hexStringToByteArray(data))
     }
 
     fun writeToSocket(socket: BluetoothSocket, data: ByteArray) {
-        println("MESSAGES Sent-> $data")
+        logI("$data", customTag = Const.Logging.SENT)
         socket.outputStream.write(data)
     }
 

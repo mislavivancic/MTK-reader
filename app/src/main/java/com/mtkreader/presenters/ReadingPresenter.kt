@@ -9,8 +9,14 @@ import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BasePresenter
 import com.mtkreader.contracts.ReadingContract
+import com.mtkreader.data.DeviceDate
+import com.mtkreader.data.DeviceTime
 import com.mtkreader.data.reading.TimeDate
+import com.mtkreader.data.writing.DataRXMessage
+import com.mtkreader.data.writing.DataTXTMessage
+import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.DataUtils
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.koin.core.KoinComponent
@@ -18,20 +24,29 @@ import org.koin.core.inject
 import java.util.*
 import kotlin.experimental.and
 import kotlin.experimental.or
+import kotlin.experimental.xor
 
 class ReadingPresenter(private val view: ReadingContract.View) : BasePresenter(view),
     ReadingContract.Presenter, KoinComponent {
 
     private val bluetoothManager: RxBluetooth by inject()
     private lateinit var connection: BluetoothConnection
+    private lateinit var socket: BluetoothSocket
+    private var readMessageData = DataRXMessage()
+    private val data = mutableListOf<Char>()
 
     override fun connectToDevice(device: BluetoothDevice) {
         addDisposable(
             bluetoothManager.connectAsClient(device, UUID.fromString(Const.BluetoothConstants.UUID))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(view::onSocketConnected, view::onError)
+                .subscribe(this::onSocketConnected, view::onError)
         )
+    }
+
+    private fun onSocketConnected(socket: BluetoothSocket) {
+        this.socket = socket
+        view.onSocketConnected(socket)
     }
 
     override fun readStream(socket: BluetoothSocket) {
@@ -154,4 +169,202 @@ class ReadingPresenter(private val view: ReadingContract.View) : BasePresenter(v
     private fun isBCD(byte: Byte): Boolean {
         return !((byte.toInt() shr 4) < 10 && (byte.toInt() and 0x0F) < 10)
     }
+
+
+    override fun setTimeDate(time: DeviceTime, deviceDate: DeviceDate) {
+        addDisposable(Single.fromCallable { return@fromCallable startTimeWrite(deviceDate, time) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(view::onTimeWriteResult, view::onError)
+        )
+    }
+
+    private fun startTimeWrite(deviceDate: DeviceDate, time: DeviceTime): Boolean {
+        val timeDate = TimeDate()
+        val year = (deviceDate.year % 100).toByte()
+        with(timeDate) {
+            god = ((year / 10) shl 4).toByte()
+            god = god or ((year % 10).toByte())
+
+            dat = ((deviceDate.day / 10) shl 4).toByte()
+            dat = dat or ((deviceDate.day % 10).toByte())
+
+            mje = (((deviceDate.month + 1) / 10) shl 4).toByte()
+            mje = mje or (((deviceDate.month + 1) % 10).toByte())
+
+            sat = ((time.hours / 10) shl 4).toByte()
+            sat = sat or ((time.hours % 10).toByte())
+
+            min = ((time.minutes / 10) shl 4).toByte()
+            min = min or ((time.minutes % 10).toByte())
+
+            sek = ((time.seconds / 10) shl 4).toByte()
+            sek = sek or (time.seconds % 10).toByte()
+            val cal = GregorianCalendar(deviceDate.year, deviceDate.month, deviceDate.day - 1)
+
+            dan = cal.get(GregorianCalendar.DAY_OF_WEEK).toByte()
+            return writeTime(timeDate)
+        }
+    }
+
+    private fun writeTime(timeDate: TimeDate): Boolean {
+        val timeString = String.format(
+            Const.Data.TIME_FORMAT,
+            timeDate.sek,
+            timeDate.min,
+            timeDate.sat,
+            timeDate.dan
+        )
+        val timeDateString = String.format(
+            Const.Data.TIME_DATE_FORMAT,
+            timeDate.sek,
+            timeDate.min,
+            timeDate.sat,
+            timeDate.dan,
+            timeDate.dat,
+            timeDate.mje,
+            timeDate.god
+        )
+
+        return !waitAnswer(timeDateString)
+
+    }
+
+    private fun waitAnswer(time: String): Boolean {
+        var isSuccessful = false
+        loop@ for (i in 1..3) {
+            sendStringToDevice(time)
+
+            readMessageData = DataRXMessage()
+            if (waitMessage()) {
+                when (readMessageData.status) {
+                    Const.Data.ACK -> {
+                        isSuccessful = true
+                        break@loop
+                    }
+                    Const.Data.NAK -> continue@loop
+                    Const.Data.COMPLETE -> break@loop
+
+                }
+            }
+
+        }
+        readMessageData = DataRXMessage()
+        return isSuccessful
+    }
+
+    override fun setData(data: List<Char>) {
+        this.data.clear()
+        this.data.addAll(data)
+    }
+
+    private fun waitMessage(): Boolean {
+        val timeOut = System.currentTimeMillis() + 1500
+        do {
+            if (System.currentTimeMillis() > timeOut) {
+                println("Timed out!")
+                return false
+            }
+
+        } while (!endOfMessage())
+        return true
+    }
+
+    private fun endOfMessage(): Boolean {
+        while (true) {
+            if (data.isNotEmpty()) {
+                for (dataByte in data) {
+                    if (readMessageData.status == Const.Data.ETX || readMessageData.status == Const.Data.EOT) {
+                        readMessageData.bcc = readMessageData.bcc xor dataByte.toByte()
+                        if (readMessageData.bcc == 0.toByte()) {
+                            readMessageData.status = Const.Data.COMPLETE
+                        } else {
+                            readMessageData.proterr = 0xCC.toByte()
+                        }
+                        return true
+                    } else {
+                        if (readMessageData.status == Const.Data.SOH || readMessageData.status == Const.Data.STX)
+                            readMessageData.bcc = readMessageData.bcc xor dataByte.toByte()
+
+                        when (dataByte.toByte()) {
+                            Const.Data.SOH -> {
+                                if (readMessageData.count == 0)
+                                    readMessageData.status = Const.Data.SOH
+                                else
+                                    readMessageData.proterr = Const.Data.SOH
+                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
+                            }
+                            Const.Data.STX -> {
+                                if (readMessageData.status == Const.Data.SOH || readMessageData.count == 0)
+                                    readMessageData.status = Const.Data.STX
+                                else
+                                    readMessageData.proterr = Const.Data.STX
+                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
+                            }
+                            0x0D.toByte() -> {
+                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
+                                if (readMessageData.type == 0.toByte()) readMessageData.crlf = 0x0D
+                            }
+                            0x0A.toByte() -> {
+                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
+                                if (readMessageData.type == 0.toByte()) {
+                                    if (readMessageData.crlf == 0x0D.toByte())
+                                        readMessageData.crlf = 0x0A
+                                    readMessageData.status = Const.Data.COMPLETE
+                                    return true
+                                }
+                            }
+                            Const.Data.ETX -> {
+                                readMessageData.status = Const.Data.ETX
+                            }
+                            Const.Data.EOT -> {
+                                readMessageData.status = Const.Data.EOT
+                            }
+                            Const.Data.ACK -> {
+                                readMessageData.status = Const.Data.ACK
+                                return true
+                            }
+                            Const.Data.NAK -> {
+                                readMessageData.status = Const.Data.NAK
+                                return true
+                            }
+                            else -> {
+                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
+                                if (readMessageData.count > 2048 * 4) {
+                                    readMessageData.proterr = 0x55
+                                    return false
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+
+
+            Thread.sleep(700)
+        }
+    }
+
+    private fun sendStringToDevice(time: String) {
+        var j = 0
+        val messageSendData = DataTXTMessage()
+        if (time.isNotEmpty()) {
+            messageSendData.buffer[j++] = Const.Data.SOH
+            for (char in time) {
+                messageSendData.buffer[j++] = char.toByte()
+                messageSendData.bcc = messageSendData.bcc xor char.toByte()
+            }
+            messageSendData.buffer[j++] = Const.Data.ETX
+            messageSendData.bcc = messageSendData.bcc xor Const.Data.ETX
+            messageSendData.buffer[j++] = messageSendData.bcc
+            messageSendData.count = j
+
+            CommunicationUtil.writeToSocket(
+                socket,
+                messageSendData.buffer.take(messageSendData.count).toByteArray()
+            )
+        }
+    }
+
 }

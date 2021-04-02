@@ -236,4 +236,7 @@
     <string name="hour_min_sec">hour:minutes:seconds</string>
     <string name="pick_time">Pick time</string>
     <string name="set_time">Set time</string>
+
+    <string name="time_changed">Time has been changed</string>
+    <string name="setting_time_is_impossible">Setting time is impossible! Set receiver in program mode!</string>
 </resources>
