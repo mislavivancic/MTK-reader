@@ -20,6 +20,7 @@ import com.mtkreader.presenters.ConnectionPresenter
 import com.mtkreader.utils.PermissionUtils
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
+import com.mtkreader.views.adapters.DeviceOperation
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
 import kotlinx.android.synthetic.main.fragment_connect.*
 import net.alexandroid.utils.mylogkt.logD
@@ -90,16 +91,14 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
             rv_devices.apply {
                 adapter = AlphaInAnimationAdapter(connectedDevicesAdapter)
             }
-
-            // probably not needed (too specific)
-            //val device = devices.find { it.name.toUpperCase().contains(Const.DeviceConstants.NAME) }
-            //if (device == null)
-            //    CantFindDeviceDialog(requireContext()).show()
         }
     }
 
-    override fun onClick(device: BluetoothDevice) {
-        val deviceBundle = Bundle().apply { putParcelable(Const.Extras.DEVICE_EXTRA, device) }
+    override fun onClick(device: BluetoothDevice, deviceOperation: DeviceOperation) {
+        val deviceBundle = Bundle().apply {
+            putParcelable(Const.Extras.DEVICE_EXTRA, device)
+            putSerializable(Const.Extras.DEVICE_OPERATION, deviceOperation)
+        }
         //findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
         findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
     }

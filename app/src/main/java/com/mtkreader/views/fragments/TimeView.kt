@@ -22,6 +22,7 @@ import com.mtkreader.presenters.TimePresenter
 import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.DataUtils.getHardwareVersion
 import com.mtkreader.utils.TimeUtils
+import com.mtkreader.views.adapters.DeviceOperation
 import com.mtkreader.views.dialogs.ConnectingDialog
 import kotlinx.android.synthetic.main.fragment_time.*
 import net.alexandroid.utils.mylogkt.logI
@@ -44,9 +45,11 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     private val readingData = mutableListOf<Char>()
     private lateinit var socket: BluetoothSocket
     private var isReadingData = false
+    private var isTimeWriteFinished = false
     private var hardwareVersion = 0
     private lateinit var time: DeviceTime
     private lateinit var deviceDate: DeviceDate
+    private lateinit var deviceOperation: DeviceOperation
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -65,7 +68,8 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         super.onActivityCreated(savedInstanceState)
         initializePresenter()
         initializeViews()
-        startReading()
+        if (deviceOperation == DeviceOperation.TIME_READ)
+            startReading()
     }
 
     private fun unpackExtras() {
@@ -74,6 +78,9 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
             connectedDevice = deviceArgument
         else
             requireActivity().finish()
+        deviceOperation =
+            arguments?.getSerializable(Const.Extras.DEVICE_OPERATION) as DeviceOperation?
+                ?: DeviceOperation.TIME_READ
     }
 
     private fun initializePresenter() {
@@ -107,8 +114,10 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
         logI("${byte.toChar()} -> $byte ", customTag = Const.Logging.RECEIVED)
-        handleTimeReading()
-        //initTimeWrite()
+        if (deviceOperation == DeviceOperation.TIME_READ)
+            handleTimeReading()
+        else if (deviceOperation == DeviceOperation.TIME_SET)
+            initTimeWrite()
     }
 
     private fun handleTimeReading() {
@@ -124,7 +133,6 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
             isReadingData = true
         }
         if (data.contains(Const.Tokens.GET_TIME_END_TOKEN)) {
-            //CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
             val timeData = mutableListOf<Char>()
             timeData.addAll(data.filter { it != ETX.toChar() && it != 10.toChar() })
             data.clear()
@@ -143,9 +151,15 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
             isReadingData = true
             presenter.setTimeDate(time, deviceDate)
         }
-        if (isReadingData && data.isNotEmpty()) {
+        if (isReadingData && data.isNotEmpty() && !isTimeWriteFinished) {
             presenter.setReadData(data)
             data.clear()
+        }
+        if (data.contains(Const.Tokens.GET_TIME_END_TOKEN) && isTimeWriteFinished) {
+            val timeData = mutableListOf<Char>()
+            timeData.addAll(data.filter { it != ETX.toChar() && it != 10.toChar() })
+            data.clear()
+            presenter.extractTimeData(requireContext(), timeData, hardwareVersion)
         }
 
     }
@@ -154,6 +168,9 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         if (isSuccessful) toast(getString(R.string.setting_time_is_impossible))
         else toast(getString(R.string.time_changed))
 
+        data.clear()
+        presenter.getTime()
+        isTimeWriteFinished = true
     }
 
     override fun displayTimeData(time: String) {

@@ -10,14 +10,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mtkreader.R
 import kotlinx.android.synthetic.main.connected_device_item.view.*
 
+enum class DeviceOperation {
+    TIME_READ, TIME_SET
+}
+
 class ConnectedDevicesRecyclerView(
     private val context: Context,
     private val layoutInflater: LayoutInflater
 ) :
     RecyclerView.Adapter<ConnectedDevicesRecyclerView.ConnectedDeviceViewHolder>() {
 
+    private var clickedPosition = -1
+
     interface OnItemClickListener {
-        fun onClick(device: BluetoothDevice)
+        fun onClick(device: BluetoothDevice, deviceOperation: DeviceOperation)
     }
 
     private val devices = mutableListOf<BluetoothDevice>()
@@ -39,7 +45,11 @@ class ConnectedDevicesRecyclerView(
 
     override fun getItemCount(): Int = devices.size
     override fun onBindViewHolder(holder: ConnectedDeviceViewHolder, position: Int) {
-        holder.addValuesOnHolder(devices[position])
+        holder.addValuesOnHolder(devices[position], position == clickedPosition)
+        holder.itemView.cl_device_info.setOnClickListener {
+            clickedPosition = position
+            notifyDataSetChanged()
+        }
     }
 
 
@@ -49,14 +59,33 @@ class ConnectedDevicesRecyclerView(
         private val onClickListener: OnItemClickListener?
     ) : RecyclerView.ViewHolder(view) {
 
-        fun addValuesOnHolder(device: BluetoothDevice) {
+        fun addValuesOnHolder(device: BluetoothDevice, isClicked: Boolean) {
             with(device) {
                 view.iv_device.setImageResource(provideTypeIcon(type))
                 view.tv_device_name.text = name
                 view.tv_device_adress.text =
                     String.format(context.resources.getString(R.string.square_bracket), address)
 
-                view.setOnClickListener { onClickListener?.onClick(this) }
+                view.btn_time_read.setOnClickListener {
+                    onClickListener?.onClick(
+                        this,
+                        DeviceOperation.TIME_READ
+                    )
+                }
+
+                view.btn_time_set.setOnClickListener {
+                    onClickListener?.onClick(
+                        this,
+                        DeviceOperation.TIME_SET
+                    )
+                }
+                if (isClicked) {
+                    view.cl_device_info.visibility = View.GONE
+                    view.ll_options.visibility = View.VISIBLE
+                } else {
+                    view.cl_device_info.visibility = View.VISIBLE
+                    view.ll_options.visibility = View.GONE
+                }
 
             }
 

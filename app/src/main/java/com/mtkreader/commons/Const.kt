@@ -14,6 +14,7 @@ object Const {
     object Extras {
         const val SOCKET_EXTRA = "SOCKET_EXTRA"
         const val DEVICE_EXTRA = "DEVICE_EXTRA"
+        const val DEVICE_OPERATION = "DEVICE_OPERATION"
         const val DATA_EXTRA = "DATA_EXTRA"
     }
 
