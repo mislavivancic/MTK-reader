@@ -20,6 +20,7 @@ import com.mtkreader.utils.DataUtils
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import net.alexandroid.utils.mylogkt.logI
 import org.koin.core.KoinComponent
@@ -34,7 +35,7 @@ class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
     TimeContract.Presenter, KoinComponent {
 
     companion object {
-        private const val TIME_QUERY_INTERVAL: Long = 1500
+        private const val TIME_QUERY_INTERVAL: Long = 2000
     }
 
     private val bluetoothManager: RxBluetooth by inject()
@@ -42,6 +43,7 @@ class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
     private lateinit var connection: BluetoothConnection
     private lateinit var socket: BluetoothSocket
     private val data = mutableListOf<Char>()
+    private lateinit var getTimeDisposable: Disposable
 
     override fun connectToDevice(device: BluetoothDevice) {
         addDisposable(
@@ -76,12 +78,18 @@ class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
 
 
     override fun getTime() {
-        addDisposable(
+        getTimeDisposable =
             Observable.interval(0, TIME_QUERY_INTERVAL, TimeUnit.MILLISECONDS).doOnNext {
                 CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.GET_TIME)
             }.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError { this.onErrorOccurred(it) }
                 .subscribe()
-        )
+        addDisposable(getTimeDisposable)
+    }
+
+    override fun stopTimeFetch() {
+        getTimeDisposable.dispose()
     }
 
     override fun extractTimeData(context: Context, data: List<Char>, hardwareVersion: Int) {

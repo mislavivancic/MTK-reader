@@ -107,8 +107,8 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
         logI("${byte.toChar()} -> $byte ", customTag = Const.Logging.RECEIVED)
-        //initTimeWrite()
         handleTimeReading()
+        //initTimeWrite()
     }
 
     private fun handleTimeReading() {
@@ -120,7 +120,6 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
 
         if ((data.contains(SECOND_LINE_TOKEN) || data.contains(SECOND_LINE_TOKEN_OTHER)) && !isReadingData) {
             data.clear()
-            //CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.GET_TIME)
             presenter.getTime()
             isReadingData = true
         }
@@ -172,4 +171,9 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         displayErrorPopup(throwable)
     }
 
+    override fun onDestroy() {
+        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
+        presenter.closeConnection()
+        super.onDestroy()
+    }
 }

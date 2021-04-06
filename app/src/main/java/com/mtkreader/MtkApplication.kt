@@ -8,6 +8,8 @@ import com.mtkreader.contracts.TimeContract
 import com.mtkreader.services.DisplayServiceImpl
 import com.mtkreader.services.ProcessDataServiceImpl
 import com.mtkreader.services.TimeServiceImpl
+import io.reactivex.exceptions.UndeliverableException
+import io.reactivex.plugins.RxJavaPlugins
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -30,6 +32,8 @@ class MtkApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        RxJavaPlugins.setErrorHandler { throwable: Throwable -> (throwable as? UndeliverableException)?.printStackTrace() }
 
         startKoin {
             modules(mtkModule)

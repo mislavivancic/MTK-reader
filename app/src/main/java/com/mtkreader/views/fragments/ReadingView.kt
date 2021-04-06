@@ -9,25 +9,18 @@ import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.ikovac.timepickerwithseconds.MyTimePickerDialog
-import com.ikovac.timepickerwithseconds.TimePicker
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.ReadingContract
 import com.mtkreader.data.DeviceDate
 import com.mtkreader.data.DeviceTime
-import com.mtkreader.data.writing.DataRXMessage
 import com.mtkreader.presenters.ReadingPresenter
 import com.mtkreader.utils.CommunicationUtil
-import com.mtkreader.utils.DataUtils.getHardwareVersion
 import com.mtkreader.utils.SharedPrefsUtils
-import com.mtkreader.utils.TimeUtils
 import com.mtkreader.views.dialogs.ConnectingDialog
 import kotlinx.android.synthetic.main.fragment_reading.*
-import net.alexandroid.utils.mylogkt.logD
 import net.alexandroid.utils.mylogkt.logI
 
 class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View {
