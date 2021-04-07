@@ -9,6 +9,7 @@ import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.github.ivbaranov.rxbluetooth.exceptions.ConnectionClosedException
 import com.ikovac.timepickerwithseconds.MyTimePickerDialog
 import com.ikovac.timepickerwithseconds.TimePicker
 import com.mtkreader.R
@@ -26,13 +27,12 @@ import com.mtkreader.views.adapters.DeviceOperation
 import com.mtkreader.views.dialogs.ConnectingDialog
 import kotlinx.android.synthetic.main.fragment_time.*
 import net.alexandroid.utils.mylogkt.logI
+import java.io.IOException
 
 class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     MyTimePickerDialog.OnTimeSetListener {
 
     companion object {
-        private const val TAG = "READING_FRAGMENT"
-
         private const val FIRST_LINE_TOKEN_FIRST = 13.toByte().toChar()
         private const val FIRST_LINE_TOKEN_SECOND = 10.toByte().toChar()
         private const val SECOND_LINE_TOKEN = 6.toByte().toChar()
@@ -44,6 +44,7 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     private val data = mutableListOf<Char>()
     private val readingData = mutableListOf<Char>()
     private lateinit var socket: BluetoothSocket
+    private var isConnectedToDevice = false
     private var isReadingData = false
     private var isTimeWriteFinished = false
     private var hardwareVersion = 0
@@ -73,13 +74,14 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     private fun unpackExtras() {
-        val deviceArgument = arguments?.getParcelable<BluetoothDevice>(Const.Extras.DEVICE_EXTRA)
+        val deviceArgument =
+            requireArguments().getParcelable<BluetoothDevice>(Const.Extras.DEVICE_EXTRA)
         if (deviceArgument != null)
             connectedDevice = deviceArgument
         else
             requireActivity().finish()
         deviceOperation =
-            arguments?.getSerializable(Const.Extras.DEVICE_OPERATION) as DeviceOperation?
+            requireArguments().getSerializable(Const.Extras.DEVICE_OPERATION) as DeviceOperation?
                 ?: DeviceOperation.TIME_READ
     }
 
@@ -91,6 +93,16 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         tv_data_read.movementMethod = ScrollingMovementMethod()
         btn_time_pick.setOnClickListener {
             TimeUtils.provideTimePicker(requireContext(), this).show()
+        }
+        btn_retry.setOnClickListener {
+            startReading()
+            toast(getString(R.string.retrying))
+        }
+        if (deviceOperation == DeviceOperation.TIME_READ) {
+            btn_retry.text = getString(R.string.retry_time_read)
+        } else if (deviceOperation == DeviceOperation.TIME_SET) {
+            btn_retry.text = getString(R.string.retry_time_set)
+
         }
     }
 
@@ -105,28 +117,29 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
 
         connectingDialog.dismiss()
         presenter.readStream(this.socket)
-
-        CommunicationUtil.writeToSocket(this.socket, Const.DeviceConstants.FIRST_INIT)
+        btn_retry.visibility = View.GONE
+        presenter.initDeviceCommunication()
     }
 
     override fun onReceiveBytes(byte: Byte) {
+        presenter.stopTimeout()
         data.add(byte.toChar())
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
         logI("${byte.toChar()} -> $byte ", customTag = Const.Logging.RECEIVED)
-        if (deviceOperation == DeviceOperation.TIME_READ)
-            handleTimeReading()
-        else if (deviceOperation == DeviceOperation.TIME_SET)
-            initTimeWrite()
-    }
-
-    private fun handleTimeReading() {
         if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
             hardwareVersion = getHardwareVersion(data.joinToString("").toByteArray())
             data.clear()
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
+            isConnectedToDevice = true
         }
+        if (deviceOperation == DeviceOperation.TIME_READ)
+            handleTimeReading()
+        else if (deviceOperation == DeviceOperation.TIME_SET && this::time.isInitialized && this::deviceDate.isInitialized)
+            initTimeWrite()
+    }
 
+    private fun handleTimeReading() {
         if ((data.contains(SECOND_LINE_TOKEN) || data.contains(SECOND_LINE_TOKEN_OTHER)) && !isReadingData) {
             data.clear()
             presenter.getTime()
@@ -141,11 +154,6 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     private fun initTimeWrite() {
-        if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
-            hardwareVersion = getHardwareVersion(data.joinToString("").toByteArray())
-            data.clear()
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
-        }
         if ((data.contains(SECOND_LINE_TOKEN) || data.contains(SECOND_LINE_TOKEN_OTHER)) && !isReadingData) {
             data.clear()
             isReadingData = true
@@ -165,16 +173,19 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     override fun onTimeWriteResult(isSuccessful: Boolean) {
-        if (isSuccessful) toast(getString(R.string.setting_time_is_impossible))
-        else toast(getString(R.string.time_changed))
+        if (isSuccessful) {
+            btn_retry.visibility = View.VISIBLE
+            toast(getString(R.string.setting_time_is_impossible))
+        } else toast(getString(R.string.time_changed))
 
         data.clear()
         presenter.getTime()
         isTimeWriteFinished = true
     }
 
-    override fun displayTimeData(time: String) {
-        tv_current_time.text = String.format(getString(R.string.device_time_s), time)
+    override fun displayTimeData(timeDate: Pair<String, String>) {
+        tv_current_time.text = String.format(getString(R.string.device_time_s), timeDate.first)
+        tv_current_date.text = String.format(getString(R.string.device_date_s), timeDate.second)
     }
 
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int, seconds: Int) {
@@ -183,9 +194,24 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         startReading()
     }
 
+    override fun displayWaitMessage() {
+        tv_data_read.append(getString(R.string.wait))
+    }
+
     override fun onError(throwable: Throwable) {
         connectingDialog.dismiss()
-        displayErrorPopup(throwable)
+        when (throwable) {
+            is ConnectionClosedException -> {
+                btn_retry.visibility = View.VISIBLE
+            }
+            is IOException -> {
+                toast(getString(R.string.set_probe_in_connecting))
+                btn_retry.visibility = View.VISIBLE
+            }
+            else -> displayErrorPopup(throwable)
+        }
+        presenter.stopTimeout()
+
     }
 
     override fun onDestroy() {

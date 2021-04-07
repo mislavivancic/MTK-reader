@@ -3,7 +3,6 @@ package com.mtkreader.contracts
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
-import androidx.fragment.app.Fragment
 import com.mtkreader.commons.base.AutoDisposePresenter
 import com.mtkreader.commons.base.ErrorHandlingFragment
 import com.mtkreader.data.DeviceDate
@@ -15,8 +14,9 @@ interface TimeContract {
     interface View : ErrorHandlingFragment {
         fun onSocketConnected(socket: BluetoothSocket)
         fun onReceiveBytes(byte: Byte)
+        fun displayWaitMessage()
 
-        fun displayTimeData(time: String)
+        fun displayTimeData(timeDate: Pair<String,String>)
         fun onTimeWriteResult(isSuccessful: Boolean)
 
         fun onError(throwable: Throwable)
@@ -24,7 +24,9 @@ interface TimeContract {
 
     interface Presenter : AutoDisposePresenter {
         fun connectToDevice(device: BluetoothDevice)
+        fun initDeviceCommunication()
         fun readStream(socket: BluetoothSocket)
+        fun stopTimeout()
         fun closeConnection()
         fun getTime()
         fun stopTimeFetch()
@@ -39,7 +41,7 @@ interface TimeContract {
             context: Context,
             data: List<Char>,
             hardwareVersion: Int
-        ): Single<String>
+        ): Single<Pair<String, String>>
 
         fun setTimeDate(time: DeviceTime, deviceDate: DeviceDate): Single<Boolean>
         fun setReadData(data: List<Char>)

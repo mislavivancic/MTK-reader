@@ -5,37 +5,29 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.github.ivbaranov.rxbluetooth.BluetoothConnection
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
-import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BasePresenter
-import com.mtkreader.contracts.ReadingContract
 import com.mtkreader.contracts.TimeContract
 import com.mtkreader.data.DeviceDate
 import com.mtkreader.data.DeviceTime
-import com.mtkreader.data.reading.TimeDate
-import com.mtkreader.data.writing.DataRXMessage
-import com.mtkreader.data.writing.DataTXTMessage
 import com.mtkreader.utils.CommunicationUtil
-import com.mtkreader.utils.DataUtils
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import net.alexandroid.utils.mylogkt.logI
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.experimental.and
-import kotlin.experimental.or
-import kotlin.experimental.xor
 
 class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
     TimeContract.Presenter, KoinComponent {
 
     companion object {
+        private const val INIT_COMMUNICATION_INTERVAL: Long = 2000
         private const val TIME_QUERY_INTERVAL: Long = 2000
+        private const val CONNECTION_TIMEOUT: Long = 10000
     }
 
     private val bluetoothManager: RxBluetooth by inject()
@@ -44,6 +36,8 @@ class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
     private lateinit var socket: BluetoothSocket
     private val data = mutableListOf<Char>()
     private lateinit var getTimeDisposable: Disposable
+    private lateinit var timeoutDisposable: Disposable
+    private lateinit var initCommunicationDisposable: Disposable
 
     override fun connectToDevice(device: BluetoothDevice) {
         addDisposable(
@@ -52,6 +46,34 @@ class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onSocketConnected, view::onError)
         )
+        timeoutDisposable = Observable.timer(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnComplete {
+                closeConnection()
+                throw IOException("TimeOut!")
+            }.doOnError { view.onError(it) }
+            .subscribe()
+        addDisposable(timeoutDisposable)
+    }
+
+    override fun initDeviceCommunication() {
+        initCommunicationDisposable =
+            Observable.interval(INIT_COMMUNICATION_INTERVAL, TimeUnit.MILLISECONDS)
+                .doOnNext {
+                    CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.FIRST_INIT)
+                    view.displayWaitMessage()
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError { this.onErrorOccurred(it) }
+                .subscribe()
+        addDisposable(initCommunicationDisposable)
+    }
+
+    override fun stopTimeout() {
+        timeoutDisposable.dispose()
+        initCommunicationDisposable.dispose()
     }
 
     private fun onSocketConnected(socket: BluetoothSocket) {
@@ -72,7 +94,8 @@ class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
     }
 
     override fun closeConnection() {
-        connection.closeConnection()
+        if (this::connection.isInitialized)
+            connection.closeConnection()
         clear()
     }
 

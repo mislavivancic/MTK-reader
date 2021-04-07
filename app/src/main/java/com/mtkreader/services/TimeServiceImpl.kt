@@ -33,8 +33,8 @@ class TimeServiceImpl : TimeContract.Service {
         context: Context,
         data: List<Char>,
         hardwareVersion: Int
-    ): Single<String> {
-        return Single.fromCallable<String> {
+    ): Single<Pair<String, String>> {
+        return Single.fromCallable<Pair<String, String>> {
             val dbuf = parseTimeData(data)
             return@fromCallable generateTimeString(context, dbuf, hardwareVersion)
         }
@@ -86,7 +86,7 @@ class TimeServiceImpl : TimeContract.Service {
         context: Context,
         dbuf: ByteArray,
         hardwareVersion: Int
-    ): String {
+    ): Pair<String, String> {
         val timeDate = TimeDate(dbuf[0], dbuf[1], dbuf[2], dbuf[3], dbuf[4], dbuf[5], dbuf[6])
         timeDate.dan = timeDate.dan and 0x0F
 
@@ -98,7 +98,7 @@ class TimeServiceImpl : TimeContract.Service {
             (timeDate.dan.toInt() - 1).toByte() else isInvalid = true
 
         if (isInvalid) {
-            return String.format(
+            val wrongFormat = String.format(
                 context.getString(R.string.wrong_value_time),
                 timeDate.dan,
                 timeDate.sat,
@@ -108,22 +108,23 @@ class TimeServiceImpl : TimeContract.Service {
                 timeDate.mje,
                 timeDate.god
             )
+            return Pair(wrongFormat, wrongFormat)
         }
-        var dateTime = String.format(
+        val time = String.format(
             context.getString(R.string.day_time_format),
             context.resources.getStringArray(R.array.a_days)[timeDate.dan.toInt()],
             timeDate.sat,
             timeDate.min,
             timeDate.sek
         )
-        if (hardwareVersion == Const.Data.TIP_PA)
-            dateTime = String.format(
-                context.getString(R.string.date_time_format),
-                timeDate.dat,
-                timeDate.mje,
-                timeDate.god
-            )
-        return dateTime
+        //if (hardwareVersion == Const.Data.TIP_PA)
+        val date = String.format(
+            context.getString(R.string.date_time_format),
+            timeDate.dat,
+            timeDate.mje,
+            timeDate.god
+        )
+        return Pair(time, date)
     }
 
     private fun hasErrors(timDate: TimeDate): Boolean {

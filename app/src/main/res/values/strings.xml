@@ -227,6 +227,7 @@
     <string name="and">and</string>
     <string name="or">or</string>
     <string name="device_time_s">Device time: %s</string>
+    <string name="device_date_s">Device date: %s</string>
 
 
     <string name="day_time_format">%s-%02X:%02X:%02X</string>
@@ -240,4 +241,10 @@
     <string name="time_changed">Time has been changed</string>
     <string name="setting_time_is_impossible">Setting time is impossible! Set receiver in program mode!</string>
     <string name="read_time">Read time</string>
+    <string name="retry">Retry</string>
+    <string name="retrying">Retrying…</string>
+    <string name="retry_time_read">Retry time read</string>
+    <string name="retry_time_set">Retry time set</string>
+    <string name="set_probe_in_connecting">Set probe in connecting mode and retry!</string>
+    <string name="wait">\nWaiting…\t</string>
 </resources>
