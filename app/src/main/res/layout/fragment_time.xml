@@ -1,81 +1,254 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:background="@color/colorPrimaryDark">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/device_time_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:elevation="4dp"
+        android:padding="10dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/tv_device_time_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:text="@string/device_time"
+            android:textColor="@color/white"
+            android:textSize="@dimen/medium_text_size"
+            app:drawableStartCompat="@drawable/ic_clock_white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_current_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/medium_text_size"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/tv_device_time_label"
+            app:layout_constraintStart_toEndOf="@id/tv_device_time_label"
+            app:layout_constraintTop_toTopOf="@id/tv_device_time_label"
+            tools:text="15:34:31" />
+
+        <TextView
+            android:id="@+id/tv_device_date_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:text="@string/device_date"
+            android:textColor="@color/white"
+            android:textSize="@dimen/medium_text_size"
+            app:drawableStartCompat="@drawable/ic_calendar_white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_device_time_label" />
+
+        <TextView
+            android:id="@+id/tv_current_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="@dimen/medium_text_size"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/tv_device_date_label"
+            app:layout_constraintStart_toEndOf="@id/tv_device_date_label"
+            app:layout_constraintTop_toTopOf="@id/tv_device_date_label"
+            tools:text="08-04-21" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/lighter_gray"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:weightSum="4">
+        android:padding="20dp"
+        app:layout_constraintBottom_toTopOf="@id/horizontal_guideline"
+        app:layout_constraintTop_toBottomOf="@id/device_time_container">
+
+
+        <DatePicker
+            android:id="@+id/date_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:calendarTextColor="@color/white"
+            android:calendarViewShown="false"
+            android:datePickerMode="spinner"
+            android:spinnersShown="true"
+            android:visibility="gone" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:background="@color/light_gray"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_current_time"
-                style="@style/LargeTextViewStyleBoldWhite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="Device time: Sun-15:34:31" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_current_date"
-                style="@style/LargeTextViewStyleBoldWhite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="Device date: 08-04-21" />
-
-            <DatePicker
-                android:id="@+id/date_picker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:calendarTextColor="@color/white"
-                android:calendarViewShown="false"
-                android:datePickerMode="spinner"
-                android:spinnersShown="true" />
+            android:id="@+id/pick_date_time_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <Button
                 android:id="@+id/btn_time_pick"
+                style="@style/MtkButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="5dp"
                 android:text="@string/pick_time"
                 android:textAllCaps="false" />
 
             <Button
-                android:id="@+id/btn_retry"
+                android:id="@+id/btn_date_pick"
+                style="@style/MtkButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/retry"
-                android:textAllCaps="false"
-                android:visibility="gone" />
-
+                android:layout_margin="5dp"
+                android:text="@string/pick_date"
+                android:textAllCaps="false" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_data_read"
-            style="@style/MediumTextViewStyleWhite"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="bottom"
-            android:padding="@dimen/medium_text_padding"
-            android:scrollbars="vertical" />
+        <Button
+            android:id="@+id/btn_program_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/program_time"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/program_time_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:elevation="4dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/tv_time_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="10dp"
+                android:gravity="center"
+                android:text="@string/time_to_program"
+                android:textColor="@color/almost_black"
+                android:textSize="@dimen/medium_text_size"
+                app:drawableStartCompat="@drawable/ic_clock"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:drawablePadding="10dp"
+                android:gravity="center"
+                android:textColor="@color/almost_black"
+                android:textSize="@dimen/medium_text_size"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/tv_time_label"
+                app:layout_constraintStart_toEndOf="@id/tv_time_label"
+                app:layout_constraintTop_toTopOf="@id/tv_time_label"
+                tools:text="15:34:31" />
+
+            <TextView
+                android:id="@+id/tv_date_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:drawablePadding="10dp"
+                android:gravity="center"
+                android:text="@string/date_to_program"
+                android:textColor="@color/almost_black"
+                android:textSize="@dimen/medium_text_size"
+                app:drawableStartCompat="@drawable/ic_calendar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_time_label" />
+
+            <TextView
+                android:id="@+id/tv_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:drawablePadding="10dp"
+                android:gravity="center"
+                android:textColor="@color/almost_black"
+                android:textSize="@dimen/medium_text_size"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/tv_date_label"
+                app:layout_constraintStart_toEndOf="@id/tv_date_label"
+                app:layout_constraintTop_toTopOf="@id/tv_date_label"
+                tools:text="08-04-21" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <Button
+            android:id="@+id/btn_retry"
+            style="@style/MtkButtonRetry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@color/blood_red"
+            android:text="@string/retry"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            tools:visibility="visible" />
     </LinearLayout>
+
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/horizontal_guideline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.75" />
+
+    <TextView
+        android:id="@+id/tv_data_read"
+        style="@style/MediumTextViewStyleWhite"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="bottom"
+        android:padding="@dimen/medium_text_padding"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/horizontal_guideline" />
 
     <include
         android:id="@+id/loading_layout"
         layout="@layout/loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@id/tv_data_read"
+        app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

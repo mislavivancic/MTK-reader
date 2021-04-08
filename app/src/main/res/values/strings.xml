@@ -232,6 +232,8 @@
 
     <string name="day_time_format">%s-%02X:%02X:%02X</string>
     <string name="date_time_format">%02X-%02X-%02X</string>
+    <string name="day_time_format_d">%02d:%02d:%02d</string>
+    <string name="date_time_format_d">%02d-%02d-%02d</string>
     <string name="wrong_value_time">(Wrong value time: %02X-%02X:%02X:%02X  date:%02X-%02X-%02X)</string>
 
     <string name="hour_min_sec">hour:minutes:seconds</string>
@@ -248,4 +250,9 @@
     <string name="set_probe_in_connecting">Set probe in connecting mode and retry!</string>
     <string name="wait">\nWaiting…\t</string>
     <string name="program_time">Program time</string>
+    <string name="pick_date">Pick date</string>
+    <string name="time_to_program">Time to program:</string>
+    <string name="date_to_program">Date to program:</string>
+    <string name="device_time">Device time:</string>
+    <string name="device_date">Device date:</string>
 </resources>

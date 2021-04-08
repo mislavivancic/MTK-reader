@@ -1,5 +1,6 @@
 package com.mtkreader.views.fragments
 
+import android.app.DatePickerDialog
 import android.app.Dialog
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
@@ -9,6 +10,7 @@ import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.DatePicker
 import com.github.ivbaranov.rxbluetooth.exceptions.ConnectionClosedException
 import com.ikovac.timepickerwithseconds.MyTimePickerDialog
 import com.ikovac.timepickerwithseconds.TimePicker
@@ -31,7 +33,7 @@ import net.alexandroid.utils.mylogkt.logI
 import java.io.IOException
 
 class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
-    MyTimePickerDialog.OnTimeSetListener {
+    MyTimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener {
 
     companion object {
         private const val FIRST_LINE_TOKEN_FIRST = 13.toByte().toChar()
@@ -98,6 +100,19 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         btn_time_pick.setOnClickListener {
             TimeUtils.provideTimePicker(requireContext(), this).show()
         }
+        btn_date_pick.setOnClickListener {
+            DatePickerDialog(
+                requireContext(),
+                this,
+                date_picker.year,
+                date_picker.month,
+                date_picker.dayOfMonth
+            ).show()
+        }
+
+        btn_program_time.setOnClickListener {
+            startReading()
+        }
         btn_retry.setOnClickListener {
             startReading()
             toast(getString(R.string.retrying))
@@ -106,8 +121,18 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
             btn_retry.text = getString(R.string.retry_time_read)
         } else if (deviceOperation == DeviceOperation.TIME_SET) {
             btn_retry.text = getString(R.string.retry_time_set)
-
+            pick_date_time_container.visibility = View.VISIBLE
+            btn_program_time.visibility = View.VISIBLE
         }
+        deviceDate = DeviceDate(date_picker.year, date_picker.month, date_picker.dayOfMonth)
+        tv_date.text =
+            String.format(
+                getString(R.string.date_time_format_d),
+                deviceDate.day,
+                deviceDate.month,
+                deviceDate.year
+            )
+        checkTimeDateSet()
     }
 
     private fun startReading() {
@@ -190,14 +215,29 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     override fun displayTimeData(timeDate: Pair<String, String>) {
-        tv_current_time.text = String.format(getString(R.string.device_time_s), timeDate.first)
-        tv_current_date.text = String.format(getString(R.string.device_date_s), timeDate.second)
+        device_time_container.visibility = View.VISIBLE
+        tv_current_time.text = String.format("%s", timeDate.first)
+        tv_current_date.text = String.format("%s", timeDate.second)
     }
 
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int, seconds: Int) {
         time = DeviceTime(hourOfDay, minute, seconds)
-        deviceDate = DeviceDate(date_picker.year, date_picker.month, date_picker.dayOfMonth)
-        startReading()
+        tv_time.text =
+            String.format(getString(R.string.day_time_format_d), hourOfDay, minute, seconds)
+        program_time_container.visibility = View.VISIBLE
+        checkTimeDateSet()
+    }
+
+    override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+        deviceDate = DeviceDate(year, month, dayOfMonth)
+        tv_date.text =
+            String.format(getString(R.string.date_time_format_d), dayOfMonth, month, year)
+        program_time_container.visibility = View.VISIBLE
+        checkTimeDateSet()
+    }
+
+    private fun checkTimeDateSet() {
+        btn_program_time.isEnabled = this::time.isInitialized && this::deviceDate.isInitialized
     }
 
     override fun displayWaitMessage() {
@@ -222,8 +262,6 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     override fun onDestroy() {
-        if (this::socket.isInitialized)
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
         presenter.closeConnection()
         super.onDestroy()
     }
