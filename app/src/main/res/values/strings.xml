@@ -247,4 +247,5 @@
     <string name="retry_time_set">Retry time set</string>
     <string name="set_probe_in_connecting">Set probe in connecting mode and retry!</string>
     <string name="wait">\nWaiting…\t</string>
+    <string name="program_time">Program time</string>
 </resources>

@@ -22,8 +22,8 @@ import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
 import com.mtkreader.views.adapters.DeviceOperation
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_connect.*
-import net.alexandroid.utils.mylogkt.logD
 
 class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionContract.View,
     ConnectedDevicesRecyclerView.OnItemClickListener {
@@ -57,6 +57,8 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
     }
 
     private fun initializeViews() {
+        requireActivity().title = getString(R.string.paired_devices)
+        requireActivity().toolbar.navigationIcon = null
         if (PermissionUtils.hasCoarseLocation(this))
             presenter.initBluetooth()
         else
@@ -85,7 +87,7 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
 
     override fun onConnectedDevices(devices: Set<BluetoothDevice>?) {
         if (devices != null) {
-            connectedDevicesAdapter = ConnectedDevicesRecyclerView(requireContext(), layoutInflater)
+            connectedDevicesAdapter = ConnectedDevicesRecyclerView(layoutInflater)
             connectedDevicesAdapter.addData(devices)
             connectedDevicesAdapter.setOnClickListener(this)
             rv_devices.apply {

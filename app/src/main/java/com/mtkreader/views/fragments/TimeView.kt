@@ -25,6 +25,7 @@ import com.mtkreader.utils.DataUtils.getHardwareVersion
 import com.mtkreader.utils.TimeUtils
 import com.mtkreader.views.adapters.DeviceOperation
 import com.mtkreader.views.dialogs.ConnectingDialog
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_time.*
 import net.alexandroid.utils.mylogkt.logI
 import java.io.IOException
@@ -90,6 +91,9 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     private fun initializeViews() {
+        requireActivity().title = getString(R.string.program_time)
+        requireActivity().toolbar.setNavigationIcon(R.drawable.ic_back_white)
+
         tv_data_read.movementMethod = ScrollingMovementMethod()
         btn_time_pick.setOnClickListener {
             TimeUtils.provideTimePicker(requireContext(), this).show()
@@ -116,12 +120,14 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         this.socket = socket
 
         connectingDialog.dismiss()
+        loading_layout.visibility = View.VISIBLE
         presenter.readStream(this.socket)
         btn_retry.visibility = View.GONE
         presenter.initDeviceCommunication()
     }
 
     override fun onReceiveBytes(byte: Byte) {
+        loading_layout.visibility = View.GONE
         presenter.stopTimeout()
         data.add(byte.toChar())
         readingData.add(byte.toChar())
@@ -200,6 +206,7 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
 
     override fun onError(throwable: Throwable) {
         connectingDialog.dismiss()
+        loading_layout.visibility = View.GONE
         when (throwable) {
             is ConnectionClosedException -> {
                 btn_retry.visibility = View.VISIBLE
@@ -215,7 +222,8 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     override fun onDestroy() {
-        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
+        if (this::socket.isInitialized)
+            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
         presenter.closeConnection()
         super.onDestroy()
     }

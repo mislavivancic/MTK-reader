@@ -1,8 +1,6 @@
 package com.mtkreader.views.adapters
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothProfile
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +12,7 @@ enum class DeviceOperation {
     TIME_READ, TIME_SET
 }
 
-class ConnectedDevicesRecyclerView(
-    private val context: Context,
-    private val layoutInflater: LayoutInflater
-) :
+class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
     RecyclerView.Adapter<ConnectedDevicesRecyclerView.ConnectedDeviceViewHolder>() {
 
     private var clickedPosition = -1
@@ -40,7 +35,7 @@ class ConnectedDevicesRecyclerView(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConnectedDeviceViewHolder {
         val view = layoutInflater.inflate(R.layout.connected_device_item, parent, false)
-        return ConnectedDeviceViewHolder(context, view, onClickListener)
+        return ConnectedDeviceViewHolder(view, onClickListener)
     }
 
     override fun getItemCount(): Int = devices.size
@@ -54,17 +49,15 @@ class ConnectedDevicesRecyclerView(
 
 
     class ConnectedDeviceViewHolder(
-        private val context: Context,
         private val view: View,
         private val onClickListener: OnItemClickListener?
     ) : RecyclerView.ViewHolder(view) {
 
         fun addValuesOnHolder(device: BluetoothDevice, isClicked: Boolean) {
             with(device) {
-                view.iv_device.setImageResource(provideTypeIcon(type))
                 view.tv_device_name.text = name
                 view.tv_device_adress.text =
-                    String.format(context.resources.getString(R.string.square_bracket), address)
+                    String.format(view.resources.getString(R.string.square_bracket), address)
 
                 view.btn_time_read.setOnClickListener {
                     onClickListener?.onClick(
@@ -89,13 +82,6 @@ class ConnectedDevicesRecyclerView(
 
             }
 
-        }
-
-        private fun provideTypeIcon(type: Int): Int {
-            return when (type) {
-                BluetoothProfile.HEADSET -> R.drawable.ic_music_type
-                else -> R.drawable.ic_unknown_type
-            }
         }
     }
 
