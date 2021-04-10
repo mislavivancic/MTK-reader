@@ -17,7 +17,7 @@ interface TimeContract {
         fun displayWaitMessage()
 
         fun displayTimeData(timeDate: Pair<String,String>)
-        fun onTimeWriteResult(isSuccessful: Boolean)
+        fun onTimeWriteResult(hasFailed: Boolean)
 
         fun onError(throwable: Throwable)
     }
@@ -28,6 +28,7 @@ interface TimeContract {
         fun readStream(socket: BluetoothSocket)
         fun stopTimeout()
         fun closeConnection()
+        fun tryReset()
         fun getTime()
         fun stopTimeFetch()
         fun extractTimeData(context: Context, data: List<Char>, hardwareVersion: Int)

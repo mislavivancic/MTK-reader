@@ -255,4 +255,10 @@
     <string name="date_to_program">Date to program:</string>
     <string name="device_time">Device time:</string>
     <string name="device_date">Device date:</string>
+
+    <string name="ok">OK</string>
+    <string name="click_here_retry">Click here to retry</string>
+    <string name="pick_time_hint">Click here to pick time to program</string>
+    <string name="pick_date_hint">Click here to pick date to program</string>
+    <string name="program_time_date_hint">Click here to program picked time and date to device!</string>
 </resources>

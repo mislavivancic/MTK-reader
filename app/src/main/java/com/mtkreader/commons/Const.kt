@@ -27,6 +27,11 @@ object Const {
         const val DENIED = -1
     }
 
+    object ShowCase {
+        const val PROGRAM_TIME = "PROGRAM_TIME"
+        const val ERROR_TIME = "ERROR_TIME"
+    }
+
     object Error {
         const val BT_NOT_SUPPORTED = "Bluetooth is not supported on this device!"
         const val BT_REQUIRED = "Bluetooth is required!"

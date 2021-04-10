@@ -93,6 +93,12 @@ class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
         )
     }
 
+
+    override fun tryReset() {
+        if (this::socket.isInitialized && socket.isConnected)
+            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
+    }
+
     override fun closeConnection() {
         if (this::connection.isInitialized)
             connection.closeConnection()

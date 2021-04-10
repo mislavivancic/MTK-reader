@@ -40,8 +40,6 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
     private val readingData = mutableListOf<Char>()
     private lateinit var socket: BluetoothSocket
     private var isReadingData = false
-    private lateinit var time: DeviceTime
-    private lateinit var deviceDate: DeviceDate
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
