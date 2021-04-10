@@ -4,12 +4,15 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark">
 
+
     <TextView
         android:id="@+id/tv_data_read"
         style="@style/MediumTextViewStyleWhite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:gravity="bottom"
         android:padding="@dimen/medium_text_padding"
         android:scrollbars="vertical" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

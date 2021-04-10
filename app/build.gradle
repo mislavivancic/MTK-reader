@@ -1,10 +1,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.1"
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         applicationId "com.mtkreader"
@@ -12,6 +14,7 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -22,6 +25,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
 }
 
 dependencies {
@@ -33,7 +41,11 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-
+    implementation 'com.android.support:multidex:1.0.3'
+    // Firebase
+    implementation platform('com.google.firebase:firebase-bom:27.0.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 
     // RX
     implementation "io.reactivex.rxjava2:rxjava:$project.ext.rxJavaVersion"
@@ -52,5 +64,12 @@ dependencies {
     // appearance
     implementation "jp.wasabeef:recyclerview-animators:$project.ext.recyclerViewAnimationsVersion"
     implementation "com.airbnb.android:lottie:$project.ext.lottieAnimationsVersion"
+
+    implementation 'com.kovachcode:timePickerWithSeconds:1.0.1'
+
+    implementation 'net.alexandroid.utils:mylogkt:1.12'
+
+    // showcase
+    implementation 'com.github.spiddekauga:MaterialShowcaseView:2.0.0'
 
 }

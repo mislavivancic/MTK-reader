@@ -7,12 +7,14 @@ object Const {
 
 
     object Tokens {
-        const val END_TOKEN = 33.toByte().toChar()
+        const val PARAM_READ_END_TOKEN = 33.toByte().toChar()
+        const val GET_TIME_END_TOKEN = ')'.toByte().toChar()
     }
 
     object Extras {
         const val SOCKET_EXTRA = "SOCKET_EXTRA"
         const val DEVICE_EXTRA = "DEVICE_EXTRA"
+        const val DEVICE_OPERATION = "DEVICE_OPERATION"
         const val DATA_EXTRA = "DATA_EXTRA"
     }
 
@@ -25,6 +27,11 @@ object Const {
         const val DENIED = -1
     }
 
+    object ShowCase {
+        const val PROGRAM_TIME = "PROGRAM_TIME"
+        const val ERROR_TIME = "ERROR_TIME"
+    }
+
     object Error {
         const val BT_NOT_SUPPORTED = "Bluetooth is not supported on this device!"
         const val BT_REQUIRED = "Bluetooth is required!"
@@ -34,11 +41,18 @@ object Const {
         const val UUID = "00001101-0000-1000-8000-00805f9b34fb"
     }
 
+    object Logging {
+        const val SENT = "MESSAGE SENT"
+        const val RECEIVED = "MESSAGE RECEIVED"
+    }
+
     object DeviceConstants {
         const val NAME = "HELM"
 
         const val FIRST_INIT = "2F3F210D0A"
         const val SECOND_INIT = "063034360D0A"
+        const val GET_TIME = "0147740330"
+        const val RESET = "01810382"
         const val ACK = "015503560D0A"
     }
 
@@ -126,7 +140,17 @@ object Const {
             "-SPN ",
             "-PS "
         )
+        val COMPLETE = 2.toByte()
+        val SOH = 0x01.toByte()
+        val STX = 0x02.toByte()
+        val ETX = 0x03.toByte()
+        val EOT = 0x04.toByte()
+        val ACK = 0x06.toByte()
+        val NAK = 0x15.toByte()
 
-
+        val TIME_FORMAT = "G0(%02X%02X%02X%02X)"
+        val TIME_DATE_FORMAT = "G0(%02X%02X%02X%02X%02X%02X%02X)"
     }
+
+
 }

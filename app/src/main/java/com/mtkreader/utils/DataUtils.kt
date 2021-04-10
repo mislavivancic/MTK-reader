@@ -1,5 +1,6 @@
 package com.mtkreader.utils
 
+import com.mtkreader.commons.Const
 import com.mtkreader.data.reading.LadderNets
 import com.mtkreader.data.reading.StrParFil
 import com.mtkreader.data.reading.StrParFilVer9
@@ -201,5 +202,25 @@ object DataUtils {
                 booleanArrayOf(false, false, false, false)
             )
         )[index]
+    }
+
+    fun HtoB(ch: Char): Char {
+        if (ch in '0'..'9') {
+            return (ch - '0').toChar()
+        }
+        if (ch in 'A'..'F') {
+            return (ch - 'A' + 0xA).toChar()
+        }
+        return ch
+    }
+
+    fun getHardwareVersion(header: ByteArray): Int {
+        val headString = header.toString(Charsets.UTF_8)
+        for ((cnt, version) in Const.Data.CTipPrij.withIndex()) {
+            if (headString.contains(version, true)) {
+                return cnt
+            }
+        }
+        return 0
     }
 }

@@ -20,7 +20,9 @@ import com.mtkreader.presenters.ConnectionPresenter
 import com.mtkreader.utils.PermissionUtils
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
+import com.mtkreader.views.adapters.DeviceOperation
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_connect.*
 
 class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionContract.View,
@@ -55,6 +57,8 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
     }
 
     private fun initializeViews() {
+        requireActivity().title = getString(R.string.paired_devices)
+        requireActivity().toolbar.navigationIcon = null
         if (PermissionUtils.hasCoarseLocation(this))
             presenter.initBluetooth()
         else
@@ -83,23 +87,22 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
 
     override fun onConnectedDevices(devices: Set<BluetoothDevice>?) {
         if (devices != null) {
-            connectedDevicesAdapter = ConnectedDevicesRecyclerView(requireContext(), layoutInflater)
+            connectedDevicesAdapter = ConnectedDevicesRecyclerView(layoutInflater)
             connectedDevicesAdapter.addData(devices)
             connectedDevicesAdapter.setOnClickListener(this)
             rv_devices.apply {
                 adapter = AlphaInAnimationAdapter(connectedDevicesAdapter)
             }
-
-            // probably not needed (too specific)
-            //val device = devices.find { it.name.toUpperCase().contains(Const.DeviceConstants.NAME) }
-            //if (device == null)
-            //    CantFindDeviceDialog(requireContext()).show()
         }
     }
 
-    override fun onClick(device: BluetoothDevice) {
-        val deviceBundle = Bundle().apply { putParcelable(Const.Extras.DEVICE_EXTRA, device) }
-        findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
+    override fun onClick(device: BluetoothDevice, deviceOperation: DeviceOperation) {
+        val deviceBundle = Bundle().apply {
+            putParcelable(Const.Extras.DEVICE_EXTRA, device)
+            putSerializable(Const.Extras.DEVICE_OPERATION, deviceOperation)
+        }
+        //findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
+        findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
     }
 
 
@@ -120,8 +123,8 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
             if (resultCode == Activity.RESULT_CANCELED) {
                 ErrorDialog(
                     requireContext(),
-                    Const.Error.BT_REQUIRED,
-                    View.OnClickListener { requireActivity().finish() }).show()
+                    Const.Error.BT_REQUIRED
+                ) { requireActivity().finish() }.show()
 
             }
         }
@@ -134,7 +137,7 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
     ) {
         if (requestCode == PermissionUtils.COARSE_LOCATION_REQUEST_CODE) {
             if (!permissions.contains(Manifest.permission.ACCESS_COARSE_LOCATION) || grantResults[0] == Const.PermissionCode.DENIED) {
-                ErrorDialog(requireContext()).show()
+                ErrorDialog(requireContext()) {}.show()
             } else {
                 presenter.initBluetooth()
             }

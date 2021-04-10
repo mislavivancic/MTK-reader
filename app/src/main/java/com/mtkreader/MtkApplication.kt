@@ -4,8 +4,12 @@ import android.app.Application
 import android.content.Context
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.contracts.DisplayDataContract
+import com.mtkreader.contracts.TimeContract
 import com.mtkreader.services.DisplayServiceImpl
 import com.mtkreader.services.ProcessDataServiceImpl
+import com.mtkreader.services.TimeServiceImpl
+import io.reactivex.exceptions.UndeliverableException
+import io.reactivex.plugins.RxJavaPlugins
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -16,6 +20,7 @@ class MtkApplication : Application() {
         // services
         single<DisplayDataContract.DisplayService> { DisplayServiceImpl() }
         single<DisplayDataContract.ProcessService> { ProcessDataServiceImpl() }
+        single<TimeContract.Service> { TimeServiceImpl() }
 
         // utils
         single { RxBluetooth(this@MtkApplication) }
@@ -27,6 +32,8 @@ class MtkApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        RxJavaPlugins.setErrorHandler { throwable: Throwable -> (throwable as? UndeliverableException)?.printStackTrace() }
 
         startKoin {
             modules(mtkModule)

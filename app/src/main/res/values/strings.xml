@@ -226,5 +226,39 @@
 
     <string name="and">and</string>
     <string name="or">or</string>
+    <string name="device_time_s">Device time: %s</string>
+    <string name="device_date_s">Device date: %s</string>
 
+
+    <string name="day_time_format">%s-%02X:%02X:%02X</string>
+    <string name="date_time_format">%02X-%02X-%02X</string>
+    <string name="day_time_format_d">%02d:%02d:%02d</string>
+    <string name="date_time_format_d">%02d-%02d-%02d</string>
+    <string name="wrong_value_time">(Wrong value time: %02X-%02X:%02X:%02X  date:%02X-%02X-%02X)</string>
+
+    <string name="hour_min_sec">hour:minutes:seconds</string>
+    <string name="pick_time">Pick time</string>
+    <string name="set_time">Set time</string>
+
+    <string name="time_changed">Time has been changed</string>
+    <string name="setting_time_is_impossible">Setting time is impossible! Set receiver in program mode!</string>
+    <string name="read_time">Read time</string>
+    <string name="retry">Retry</string>
+    <string name="retrying">Retrying…</string>
+    <string name="retry_time_read">Retry time read</string>
+    <string name="retry_time_set">Retry time set</string>
+    <string name="set_probe_in_connecting">Set probe in connecting mode and retry!</string>
+    <string name="wait">\nWaiting…\t</string>
+    <string name="program_time">Program time</string>
+    <string name="pick_date">Pick date</string>
+    <string name="time_to_program">Time to program:</string>
+    <string name="date_to_program">Date to program:</string>
+    <string name="device_time">Device time:</string>
+    <string name="device_date">Device date:</string>
+
+    <string name="ok">OK</string>
+    <string name="click_here_retry">Click here to retry</string>
+    <string name="pick_time_hint">Click here to pick time to program</string>
+    <string name="pick_date_hint">Click here to pick date to program</string>
+    <string name="program_time_date_hint">Click here to program picked time and date to device!</string>
 </resources>

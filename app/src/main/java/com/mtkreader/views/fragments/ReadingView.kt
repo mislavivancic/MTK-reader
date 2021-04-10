@@ -9,17 +9,19 @@ import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.ReadingContract
+import com.mtkreader.data.DeviceDate
+import com.mtkreader.data.DeviceTime
 import com.mtkreader.presenters.ReadingPresenter
 import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.dialogs.ConnectingDialog
 import kotlinx.android.synthetic.main.fragment_reading.*
+import net.alexandroid.utils.mylogkt.logI
 
 class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContract.View {
 
@@ -94,7 +96,11 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         data.add(byte.toChar())
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
-        println("${byte.toChar()} -> $byte ")
+        logI("${byte.toChar()} -> $byte ", customTag = Const.Logging.RECEIVED)
+        handleParameterReading()
+    }
+
+    private fun handleParameterReading() {
         if (data.contains(FIRST_LINE_TOKEN_FIRST) && data.contains(FIRST_LINE_TOKEN_SECOND) && !isReadingData) {
             data.clear()
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
@@ -104,7 +110,8 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
             isReadingData = true
         }
-        if (data.contains(Const.Tokens.END_TOKEN)) {
+        if (data.contains(Const.Tokens.PARAM_READ_END_TOKEN)) {
+            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
             socket.close()
             presenter.closeConnection()
 
@@ -119,9 +126,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
     }
 
     override fun onError(throwable: Throwable) {
+        connectingDialog.dismiss()
         displayErrorPopup(throwable)
     }
-
-    override fun provideFragment(): Fragment = this
-
 }

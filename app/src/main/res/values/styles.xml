@@ -55,8 +55,19 @@
 
 
     <style name="MtkButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@color/dark_gray</item>
         <item name="colorButtonNormal">@color/colorPrimary</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="MtkButtonCommand" parent="Widget.AppCompat.Button">
+        <item name="colorButtonNormal">@color/colorPrimary</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="MtkButtonRetry" parent="Widget.AppCompat.Button">
+        <item name="background">@color/blood_red</item>
+        <item name="colorButtonNormal">@color/blood_red</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>
