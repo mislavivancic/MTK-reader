@@ -119,6 +119,8 @@ object Const {
         const val TIP_PASN = 5
         const val TIP_SPN = 6
         const val TIP_PS = 7
+        const val TIP_PSB = 8
+
         val bVtmask = byteArrayOf(
             0x80.toByte(),
             0x40.toByte(),
@@ -138,7 +140,8 @@ object Const {
             "-PA ",
             "-PASN ",
             "-SPN ",
-            "-PS "
+            "-PS ",
+            "-PSB "
         )
         val COMPLETE = 2.toByte()
         val SOH = 0x01.toByte()

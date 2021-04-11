@@ -6,6 +6,7 @@ import com.mtkreader.commons.Const
 import com.mtkreader.commons.Const.Data.TIP_PA
 import com.mtkreader.commons.Const.Data.TIP_PASN
 import com.mtkreader.commons.Const.Data.TIP_PS
+import com.mtkreader.commons.Const.Data.TIP_PSB
 import com.mtkreader.commons.Const.Data.TIP_S
 import com.mtkreader.commons.Const.Data.TIP_SN
 import com.mtkreader.commons.Const.Data.TIP_SPA
@@ -58,11 +59,13 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     var fVis_Realoc = false
     var fVis_Cz95P = false
     var fVis_Cz96P = false
+    var fVis_Cz96HDOBAT= false
 
     var IsCZRaster = false
     var IsCZ44raster = false
 
 
+    //private lateinit var REC_PAR_STR: REC_PAR_STRv
     // data to be filled
     private lateinit var wipers: List<Wiper>
     private lateinit var pOnPOffRDat: List<PonPoffStr>
@@ -128,16 +131,12 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
     private fun setupFlags() {
-        fVis_VersacomPS = m_HWVerPri != TIP_PS
-        fVis_VersacomPS = m_HWVerPri != TIP_PS
+        fVis_VersacomPS = (m_HWVerPri != TIP_PS) && (m_HWVerPri != TIP_PSB)
         fVis_Versacom = m_HWVerPri != TIP_S && m_HWVerPri != TIP_SN && m_HWVerPri != TIP_SPN
-        fVis_Uklsat =
-            m_HWVerPri == TIP_SPA || m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN
-        fVis_Prazdani =
-            mSoftwareVersionPri >= 94 && (m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN)
-        fVis_Sezone =
-            fVis_Versacom && m_HWVerPri != TIP_PA || fVis_Uklsat && mSoftwareVersionPri >= 95
-        fVis_Sezone = fVis_Sezone && mSoftwareVersionPri >= 80 && m_HWVerPri != TIP_PS
+        fVis_Uklsat = m_HWVerPri == TIP_SPA || m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN
+        fVis_Prazdani = mSoftwareVersionPri >= 94 && (m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN)
+        fVis_Sezone = (fVis_Versacom && m_HWVerPri != TIP_PA) || (fVis_Uklsat && mSoftwareVersionPri >= 95)
+        fVis_Sezone = fVis_Sezone && mSoftwareVersionPri >= 80 && m_HWVerPri != TIP_PS && (m_HWVerPri != TIP_PSB)
         fVis_Asat = m_HWVerPri == TIP_PASN || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN
         fVis_RefPrij = m_HWVerPri != TIP_S && m_HWVerPri != TIP_SN
         fVis_TBAS = m_HWVerPri != TIP_PA
@@ -146,6 +145,8 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
         fVis_Cz95P = mSoftwareVersionPri >= 95
         fVis_Cz96P = mSoftwareVersionPri >= 96
+        fVis_Cz96HDOBAT = m_HWVerPri == TIP_PSB
+
     }
 
     private fun getLineData() {
@@ -194,23 +195,31 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
     private fun unpackDatV9(dbuf: ByteArray, mgaddr: Mgaddr) {
-        globalIndex = 0
+        globalIndex = 0 //TODO  mislim da se samo tu treba resetirat na nulu
 
         when (mgaddr.group) {
-
+            0 ->{
+                when (mgaddr.objectt) {
+                    1 -> mgaddr.objectt //var pFrameWnd->m_opPrij.VAdrPrij=pFrameWnd->SetOprel4I(); //TODO implementirati
+                    2 -> getcLastParData(dbuf) //TODO napravit metodu
+                    3 -> mRelInterLock = getRelInterLock(dbuf) //TODO chekirat
+                    4 -> getDeviceSerNr(dbuf)
+                }
+            }
             in 1..4 -> {
                 globalIndex = 0
                 val oPProg = getTparPar(dbuf)
                 when (mgaddr.group) {
                     1 -> mPProgR1.add(mgaddr.objectt, oPProg)
                     2 -> mPProgR2.add(mgaddr.objectt, oPProg)
-                    3 -> {
-                        mRelInterLock = getRelInterLock(dbuf)
-                        globalIndex = 0
-                        mPProgR3.add(mgaddr.objectt, oPProg)
-                    }
+                    3 -> mPProgR3.add(mgaddr.objectt, oPProg)
                     4 -> mPProgR4.add(mgaddr.objectt, oPProg)
                 }
+            }
+            0xC -> getFriRPar(dbuf, mParFilteraCF, mParFiltera)
+
+            7->{
+                // PRAZNO ZA PS i PSB
             }
             5 -> {
                 when (mgaddr.objectt) {
@@ -220,12 +229,93 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                     3 -> learningData = getLearningDat(dbuf)
                 }
             }
-
+            6 -> GetLoopTim(dbuf) //TODO implementirati
 
             8 -> getOprijParV9(mgaddr, dbuf, mOp50Prij, mOpPrij, mReallocs)
             9 -> getTlg50Par(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnD)
-            12 -> getFriRPar(dbuf, mParFilteraCF, mParFiltera)
         }
+
+    }
+    private fun getDeviceSerNr(dbuf: ByteArray) {
+        //pFrameWnd->m_dwDeviceSerNr = pFrameWnd->SetOprel4I();
+//
+        //CString str;
+        //str.Format(_T("\n\r"+CMsg(IDSI_SERIALNUM)+"  %d  "), pFrameWnd->m_dwDeviceSerNr);
+        //pFrameWnd->ShowData(str);
+
+    }
+    private fun GetLoopTim(dbuf: ByteArray) {
+
+       //typedef struct {
+       //    byte State;		// ne koristi se
+       //    byte LastCmd;		//0 nepoznata  1 ON 2 OFF
+       //    WTONOFF  Tpar;
+
+       //} LOOPTIMSTR;
+
+
+
+       // CString str = _T("Loop:\n\r");
+       // for (UINT uRel = 0; uRel < 4; uRel++)
+       // {
+       //     m_LoopPar[uRel].State = *m_pbuf++;
+       //     m_LoopPar[uRel].LastCmd = *m_pbuf++;
+       //     m_LoopPar[uRel].Tpar.ton = SetOprelI();
+       //     m_LoopPar[uRel].Tpar.toff = SetOprelI();
+//
+       //     CString strllt ;
+//
+       //     if((m_LoopPar[uRel].Tpar.ton & 0x8000 ) || (m_LoopPar[uRel].Tpar.toff & 0x8000))
+       //     strllt.Format(_T("%02X -:- -:-\n\r "), m_LoopPar[uRel].LastCmd);
+       //     else
+       //     strllt.Format(_T("%02X %02d:%02d  %02d:%02d\n\r "), m_LoopPar[uRel].LastCmd, m_LoopPar[uRel].Tpar.ton/60, m_LoopPar[uRel].Tpar.ton % 60, m_LoopPar[uRel].Tpar.toff / 60, m_LoopPar[uRel].Tpar.toff % 60);
+//
+       //     str += strllt;
+       // }
+       // //ShowData(str);
+    }
+
+    private fun getcLastParData(dbuf: ByteArray) {
+
+
+        //#define PARIDFILE_SIZE 18
+        //#define PARID_SIZE 8
+        //typedef struct {
+        //    byte	DataTime[6];
+        //    byte  CreateSite[PARID_SIZE];
+        //    byte  IDCreate[PARID_SIZE];
+        //    byte  ReParaSite[PARID_SIZE];
+        //    byte  IDRePara[PARID_SIZE];
+//
+        //    byte  IDFile[PARIDFILE_SIZE];
+        //}REC_PAR_STR;
+//
+        //typedef struct {
+        //    byte  CreateSite[PARID_SIZE];
+        //    byte  IDCreate[PARID_SIZE];
+        //    byte  IDFile[PARIDFILE_SIZE];
+        //}REC_FILPAR_STR;
+
+
+
+
+       // REC_PAR_STR *pLastPa = &(pFrameWnd->m_cLastParData);
+       // memcpy(pLastPa, pFrameWnd->m_pbuf, sizeof(REC_PAR_STR));
+       // CString str;
+//
+       // byte IDCreate[PARID_SIZE+1];		memset(&IDCreate	,0,PARID_SIZE+1);		memcpy(&IDCreate,	pLastPa->IDCreate,	PARID_SIZE );
+       // byte CreateSite[PARID_SIZE + 1];	memset(&CreateSite, 0, PARID_SIZE + 1);		memcpy(&CreateSite, pLastPa->CreateSite, PARID_SIZE);
+       // byte IDRePara[PARID_SIZE + 1];		memset(&IDRePara, 0, PARID_SIZE + 1);		memcpy(&IDRePara,	pLastPa->IDRePara,	PARID_SIZE);
+       // byte ReParaSite[PARID_SIZE + 1];	memset(&ReParaSite, 0, PARID_SIZE + 1);		memcpy(&ReParaSite, pLastPa->ReParaSite, PARID_SIZE);
+       // byte IDFile[PARIDFILE_SIZE + 1];	memset(&IDFile, 0, PARIDFILE_SIZE + 1);		memcpy(&IDFile,		pLastPa->IDFile,	 PARIDFILE_SIZE);
+//
+       // str.Format(_T("\n\r"+CMsg(IDSI_LASTREPARAMTIME)+" %02X-%02X-%02X %02X:%02X\n\r"+CMsg(IDSI_CREATED_UID)+" %s "+CMsg(IDSI_CREATED_PCUID)+" |%s|\n\r"+CMsg(IDSI_REPARM_UID)+" %s "+CMsg(IDSI_REPARM_PCUID)+" |%s|\n\r"+CMsg(IDSI_PARM_FILE)+"%s.mtk \n\r"), pLastPa->DataTime[3], pLastPa->DataTime[4],
+       // pLastPa->DataTime[5], pLastPa->DataTime[2], pLastPa->DataTime[1], IDCreate, CreateSite, IDRePara, ReParaSite, IDFile );
+       // pFrameWnd->ShowData(str);
+
+
+
+
 
     }
 
@@ -1691,10 +1781,12 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mTlgFnd: List<Telegram>
     ) {
         when (mgaddr.objectt) {
-            0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)
+            0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)  //TODO iskoristit istu funkciju storeDataTlgFn
             1 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel2)
             2 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel3)
             3 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel4)
+
+
             4 -> {
                 storeDataTlgFn(dbuf, mOp50Prij.tlg[0].tel1)
                 storeDataTlgFn(dbuf, mOp50Prij.tlg[1].tel1)
@@ -1709,6 +1801,12 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                 storeDataTlgFn(dbuf, mOp50Prij.tlg[6].tel1)
                 storeDataTlgFn(dbuf, mOp50Prij.tlg[7].tel1)
             }
+
+            7 ->{
+                storeDataTlgFn(dbuf, mOp50Prij.TlgVerAdr2.TlgAdr) //??
+
+            }
+
             8 -> {
                 storeDataTlgFn(dbuf, mTelegSync[0])
                 storeDataTlgFn(dbuf, mTelegSync[1])
@@ -1717,21 +1815,20 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                 storeDataTlgFn(dbuf, mTelegSync[2])
                 storeDataTlgFn(dbuf, mTelegSync[3])
                 storeDataTlgFn(dbuf, mTelegSync[4])
-
             }
-            10 -> {
-                storeDataTlgFn(dbuf, mTlgFnd[0])
-                storeDataTlgFn(dbuf, mTlgFnd[1])
-                storeDataTlgFn(dbuf, mTlgFnd[2])
+            0x0A -> {
+                storeDataTlgFn(dbuf, mTelegSync[5])
+                storeDataTlgFn(dbuf, mTelegSync[6])
+                storeDataTlgFn(dbuf, mTelegSync[7])
             }
-            11 -> {
-                storeDataTlgFn(dbuf, mTlgFnd[3])
-                storeDataTlgFn(dbuf, mTlgFnd[4])
+            0x0B -> {
+                storeDataTlgFn(dbuf, mTelegSync[8])
+                storeDataTlgFn(dbuf, mTelegSync[9])
             }
-            12 -> {
-                storeDataTlgFn(dbuf, mTlgFnd[5])
-                storeDataTlgFn(dbuf, mTlgFnd[6])
-                storeDataTlgFn(dbuf, mTlgFnd[7])
+            0x0C -> {
+                storeDataTlgFn(dbuf, mTelegSync[10])
+                storeDataTlgFn(dbuf, mTelegSync[11])
+                storeDataTlgFn(dbuf, mTelegSync[12])
             }
         }
     }
@@ -1751,10 +1848,12 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         byteBuffer.clear()
         fn.Cmd.Fn = dbuf[globalIndex++]
 
-        val temp: Int = dbuf[globalIndex++].toInt()
-        var tempUp: Int = dbuf[globalIndex++].toInt()
-        tempUp = tempUp shl 8
-        fn.ID = temp or tempUp
+
+        //TODO removed ID
+        //val temp: Int = dbuf[globalIndex++].toInt()
+        //var tempUp: Int = dbuf[globalIndex++].toInt()
+        //tempUp = tempUp shl 8
+        //fn.ID = temp or tempUp
     }
 
     private fun storeDataTlgRel(dbuf: ByteArray, tlgRel: Telegrel) {
@@ -1788,12 +1887,12 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         byteBuffer.clear()
 
         tlgRel.Isk.Fn = dbuf[globalIndex++]
-
-        val temp: Int = dbuf[globalIndex++].toInt()
-        var tempUp: Int = dbuf[globalIndex++].toInt()
-        tempUp = tempUp shl 8
-
-        tlgRel.ID = temp or tempUp
+        //TODO removed ID
+        //val temp: Int = dbuf[globalIndex++].toInt()
+        //var tempUp: Int = dbuf[globalIndex++].toInt()
+        //tempUp = tempUp shl 8
+//
+        //tlgRel.ID = temp or tempUp
     }
 
 
@@ -2046,7 +2145,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         val wipers = mutableListOf<Wiper>()
         for (i in 0..3) {
             val wiper = Wiper()
-            wiper.status = (0x80 + 0x20).toByte()
+            wiper.status = (0x80 + 0x20).toByte() //TODO  unsigned char vs signed char    PAZZZIITT
             setWiperRelData(wiper, dbuf)
             wipers.add(wiper)
         }
@@ -2266,3 +2365,5 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
 }
+
+
