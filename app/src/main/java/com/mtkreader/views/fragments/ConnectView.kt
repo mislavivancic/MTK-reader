@@ -91,6 +91,7 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
             connectedDevicesAdapter.addData(devices)
             connectedDevicesAdapter.setOnClickListener(this)
             rv_devices.apply {
+                setHasFixedSize(true)
                 adapter = AlphaInAnimationAdapter(connectedDevicesAdapter)
             }
         }
@@ -99,10 +100,14 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
     override fun onClick(device: BluetoothDevice, deviceOperation: DeviceOperation) {
         val deviceBundle = Bundle().apply {
             putParcelable(Const.Extras.DEVICE_EXTRA, device)
-            putSerializable(Const.Extras.DEVICE_OPERATION, deviceOperation)
         }
-        //findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
-        findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
+        if (deviceOperation == DeviceOperation.TIME_READ || deviceOperation == DeviceOperation.TIME_SET) {
+            deviceBundle.apply {
+                putSerializable(Const.Extras.DEVICE_OPERATION, deviceOperation)
+            }
+            findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
+        } else if (deviceOperation == DeviceOperation.PARAM_READ)
+            findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
     }
 
 

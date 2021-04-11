@@ -1,49 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:background="@color/lighterer_gray">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/device_container"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_marginTop="1dp"
         android:layout_marginBottom="@dimen/small_margin"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
         android:padding="@dimen/rv_item_padding"
         app:cardElevation="@dimen/cardview_elevation"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
-        <LinearLayout
-            android:id="@+id/ll_options"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="@dimen/rv_item_padding"
-            android:visibility="gone"
-            android:weightSum="2">
-
-            <Button
-                android:id="@+id/btn_time_read"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/read_time" />
-
-            <Button
-                android:id="@+id/btn_time_set"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/time_set" />
-        </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_device_info"
@@ -82,8 +57,69 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/iv_device"
                 app:layout_constraintTop_toBottomOf="@id/tv_device_name" />
+
+            <ImageButton
+                android:id="@+id/btn_options"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/transparent"
+                android:clickable="false"
+                android:focusable="false"
+                android:padding="10dp"
+                android:src="@drawable/ic_dropdown"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/options_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/rv_item_padding"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/device_container"
+        tools:visibility="visible">
+
+        <Button
+            android:id="@+id/btn_time_read"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/read_time"
+            app:layout_constraintEnd_toStartOf="@id/btn_time_set"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btn_time_set"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/time_set"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_time_read"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btn_param_read"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/read_params"
+            app:layout_constraintEnd_toStartOf="@id/btn_param_write"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btn_time_read" />
+
+        <Button
+            android:id="@+id/btn_param_write"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:hint="@string/not_available_yet"
+            android:text="@string/write_params"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_param_read"
+            app:layout_constraintTop_toBottomOf="@id/btn_time_set" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

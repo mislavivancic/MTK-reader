@@ -261,4 +261,7 @@
     <string name="pick_time_hint">Click here to pick time to program</string>
     <string name="pick_date_hint">Click here to pick date to program</string>
     <string name="program_time_date_hint">Click here to program picked time and date to device!</string>
+    <string name="read_params">Read Params</string>
+    <string name="write_params">Write Params</string>
+    <string name="not_available_yet">Not available yet</string>
 </resources>

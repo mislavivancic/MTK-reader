@@ -9,13 +9,15 @@ import com.mtkreader.R
 import kotlinx.android.synthetic.main.connected_device_item.view.*
 
 enum class DeviceOperation {
-    TIME_READ, TIME_SET
+    TIME_READ, TIME_SET, PARAM_READ
 }
 
 class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
     RecyclerView.Adapter<ConnectedDevicesRecyclerView.ConnectedDeviceViewHolder>() {
 
     private var clickedPosition = -1
+
+    private val expandedSet = mutableSetOf<BluetoothDevice>()
 
     interface OnItemClickListener {
         fun onClick(device: BluetoothDevice, deviceOperation: DeviceOperation)
@@ -40,10 +42,25 @@ class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
 
     override fun getItemCount(): Int = devices.size
     override fun onBindViewHolder(holder: ConnectedDeviceViewHolder, position: Int) {
-        holder.addValuesOnHolder(devices[position], position == clickedPosition)
+        holder.addValuesOnHolder(
+            devices[position],
+            expandedSet.contains(devices[position])
+        )
         holder.itemView.cl_device_info.setOnClickListener {
+            if (expandedSet.contains(devices[position]))
+                expandedSet.remove(devices[position])
+            else
+                expandedSet.add(devices[position])
             clickedPosition = position
-            notifyDataSetChanged()
+            notifyItemChanged(position)
+        }
+        holder.itemView.btn_options.setOnClickListener {
+            if (expandedSet.contains(devices[position]))
+                expandedSet.remove(devices[position])
+            else
+                expandedSet.add(devices[position])
+            clickedPosition = position
+            notifyItemChanged(position)
         }
     }
 
@@ -53,7 +70,7 @@ class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
         private val onClickListener: OnItemClickListener?
     ) : RecyclerView.ViewHolder(view) {
 
-        fun addValuesOnHolder(device: BluetoothDevice, isClicked: Boolean) {
+        fun addValuesOnHolder(device: BluetoothDevice, shouldExpand: Boolean) {
             with(device) {
                 view.tv_device_name.text = name
                 view.tv_device_adress.text =
@@ -72,12 +89,18 @@ class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
                         DeviceOperation.TIME_SET
                     )
                 }
-                if (isClicked) {
-                    view.cl_device_info.visibility = View.GONE
-                    view.ll_options.visibility = View.VISIBLE
+                view.btn_param_read.setOnClickListener {
+                    onClickListener?.onClick(
+                        this,
+                        DeviceOperation.PARAM_READ
+                    )
+                }
+                if (shouldExpand) {
+                    view.btn_options.animate().setDuration(200).rotation(180f)
+                    view.options_container.visibility = View.VISIBLE
                 } else {
-                    view.cl_device_info.visibility = View.VISIBLE
-                    view.ll_options.visibility = View.GONE
+                    view.btn_options.animate().setDuration(200).rotation(0f)
+                    view.options_container.visibility = View.GONE
                 }
 
             }
