@@ -21,5 +21,6 @@ class DeviceOperationChooseDialog(context: Context) :
         setCanceledOnTouchOutside(true)
         btn_read_time.setOnClickListener {  }
         btn_set_time.setOnClickListener { }
+        btn_read_setting.setOnClickListener { }
     }
 }

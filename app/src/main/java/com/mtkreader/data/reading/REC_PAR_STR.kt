@@ -4,9 +4,9 @@ package com.mtkreader.data.reading
 
 class REC_PAR_STR {
     companion object {
-        private const val DataTime_SIZE = 6
-        private const val PARID_SIZE = 8
-        private const val PARIDFILE_SIZE = 18
+        public const val DataTime_SIZE = 6
+        public const val PARID_SIZE = 8
+        public const val PARIDFILE_SIZE = 18
     }
 
     var DataTime = ByteArray(DataTime_SIZE)
@@ -30,11 +30,11 @@ class REC_PAR_STR {
         )
 
       val str2=  String.format("IDCreate %s CreateSite %s IDRePara %s ReParaSite %s IDFile %s .mtk",
-            CreateSite.joinToString("","",""),
-            IDCreate.joinToString("","",""),
-            ReParaSite.joinToString("","",""),
-            IDRePara.joinToString("","",""),
-            IDFile.joinToString("","","")
+          CreateSite.toString(Charsets.US_ASCII),
+            IDCreate.toString(Charsets.US_ASCII),
+            ReParaSite.toString(Charsets.US_ASCII),
+            IDRePara.toString(Charsets.US_ASCII),
+            IDFile.toString(Charsets.US_ASCII)
 
         )
         return str1+str2

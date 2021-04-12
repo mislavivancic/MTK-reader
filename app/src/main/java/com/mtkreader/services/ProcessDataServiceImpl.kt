@@ -1,6 +1,7 @@
 package com.mtkreader.services
 
 import android.content.Context
+import android.util.Log
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.Const.Data.TIP_PA
@@ -84,7 +85,9 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     private val mParFilteraCF = StrParFilVer9()
     private val mParFiltera = StrParFil()
 
-
+    private val m_LoopParL=List(4) { m_LoopPar() }
+    private val pLastPa=REC_PAR_STR()
+    private var m_dwDeviceSerNr:Int=-1
     private var globalIndex = 0
 
     private val mline = ByteArray(256)
@@ -167,14 +170,15 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         m_gaddr.update()
 
 
-        if (mline[i] != ')'.toByte())
-            m_Dateerr++
+        if (mline[i] != ')'.toByte()) // TODO 	if(!(m_Line[i++]=='('))m_Daterr++;
+
+        m_Dateerr++
 
         i = 5
         val dbuf = ByteArray(128)
 
 
-        for (j in 0..128) {
+        for (j in 0..128) {//INDEX 128>od velicine dbuf pa bi trebalo bit 127??
             var k = 2
             while (k != 0) {
                 k--
@@ -196,6 +200,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
     private fun unpackDatV9(dbuf: ByteArray, mgaddr: Mgaddr) {
         globalIndex = 0 //TODO  mislim da se samo tu treba resetirat na nulu
+        Log.i(Const.Logging.PACK,"group: ${mgaddr.group} obj ${mgaddr.objectt}" )
 
         when (mgaddr.group) {
             0 ->{
@@ -237,6 +242,9 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
     }
     private fun getDeviceSerNr(dbuf: ByteArray) {
+
+        m_dwDeviceSerNr=setOprel4I(dbuf)
+
         //pFrameWnd->m_dwDeviceSerNr = pFrameWnd->SetOprel4I();
 //
         //CString str;
@@ -253,9 +261,20 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
        //} LOOPTIMSTR;
 
+       //typedef struct{
+       //    WORD ton;
+       //    WORD toff;
+       //}
 
-
-       // CString str = _T("Loop:\n\r");
+        for (uRel in 0..3)
+        {
+            m_LoopParL[uRel].State=dbuf[globalIndex++]
+            m_LoopParL[uRel].LastCmd=dbuf[globalIndex++]
+            m_LoopParL[uRel].Tpar.ton= setOprelI(dbuf).toShort()
+            m_LoopParL[uRel].Tpar.toff= setOprelI(dbuf).toShort()
+        }
+        m_LoopParL
+        // CString str = _T("Loop:\n\r");
        // for (UINT uRel = 0; uRel < 4; uRel++)
        // {
        //     m_LoopPar[uRel].State = *m_pbuf++;
@@ -297,6 +316,14 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         //}REC_FILPAR_STR;
 
 
+        for(i in 0..REC_PAR_STR.DataTime_SIZE-1)  pLastPa.DataTime[i]=dbuf[globalIndex++]
+        for(i in 0..REC_PAR_STR.PARID_SIZE-1)  pLastPa.CreateSite[i]=dbuf[globalIndex++]
+        for(i in 0..REC_PAR_STR.PARID_SIZE-1)  pLastPa.IDCreate[i]=dbuf[globalIndex++]
+        for(i in 0..REC_PAR_STR.PARID_SIZE-1)  pLastPa.ReParaSite[i]=dbuf[globalIndex++]
+        for(i in 0..REC_PAR_STR.PARID_SIZE-1)  pLastPa.IDRePara[i]=dbuf[globalIndex++]
+        for(i in 0..REC_PAR_STR.PARIDFILE_SIZE-1)  pLastPa.IDFile[i]=dbuf[globalIndex++]
+
+        var s =pLastPa.toString()
 
 
        // REC_PAR_STR *pLastPa = &(pFrameWnd->m_cLastParData);

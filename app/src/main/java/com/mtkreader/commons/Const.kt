@@ -44,6 +44,7 @@ object Const {
     object Logging {
         const val SENT = "MESSAGE SENT"
         const val RECEIVED = "MESSAGE RECEIVED"
+        const val PACK = "PACK"
     }
 
     object DeviceConstants {

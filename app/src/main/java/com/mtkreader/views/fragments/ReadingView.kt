@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,7 +97,7 @@ class ReadingView : BaseMVPFragment<ReadingContract.Presenter>(), ReadingContrac
         data.add(byte.toChar())
         readingData.add(byte.toChar())
         tv_data_read.append(byte.toChar().toString())
-        logI("${byte.toChar()} -> $byte ", customTag = Const.Logging.RECEIVED)
+        Log.i(Const.Logging.RECEIVED,"${byte.toChar()} -> $byte " )
         handleParameterReading()
     }
 

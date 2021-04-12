@@ -100,9 +100,10 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
         val deviceBundle = Bundle().apply {
             putParcelable(Const.Extras.DEVICE_EXTRA, device)
             putSerializable(Const.Extras.DEVICE_OPERATION, deviceOperation)
+
         }
-        //findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
-        findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
+        findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
+        // findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
     }
 
 
