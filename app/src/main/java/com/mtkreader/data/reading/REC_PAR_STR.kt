@@ -30,17 +30,21 @@ class REC_PAR_STR {
         )
 
       val str2=  String.format("IDCreate %s CreateSite %s IDRePara %s ReParaSite %s IDFile %s .mtk",
-          CreateSite.toString(Charsets.US_ASCII),
-            IDCreate.toString(Charsets.US_ASCII),
-            ReParaSite.toString(Charsets.US_ASCII),
-            IDRePara.toString(Charsets.US_ASCII),
-            IDFile.toString(Charsets.US_ASCII)
+          TrimByteArrToString(CreateSite),
+          TrimByteArrToString(IDCreate),
+          TrimByteArrToString(ReParaSite),
+          TrimByteArrToString(IDRePara),
+          TrimByteArrToString(IDFile)
 
         )
         return str1+str2
     }
     fun get(ba: ByteArray): Unit {
         
+    }
+    fun TrimByteArrToString(s:ByteArray) :String{
+        var trim =s.copyOfRange(0,s.indexOf(0))
+        return trim.toString(Charsets.US_ASCII)
     }
     //byte	DataTime[6];
     //byte  CreateSite[PARID_SIZE];

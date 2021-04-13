@@ -170,7 +170,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         m_gaddr.update()
 
 
-        if (mline[i] != ')'.toByte()) // TODO 	if(!(m_Line[i++]=='('))m_Daterr++;
+        if (mline[i] != '('.toByte()) // TODO 	if(!(m_Line[i++]=='('))m_Daterr++;
 
         m_Dateerr++
 
@@ -186,7 +186,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                     break
                 bb = HtoB(mline[i++].toChar())
                 if (isCheck) {
-                    dbuf[j] = (dbuf[j] * (2f.pow(4)).toInt()).toByte()
+                    dbuf[j] = (dbuf[j].toInt() shl 4).toByte()
                     dbuf[j] = dbuf[j] or bb.toByte()
                 } else
                     m_Dateerr++
@@ -353,7 +353,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             mPProgR3.add(Opprog())
             mPProgR4.add(Opprog())
         }
-        for (i in 0..4)
+        for (i in 0..12)
             mTelegSync.add(Telegram())
 
         for (i in 0..7)
@@ -423,7 +423,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
         if (fVis_RefPrij && fVis_Cz95P) {
             generateTelegramSync(builder)
-            generateSyncTelegramDoW(builder)
+            //generateSyncTelegramDoW(builder)
         }
 
         generateWorkSchedules(mPProgR1, mPProgR2, mPProgR3, mPProgR4, oprij, builder)
@@ -600,7 +600,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
 
     private fun generateEventLog(builder: java.lang.StringBuilder) {
-        val mLogEnFlags = arrayOf(mOp50Prij.CLOGENFLGS?.get(0), mOp50Prij.CLOGENFLGS?.get(1))
+        val mLogEnFlags = arrayOf(mOp50Prij.CLOGENFLGS[0].toInt(), mOp50Prij.CLOGENFLGS[1].toInt())
 
         builder.append(h2 + getString(R.string.event_log) + h2C)
         builder.append(table)
@@ -1184,7 +1184,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         getRasterHeadStringH(builder)
         getRasterHeadStringTop(builder)
         getRasterHeadStringBottom(builder)
-        for (i in 0..4)
+        for (i in 0..7)
             getRasterStringSync(builder, mTelegSync[i].Cmd, i)
 
         builder.append(tableC)
@@ -1261,7 +1261,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         for (iBimp in 0..49) {
             val nBitNumber = iBimp % 8
             val nByteNumber = iBimp / 8
-
+//TODO  null??
             val N = t.NeutImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
             val A = t.AktiImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
 
@@ -1281,7 +1281,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     private fun getRasterStringSync(builder: StringBuilder, t: TelegCMD, x: Int) {
         builder.append(tr)
         builder.append(th + getString(R.string.unknown) + thC)
-        builder.append(th + getSyncTime(mOp50Prij.SinhTime?.get(x)!!, m_HWVerPri) + thC)
+        builder.append(th + getSyncTime(mOp50Prij.SinhTime.get(x), m_HWVerPri) + thC)
 
         for (iBimp in 0..49) {
             val nBitNumber = iBimp % 8
@@ -1787,16 +1787,16 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         ,
         mTlgFnd: List<Telegram>
     ) {
-        if (m_CFG.cID >= 0x8C) {
+       // if (m_CFG.cID >= 0x8C) {
             getTlgID50ParV96(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnd)
-        } else {
-            when (mgaddr.objectt) {
-                0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)
-                1 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel2)
-                2 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel3)
-                3 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel4)
-            }
-        }
+       //} else {
+       //    when (mgaddr.objectt) {
+       //        0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)
+       //        1 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel2)
+       //        2 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel3)
+       //        3 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel4)
+       //    }
+       //}
     }
 
     private fun getTlgID50ParV96(
@@ -1977,8 +1977,8 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
         mOp50Prij.RTCSinh = dbuf[globalIndex++]
 
-        if (inCik)
-            mOp50Prij.WDaySinh = dbuf[globalIndex++]
+        if (inCik) mOp50Prij.WDaySinh = dbuf[globalIndex++]
+        else mOp50Prij.WDaySinh=0
 
         if (m_CFG.cID == 100) {
             globalIndex++
@@ -1989,35 +1989,32 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             globalIndex++
             globalIndex++
         }
-        val sinhTimes = mutableListOf<Int>()
-        for (i in 0..4) {
-            sinhTimes.add(setOprel4I(dbuf))
-        }
-        mOp50Prij.SinhTime = sinhTimes.toIntArray()
+
+        for (i in 0..12)
+            mOp50Prij.SinhTime[i]=setOprel4I(dbuf)
+
 
         if (!inCik)
             return
 
-        val b1 = dbuf[globalIndex++]
+        mOpPrij.CRelXSw[0] = dbuf[globalIndex++]
         mOpPrij.VCRel1Tu = dbuf[globalIndex++]
         mOpPrij.VC1R1 = setOprelI(dbuf)
 
-        val b2 = dbuf[globalIndex++]
+        mOpPrij.CRelXSw[1] = dbuf[globalIndex++]
         mOpPrij.VCRel2Tu = dbuf[globalIndex++]
         mOpPrij.VC1R2 = setOprelI(dbuf)
 
-        val b3 = dbuf[globalIndex++]
+        mOpPrij.CRelXSw[2] = dbuf[globalIndex++]
         mOpPrij.VCRel3Tu = dbuf[globalIndex++]
         mOpPrij.VC1R3 = setOprelI(dbuf)
 
-        val b4 = dbuf[globalIndex++]
+        mOpPrij.CRelXSw[3] = dbuf[globalIndex++]
         mOpPrij.VCRel4Tu = dbuf[globalIndex++]
         mOpPrij.VC1R4 = setOprelI(dbuf)
 
-        mOpPrij.CRelXSw = byteArrayOf(b1, b2, b3, b4)
 
-
-        if (m_CFG.cID == 120 || m_HWVerPri == Const.Data.TIP_PS)
+        if (m_CFG.cID == 120 || m_HWVerPri == Const.Data.TIP_PS || m_HWVerPri == Const.Data.TIP_PSB)
             return
 
         mOpPrij.VAdrR1 = setVerAdrVer9(dbuf)
@@ -2059,7 +2056,9 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         getKlDatVer9(dbuf, mOpPrij, mReallocs)
         mOp50Prij.apply {
             CPWBRTIME = setOprelI(dbuf)
-            CLOGENFLGS = intArrayOf(setOprelI(dbuf), setOprelI(dbuf), setOprelI(dbuf))
+            CLOGENFLGS[0] = setOprelI(dbuf).toShort()
+            CLOGENFLGS[1] = setOprelI(dbuf).toShort()
+            CLOGENFLGS[2] = setOprelI(dbuf).toShort()
         }
     }
 
