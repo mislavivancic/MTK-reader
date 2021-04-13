@@ -113,7 +113,6 @@
             android:id="@+id/btn_param_write"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:enabled="false"
             android:hint="@string/not_available_yet"
             android:text="@string/write_params"
             app:layout_constraintEnd_toEndOf="parent"

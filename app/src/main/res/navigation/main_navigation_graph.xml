@@ -17,7 +17,6 @@
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit" />
-
         <action
             android:id="@+id/navigateToDisplayTimeView"
             app:destination="@id/displayTimeView"
@@ -28,6 +27,13 @@
         <action
             android:id="@+id/navigateToDisplayDataView"
             app:destination="@id/displayDataView"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/navigateToParamsWriteView"
+            app:destination="@id/paramWriteView"
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
@@ -57,5 +63,11 @@
         android:name="com.mtkreader.views.fragments.TimeView"
         android:label="DisplayTimeView"
         tools:layout="@layout/fragment_time" />
+
+    <fragment
+        android:id="@+id/paramWriteView"
+        android:name="com.mtkreader.views.fragments.ParamsWriteView"
+        android:label="ParamsWriteView"
+        tools:layout="@layout/fragment_file_pick"></fragment>
 
 </navigation>

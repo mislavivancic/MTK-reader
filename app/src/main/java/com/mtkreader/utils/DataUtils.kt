@@ -4,8 +4,12 @@ import com.mtkreader.commons.Const
 import com.mtkreader.data.reading.LadderNets
 import com.mtkreader.data.reading.StrParFil
 import com.mtkreader.data.reading.StrParFilVer9
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 object DataUtils {
+    private val HEXADECIMAL_PATTERN: Pattern = Pattern.compile("\\p{XDigit}+")
+
 
     fun extractHeaderAndBody(data: String): Pair<ByteArray, ByteArray> {
         val splitIndex = data.indexOf("\n")
@@ -36,7 +40,7 @@ object DataUtils {
         )
     }
 
-    fun tbparfiltera98mhz(): List<StrParFil> {
+    fun getTbparfiltera98mhz(): List<StrParFil> {
         return listOf(
             StrParFil(21, 21, 0, 0, 0x120, 0x80, 0xDB7, 2, 2, 175.00),
             StrParFil(22, 22, 0, 0, 0x120, 0x80, 0x0D17, 2, 1, 183.3333333),
@@ -222,5 +226,15 @@ object DataUtils {
             }
         }
         return 0
+    }
+
+    fun isHexadecimal(input: String): Boolean {
+        val matcher: Matcher = HEXADECIMAL_PATTERN.matcher(input)
+        return matcher.matches()
+    }
+
+    fun removeNonAlphanumeric(input: String): String {
+        val re = Regex("[^A-Za-z0-9 ]")
+        return re.replace(input, "")
     }
 }

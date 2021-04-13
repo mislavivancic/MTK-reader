@@ -1440,7 +1440,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                     builder.append(
                         td + String.format(
                             "%4.2f Hz",
-                            DataUtils.tbparfiltera98mhz()[mParFilteraCF.BROJ].fre
+                            DataUtils.getTbparfiltera98mhz()[mParFilteraCF.BROJ].fre
                         )
                                 + tdC
                     )
@@ -1457,7 +1457,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                         builder.append(
                             td + String.format(
                                 "%4.2f Hz",
-                                DataUtils.tbparfiltera98mhz()[mParFiltera.BROJ].fre
+                                DataUtils.getTbparfiltera98mhz()[mParFiltera.BROJ].fre
                             ) + tdC
                         )
 

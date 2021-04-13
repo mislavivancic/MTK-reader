@@ -108,6 +108,9 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
             findNavController().navigate(R.id.navigateToDisplayTimeView, deviceBundle)
         } else if (deviceOperation == DeviceOperation.PARAM_READ)
             findNavController().navigate(R.id.navigateToReadingView, deviceBundle)
+        else if (deviceOperation == DeviceOperation.PARAM_WRITE) {
+            findNavController().navigate(R.id.navigateToParamsWriteView, deviceBundle)
+        }
     }
 
 

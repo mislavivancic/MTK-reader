@@ -20,6 +20,7 @@ object Const {
 
     object SharedPrefKeys {
         const val READ_DATA_KEY = "READ_DATA_KEY"
+        const val LAST_FILE_READ_KEY = "LAST_FILE_READ_KEY"
     }
 
     object PermissionCode {

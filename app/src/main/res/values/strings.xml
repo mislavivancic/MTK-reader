@@ -264,4 +264,8 @@
     <string name="read_params">Read Params</string>
     <string name="write_params">Write Params</string>
     <string name="not_available_yet">Not available yet</string>
+    <string name="pick_file">Pick file</string>
+    <string name="no_file_picked">No file picked</string>
+    <string name="not_mtk_file">Not MTK file!</string>
+    <string name="pick_last_read_file">Pick last read file</string>
 </resources>
