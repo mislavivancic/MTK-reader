@@ -22,7 +22,7 @@
         android:text="@string/display_last_reading"
         android:textAllCaps="false"
         android:theme="@style/MtkButton"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 

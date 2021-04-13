@@ -10,7 +10,7 @@ class Unitimbyt {
         i = 0x0
         var top1 = 0
         top1 = b[3].toInt()
-        top1 = top1 shl 32
+        top1 = top1 shl 32 // TODO 24 shift
         top1 = top1 and -0x1000000
 
         var top2 = 0
