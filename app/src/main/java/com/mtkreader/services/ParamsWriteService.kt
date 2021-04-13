@@ -3,9 +3,7 @@ package com.mtkreader.services
 import android.content.Context
 import com.mtkreader.R
 import com.mtkreader.contracts.ParamsWriteContract
-import com.mtkreader.data.reading.CfgParHwsw
-import com.mtkreader.data.reading.StrParFil
-import com.mtkreader.data.reading.StrParFilVer9
+import com.mtkreader.data.reading.*
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.DataUtils.isHexadecimal
 import com.mtkreader.utils.DataUtils.removeNonAlphanumeric
@@ -18,6 +16,8 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
 
     private val context: Context by inject()
 
+    private var globalIndex = 0
+
     private var mTip = 0
     private var mHardwareVersion = 0
     private var mSoftwareVersion = 0
@@ -27,6 +27,9 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
     private var mUtfPosto = 0.0
     private val mCfg = CfgParHwsw()
     private var mFileComment = ""
+    private val mOprij = Oprij()
+    private val mOp50rij = Oprij50()
+    private var mPBuff = ByteArray(256)
 
     private val addressMap = mutableMapOf<String, String>()
 
@@ -49,14 +52,75 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
         line = fileLines.getOrNull(3)
         extractComment(line)
         fillAddressMap(fileLines.subList(4, fileLines.size))
+
+        val data = addressMap["8080"]?.toByteArray()
+        if (data != null) {
+            mPBuff = data
+        }
+        if (mSoftwareVersion >= 80) {
+            getKlDatVer9file()
+        }
+
+
     }
+
+    private fun getKlDatVer9file() {
+        getKlDatVer6()
+    }
+
+    private fun getKlDatVer6() {
+        mOprij.VDuzAdr = mPBuff[globalIndex++]
+        mOprij.KlOpR1 = setDlyRelData()
+        mOprij.KlOpR2 = setDlyRelData()
+        mOprij.KlOpR3 = setDlyRelData()
+        mOprij.KlOpR4 = setDlyRelData()
+        mOprij.Dly24H = setOprelI()
+        mOprij.PolUKRe = mPBuff[globalIndex++]
+        if (mSoftwareVersion >= 98)
+            mOp50rij.SinhTime[0] = setOprel4I()
+
+
+    }
+
+    private fun setDlyRelData(): Klopr {
+        return Klopr().apply {
+            KRelDela = setOprel3I()
+            KRelDelb = setOprel3I()
+        }
+    }
+
+    private fun setOprelI(): Int {
+        val b1 = mPBuff[globalIndex++]
+        val b0 = mPBuff[globalIndex++]
+        val tempi = Uni4byt(byteArrayOf(b0, b1, 0, 0))
+        return tempi.i
+    }
+
+    private fun setOprel3I(): Int {
+        val b2 = mPBuff[globalIndex++]
+        val b1 = mPBuff[globalIndex++]
+        val b0 = mPBuff[globalIndex++]
+        val tempi = Uni4byt(byteArrayOf(b0, b1, b2, 0))
+        return tempi.i
+    }
+
+    private fun setOprel4I()
+            : Int {
+        val b3 = mPBuff[globalIndex++]
+        val b2 = mPBuff[globalIndex++]
+        val b1 = mPBuff[globalIndex++]
+        val b0 = mPBuff[globalIndex++]
+        val tempi = Uni4byt(byteArrayOf(b0, b1, b2, b3))
+        return tempi.i
+    }
+
 
     private fun fillAddressMap(lines: List<String>) {
         for (line in lines) {
             println(line)
             val addressData = line.split("(")
             val address = addressData.getOrElse(0) { "" }
-            val data = addressData.getOrElse(1) { "" }
+            val data = addressData.getOrElse(1) { "" }.replace(")", "")
             addressMap[address] = data
         }
         println()
