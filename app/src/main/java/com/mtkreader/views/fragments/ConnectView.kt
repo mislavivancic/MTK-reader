@@ -15,6 +15,7 @@ import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.commons.base.ErrorDialog
+import com.mtkreader.compare
 import com.mtkreader.contracts.ConnectionContract
 import com.mtkreader.presenters.ConnectionPresenter
 import com.mtkreader.utils.PermissionUtils

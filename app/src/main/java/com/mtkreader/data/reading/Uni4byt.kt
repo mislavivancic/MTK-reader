@@ -1,5 +1,7 @@
 package com.mtkreader.data.reading
 
+import com.mtkreader.toPositiveInt
+
 class Uni4byt {
     var i = 0
     var b: ByteArray? = null
@@ -7,22 +9,22 @@ class Uni4byt {
     constructor(b: ByteArray) {
         this.b = b
         var mask1 = 0
-        mask1 = b[3].toInt()
-        mask1 = mask1 shl 32
-        mask1 = mask1 and -0x1000000
+        mask1 = b[3].toPositiveInt()
+        mask1 = mask1 shl 24
+        mask1 = mask1 and 0xFF000000.toInt()
 
         var mask2 = 0
-        mask2 = b[2].toInt()
+        mask2 = b[2].toPositiveInt()
         mask2 = mask2 shl 16
         mask2 = mask2 and 0x00FF0000
 
         var mask3 = 0
-        mask3 = b[1].toInt()
+        mask3 = b[1].toPositiveInt()
         mask3 = mask3 shl 8
         mask3 = mask3 and 0x0000FF00
 
         var mask4 = 0
-        mask4 = b[0].toInt()
+        mask4 = b[0].toPositiveInt()
         mask4 = mask4 and 0x000000FF
 
         i = mask1 or mask2 or mask3 or mask4

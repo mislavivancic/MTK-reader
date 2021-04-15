@@ -11,10 +11,10 @@ class Oprij {
     var PolUKRe: Byte = 0
     var VerKomAdr: Int = 0
     var VAdrPrij: Int = 0
-    var VAdrR1: Vadrr? = null
-    var VAdrR2: Vadrr? = null
-    var VAdrR3: Vadrr? = null
-    var VAdrR4: Vadrr? = null
+    var VAdrR1: Vadrr = Vadrr()
+    var VAdrR2: Vadrr = Vadrr()
+    var VAdrR3: Vadrr = Vadrr()
+    var VAdrR4: Vadrr = Vadrr()
     var VC1R1: Int = 0
     var VC1R2: Int = 0
     var VC1R3: Int = 0

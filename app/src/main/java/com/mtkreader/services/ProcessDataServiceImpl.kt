@@ -60,7 +60,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     var fVis_Realoc = false
     var fVis_Cz95P = false
     var fVis_Cz96P = false
-    var fVis_Cz96HDOBAT= false
+    var fVis_Cz96HDOBAT = false
 
     var IsCZRaster = false
     var IsCZ44raster = false
@@ -85,9 +85,9 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     private val mParFilteraCF = StrParFilVer9()
     private val mParFiltera = StrParFil()
 
-    private val m_LoopParL=List(4) { m_LoopPar() }
-    private val pLastPa=REC_PAR_STR()
-    private var m_dwDeviceSerNr:Int=-1
+    private val m_LoopParL = List(4) { m_LoopPar() }
+    private val pLastPa = REC_PAR_STR()
+    private var m_dwDeviceSerNr: Int = -1
     private var globalIndex = 0
 
     private val mline = ByteArray(256)
@@ -136,10 +136,14 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     private fun setupFlags() {
         fVis_VersacomPS = (m_HWVerPri != TIP_PS) && (m_HWVerPri != TIP_PSB)
         fVis_Versacom = m_HWVerPri != TIP_S && m_HWVerPri != TIP_SN && m_HWVerPri != TIP_SPN
-        fVis_Uklsat = m_HWVerPri == TIP_SPA || m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN
-        fVis_Prazdani = mSoftwareVersionPri >= 94 && (m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN)
-        fVis_Sezone = (fVis_Versacom && m_HWVerPri != TIP_PA) || (fVis_Uklsat && mSoftwareVersionPri >= 95)
-        fVis_Sezone = fVis_Sezone && mSoftwareVersionPri >= 80 && m_HWVerPri != TIP_PS && (m_HWVerPri != TIP_PSB)
+        fVis_Uklsat =
+            m_HWVerPri == TIP_SPA || m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN
+        fVis_Prazdani =
+            mSoftwareVersionPri >= 94 && (m_HWVerPri == TIP_S || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN)
+        fVis_Sezone =
+            (fVis_Versacom && m_HWVerPri != TIP_PA) || (fVis_Uklsat && mSoftwareVersionPri >= 95)
+        fVis_Sezone =
+            fVis_Sezone && mSoftwareVersionPri >= 80 && m_HWVerPri != TIP_PS && (m_HWVerPri != TIP_PSB)
         fVis_Asat = m_HWVerPri == TIP_PASN || m_HWVerPri == TIP_SN || m_HWVerPri == TIP_SPN
         fVis_RefPrij = m_HWVerPri != TIP_S && m_HWVerPri != TIP_SN
         fVis_TBAS = m_HWVerPri != TIP_PA
@@ -172,7 +176,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
         if (mline[i] != '('.toByte()) // TODO 	if(!(m_Line[i++]=='('))m_Daterr++;
 
-        m_Dateerr++
+            m_Dateerr++
 
         i = 5
         val dbuf = ByteArray(128)
@@ -200,10 +204,10 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
     private fun unpackDatV9(dbuf: ByteArray, mgaddr: Mgaddr) {
         globalIndex = 0 //TODO  mislim da se samo tu treba resetirat na nulu
-        Log.i(Const.Logging.PACK,"group: ${mgaddr.group} obj ${mgaddr.objectt}" )
+        Log.i(Const.Logging.PACK, "group: ${mgaddr.group} obj ${mgaddr.objectt}")
 
         when (mgaddr.group) {
-            0 ->{
+            0 -> {
                 when (mgaddr.objectt) {
                     1 -> mgaddr.objectt //var pFrameWnd->m_opPrij.VAdrPrij=pFrameWnd->SetOprel4I(); //TODO implementirati
                     2 -> getcLastParData(dbuf) //TODO napravit metodu
@@ -223,7 +227,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             }
             0xC -> getFriRPar(dbuf, mParFilteraCF, mParFiltera)
 
-            7->{
+            7 -> {
                 // PRAZNO ZA PS i PSB
             }
             5 -> {
@@ -241,9 +245,10 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         }
 
     }
+
     private fun getDeviceSerNr(dbuf: ByteArray) {
 
-        m_dwDeviceSerNr=setOprel4I(dbuf)
+        m_dwDeviceSerNr = setOprel4I(dbuf)
 
         //pFrameWnd->m_dwDeviceSerNr = pFrameWnd->SetOprel4I();
 //
@@ -252,46 +257,46 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         //pFrameWnd->ShowData(str);
 
     }
+
     private fun GetLoopTim(dbuf: ByteArray) {
 
-       //typedef struct {
-       //    byte State;		// ne koristi se
-       //    byte LastCmd;		//0 nepoznata  1 ON 2 OFF
-       //    WTONOFF  Tpar;
+        //typedef struct {
+        //    byte State;		// ne koristi se
+        //    byte LastCmd;		//0 nepoznata  1 ON 2 OFF
+        //    WTONOFF  Tpar;
 
-       //} LOOPTIMSTR;
+        //} LOOPTIMSTR;
 
-       //typedef struct{
-       //    WORD ton;
-       //    WORD toff;
-       //}
+        //typedef struct{
+        //    WORD ton;
+        //    WORD toff;
+        //}
 
-        for (uRel in 0..3)
-        {
-            m_LoopParL[uRel].State=dbuf[globalIndex++]
-            m_LoopParL[uRel].LastCmd=dbuf[globalIndex++]
-            m_LoopParL[uRel].Tpar.ton= setOprelI(dbuf).toShort()
-            m_LoopParL[uRel].Tpar.toff= setOprelI(dbuf).toShort()
+        for (uRel in 0..3) {
+            m_LoopParL[uRel].State = dbuf[globalIndex++]
+            m_LoopParL[uRel].LastCmd = dbuf[globalIndex++]
+            m_LoopParL[uRel].Tpar.ton = setOprelI(dbuf).toShort()
+            m_LoopParL[uRel].Tpar.toff = setOprelI(dbuf).toShort()
         }
         m_LoopParL
         // CString str = _T("Loop:\n\r");
-       // for (UINT uRel = 0; uRel < 4; uRel++)
-       // {
-       //     m_LoopPar[uRel].State = *m_pbuf++;
-       //     m_LoopPar[uRel].LastCmd = *m_pbuf++;
-       //     m_LoopPar[uRel].Tpar.ton = SetOprelI();
-       //     m_LoopPar[uRel].Tpar.toff = SetOprelI();
+        // for (UINT uRel = 0; uRel < 4; uRel++)
+        // {
+        //     m_LoopPar[uRel].State = *m_pbuf++;
+        //     m_LoopPar[uRel].LastCmd = *m_pbuf++;
+        //     m_LoopPar[uRel].Tpar.ton = SetOprelI();
+        //     m_LoopPar[uRel].Tpar.toff = SetOprelI();
 //
-       //     CString strllt ;
+        //     CString strllt ;
 //
-       //     if((m_LoopPar[uRel].Tpar.ton & 0x8000 ) || (m_LoopPar[uRel].Tpar.toff & 0x8000))
-       //     strllt.Format(_T("%02X -:- -:-\n\r "), m_LoopPar[uRel].LastCmd);
-       //     else
-       //     strllt.Format(_T("%02X %02d:%02d  %02d:%02d\n\r "), m_LoopPar[uRel].LastCmd, m_LoopPar[uRel].Tpar.ton/60, m_LoopPar[uRel].Tpar.ton % 60, m_LoopPar[uRel].Tpar.toff / 60, m_LoopPar[uRel].Tpar.toff % 60);
+        //     if((m_LoopPar[uRel].Tpar.ton & 0x8000 ) || (m_LoopPar[uRel].Tpar.toff & 0x8000))
+        //     strllt.Format(_T("%02X -:- -:-\n\r "), m_LoopPar[uRel].LastCmd);
+        //     else
+        //     strllt.Format(_T("%02X %02d:%02d  %02d:%02d\n\r "), m_LoopPar[uRel].LastCmd, m_LoopPar[uRel].Tpar.ton/60, m_LoopPar[uRel].Tpar.ton % 60, m_LoopPar[uRel].Tpar.toff / 60, m_LoopPar[uRel].Tpar.toff % 60);
 //
-       //     str += strllt;
-       // }
-       // //ShowData(str);
+        //     str += strllt;
+        // }
+        // //ShowData(str);
     }
 
     private fun getcLastParData(dbuf: ByteArray) {
@@ -316,32 +321,29 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         //}REC_FILPAR_STR;
 
 
-        for(i in 0..REC_PAR_STR.DataTime_SIZE-1)  pLastPa.DataTime[i]=dbuf[globalIndex++]
-        for(i in 0..REC_PAR_STR.PARID_SIZE-1)  pLastPa.CreateSite[i]=dbuf[globalIndex++]
-        for(i in 0..REC_PAR_STR.PARID_SIZE-1)  pLastPa.IDCreate[i]=dbuf[globalIndex++]
-        for(i in 0..REC_PAR_STR.PARID_SIZE-1)  pLastPa.ReParaSite[i]=dbuf[globalIndex++]
-        for(i in 0..REC_PAR_STR.PARID_SIZE-1)  pLastPa.IDRePara[i]=dbuf[globalIndex++]
-        for(i in 0..REC_PAR_STR.PARIDFILE_SIZE-1)  pLastPa.IDFile[i]=dbuf[globalIndex++]
+        for (i in 0..REC_PAR_STR.DataTime_SIZE - 1) pLastPa.DataTime[i] = dbuf[globalIndex++]
+        for (i in 0..REC_PAR_STR.PARID_SIZE - 1) pLastPa.CreateSite[i] = dbuf[globalIndex++]
+        for (i in 0..REC_PAR_STR.PARID_SIZE - 1) pLastPa.IDCreate[i] = dbuf[globalIndex++]
+        for (i in 0..REC_PAR_STR.PARID_SIZE - 1) pLastPa.ReParaSite[i] = dbuf[globalIndex++]
+        for (i in 0..REC_PAR_STR.PARID_SIZE - 1) pLastPa.IDRePara[i] = dbuf[globalIndex++]
+        for (i in 0..REC_PAR_STR.PARIDFILE_SIZE - 1) pLastPa.IDFile[i] = dbuf[globalIndex++]
 
-        var s =pLastPa.toString()
+        var s = pLastPa.toString()
 
 
-       // REC_PAR_STR *pLastPa = &(pFrameWnd->m_cLastParData);
-       // memcpy(pLastPa, pFrameWnd->m_pbuf, sizeof(REC_PAR_STR));
-       // CString str;
+        // REC_PAR_STR *pLastPa = &(pFrameWnd->m_cLastParData);
+        // memcpy(pLastPa, pFrameWnd->m_pbuf, sizeof(REC_PAR_STR));
+        // CString str;
 //
-       // byte IDCreate[PARID_SIZE+1];		memset(&IDCreate	,0,PARID_SIZE+1);		memcpy(&IDCreate,	pLastPa->IDCreate,	PARID_SIZE );
-       // byte CreateSite[PARID_SIZE + 1];	memset(&CreateSite, 0, PARID_SIZE + 1);		memcpy(&CreateSite, pLastPa->CreateSite, PARID_SIZE);
-       // byte IDRePara[PARID_SIZE + 1];		memset(&IDRePara, 0, PARID_SIZE + 1);		memcpy(&IDRePara,	pLastPa->IDRePara,	PARID_SIZE);
-       // byte ReParaSite[PARID_SIZE + 1];	memset(&ReParaSite, 0, PARID_SIZE + 1);		memcpy(&ReParaSite, pLastPa->ReParaSite, PARID_SIZE);
-       // byte IDFile[PARIDFILE_SIZE + 1];	memset(&IDFile, 0, PARIDFILE_SIZE + 1);		memcpy(&IDFile,		pLastPa->IDFile,	 PARIDFILE_SIZE);
+        // byte IDCreate[PARID_SIZE+1];		memset(&IDCreate	,0,PARID_SIZE+1);		memcpy(&IDCreate,	pLastPa->IDCreate,	PARID_SIZE );
+        // byte CreateSite[PARID_SIZE + 1];	memset(&CreateSite, 0, PARID_SIZE + 1);		memcpy(&CreateSite, pLastPa->CreateSite, PARID_SIZE);
+        // byte IDRePara[PARID_SIZE + 1];		memset(&IDRePara, 0, PARID_SIZE + 1);		memcpy(&IDRePara,	pLastPa->IDRePara,	PARID_SIZE);
+        // byte ReParaSite[PARID_SIZE + 1];	memset(&ReParaSite, 0, PARID_SIZE + 1);		memcpy(&ReParaSite, pLastPa->ReParaSite, PARID_SIZE);
+        // byte IDFile[PARIDFILE_SIZE + 1];	memset(&IDFile, 0, PARIDFILE_SIZE + 1);		memcpy(&IDFile,		pLastPa->IDFile,	 PARIDFILE_SIZE);
 //
-       // str.Format(_T("\n\r"+CMsg(IDSI_LASTREPARAMTIME)+" %02X-%02X-%02X %02X:%02X\n\r"+CMsg(IDSI_CREATED_UID)+" %s "+CMsg(IDSI_CREATED_PCUID)+" |%s|\n\r"+CMsg(IDSI_REPARM_UID)+" %s "+CMsg(IDSI_REPARM_PCUID)+" |%s|\n\r"+CMsg(IDSI_PARM_FILE)+"%s.mtk \n\r"), pLastPa->DataTime[3], pLastPa->DataTime[4],
-       // pLastPa->DataTime[5], pLastPa->DataTime[2], pLastPa->DataTime[1], IDCreate, CreateSite, IDRePara, ReParaSite, IDFile );
-       // pFrameWnd->ShowData(str);
-
-
-
+        // str.Format(_T("\n\r"+CMsg(IDSI_LASTREPARAMTIME)+" %02X-%02X-%02X %02X:%02X\n\r"+CMsg(IDSI_CREATED_UID)+" %s "+CMsg(IDSI_CREATED_PCUID)+" |%s|\n\r"+CMsg(IDSI_REPARM_UID)+" %s "+CMsg(IDSI_REPARM_PCUID)+" |%s|\n\r"+CMsg(IDSI_PARM_FILE)+"%s.mtk \n\r"), pLastPa->DataTime[3], pLastPa->DataTime[4],
+        // pLastPa->DataTime[5], pLastPa->DataTime[2], pLastPa->DataTime[1], IDCreate, CreateSite, IDRePara, ReParaSite, IDFile );
+        // pFrameWnd->ShowData(str);
 
 
     }
@@ -1771,8 +1773,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mgaddr: Mgaddr,
         dbuf: ByteArray,
         mOp50Prij: Oprij50,
-        mTelegSync: List<Telegram>
-        ,
+        mTelegSync: List<Telegram>,
         mTlgFnd: List<Telegram>
     ) {
         if (mSoftwareVersionPri >= 96)
@@ -1783,32 +1784,33 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mgaddr: Mgaddr,
         dbuf: ByteArray,
         mOp50Prij: Oprij50,
-        mTelegSync: List<Telegram>
-        ,
+        mTelegSync: List<Telegram>,
         mTlgFnd: List<Telegram>
     ) {
-       // if (m_CFG.cID >= 0x8C) {
-            getTlgID50ParV96(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnd)
-       //} else {
-       //    when (mgaddr.objectt) {
-       //        0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)
-       //        1 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel2)
-       //        2 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel3)
-       //        3 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel4)
-       //    }
-       //}
+        // if (m_CFG.cID >= 0x8C) {
+        getTlgID50ParV96(mgaddr, dbuf, mOp50Prij, mTelegSync, mTlgFnd)
+        //} else {
+        //    when (mgaddr.objectt) {
+        //        0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)
+        //        1 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel2)
+        //        2 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel3)
+        //        3 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel4)
+        //    }
+        //}
     }
 
     private fun getTlgID50ParV96(
         mgaddr: Mgaddr,
         dbuf: ByteArray,
         mOp50Prij: Oprij50,
-        mTelegSync: List<Telegram>
-        ,
+        mTelegSync: List<Telegram>,
         mTlgFnd: List<Telegram>
     ) {
         when (mgaddr.objectt) {
-            0 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel1)  //TODO iskoristit istu funkciju storeDataTlgFn
+            0 -> storeDataTlgRel(
+                dbuf,
+                mOp50Prij.TlgRel1
+            )  //TODO iskoristit istu funkciju storeDataTlgFn
             1 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel2)
             2 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel3)
             3 -> storeDataTlgRel(dbuf, mOp50Prij.TlgRel4)
@@ -1829,7 +1831,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                 storeDataTlgFn(dbuf, mOp50Prij.tlg[7].tel1)
             }
 
-            7 ->{
+            7 -> {
                 storeDataTlgFn(dbuf, mOp50Prij.TlgVerAdr2.TlgAdr) //??
 
             }
@@ -1978,7 +1980,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         mOp50Prij.RTCSinh = dbuf[globalIndex++]
 
         if (inCik) mOp50Prij.WDaySinh = dbuf[globalIndex++]
-        else mOp50Prij.WDaySinh=0
+        else mOp50Prij.WDaySinh = 0
 
         if (m_CFG.cID == 100) {
             globalIndex++
@@ -1991,7 +1993,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         }
 
         for (i in 0..12)
-            mOp50Prij.SinhTime[i]=setOprel4I(dbuf)
+            mOp50Prij.SinhTime[i] = setOprel4I(dbuf)
 
 
         if (!inCik)
