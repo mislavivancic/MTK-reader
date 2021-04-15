@@ -79,16 +79,11 @@ object Const {
         const val SNE_RTC_ST = 0x0004
         const val SNE_RTC_OF = 0x0008
         const val SNE_SHT = 0x0010 //
-
         const val SNE_SHD = 0x0020 //
-
         const val SNE_RTC_BL = 0x0040 //
-
         const val SNE_RTC_OOK = 0x0080
         const val SNE_LSINH = 0x0100 //
-
         const val SNE_WPAROK = 0x0400 //
-
         const val SNE_WPARERR = 0x0800 //
 
 
@@ -108,6 +103,7 @@ object Const {
         const val TEL_REL_X = 0x0200
         const val CLP_REL_X = 0x0400
         const val PON_REL_X = 0x0800
+        const val EMT_REL_X	= 0x1000
 
         const val PRO_REL_ON = 0x0101
         const val PRO_REL_OFF = 0x0102

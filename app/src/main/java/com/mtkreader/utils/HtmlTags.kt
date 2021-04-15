@@ -20,12 +20,16 @@ object HtmlTags {
     val table = "<table>"
     val tableC = "</table>"
 
+    val tbody = "<tbody>"
+    val tbodyC = "</tbody>"
+
     val tr = "<tr>"
     val trC = "</tr>"
 
     val th = "<th>"
     val thC = "</th>"
     val thcol2 = "<th colspan=\"2\">"
+    val thcol2bgth = "<th colspan=\"2\">"
     val thcol4 = "<th colspan=\"4\">"
     val thcol8 = "<th colspan=\"8\">"
     val td = "<td>"

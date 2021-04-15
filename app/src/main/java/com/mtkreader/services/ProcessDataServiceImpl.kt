@@ -33,6 +33,7 @@ import com.mtkreader.utils.HtmlTags.tdImpNeutr
 import com.mtkreader.utils.HtmlTags.th
 import com.mtkreader.utils.HtmlTags.thC
 import com.mtkreader.utils.HtmlTags.thcol2
+import com.mtkreader.utils.HtmlTags.thcol2bgth
 import com.mtkreader.utils.HtmlTags.thcol4
 import com.mtkreader.utils.HtmlTags.thcol8
 import com.mtkreader.utils.HtmlTags.tr
@@ -40,7 +41,6 @@ import com.mtkreader.utils.HtmlTags.trC
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import kotlin.experimental.or
-import kotlin.math.pow
 
 class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent {
 
@@ -73,10 +73,10 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     private lateinit var tlgAbsenceDat: List<TlgAbstr>
     private lateinit var learningData: List<StrLoadMng>
     private lateinit var mRelInterLock: List<IntrlockStr>
-    private val mPProgR1 = mutableListOf<Opprog>()
-    private val mPProgR2 = mutableListOf<Opprog>()
-    private val mPProgR3 = mutableListOf<Opprog>()
-    private val mPProgR4 = mutableListOf<Opprog>()
+    private val mPProgR1 = Array(16) { Opprog() } //TODO array 16
+    private val mPProgR2 = Array(16) { Opprog() }
+    private val mPProgR3 = Array(16) { Opprog() }
+    private val mPProgR4 = Array(16) { Opprog() }
     private val mOpPrij = Oprij()
     private val mOp50Prij = Oprij50()
     private val mReallocs = mutableListOf<Rreallc>()
@@ -112,9 +112,11 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         initData()
         mline[0] = 0
 
-        while (hasNextLine(data)) {
-            if (mline[0] != Const.Tokens.PARAM_READ_END_TOKEN.toByte())
-                getLineData()
+        while (GetMsgLine(data)) {
+            if (mline[0] != Const.Tokens.PARAM_READ_END_TOKEN.toByte()) {
+                if (mline[0] == '!'.toByte()) break
+                GetLineDat()
+            }
             else
                 break
         }
@@ -125,10 +127,6 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             pOnPOffRDat,
             tlgAbsenceDat,
             learningData,
-            mPProgR1,
-            mPProgR2,
-            mPProgR3,
-            mPProgR4,
             mOpPrij
         )
     }
@@ -151,17 +149,38 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         fVis_Cz96HDOBAT = m_HWVerPri == TIP_PSB
 
     }
+    private fun GetMsgLine(data: ByteArray)
+            : Boolean {
+        var i = 0
+        while (m_cntxx < data.size) {
+            if (data[m_cntxx] == 0x0D.toByte()) {
+                mline[i++] = data[m_cntxx++]
 
-    private fun getLineData() {
+                if (data[m_cntxx] == 0x0A.toByte()) {
+                    mline[i++] = data[m_cntxx++]
+                    mline[i] = 0
+                    return true
+                } else {
+                    mline[i++] = 0
+                    m_Dateerr++
+                    return false
+                }
+            }
+            mline[i++] = data[m_cntxx++]
+        }
+        m_Dateerr++
+        return false
+    }
+    private fun GetLineDat() {
         var i = 0
         val m_gaddr = Mgaddr(0)
-        var bb: Char
+        var bb: Char?
 
         while (i < 5) {
             if (mline[i] == '('.toByte())
                 break
             bb = HtoB(mline[i++].toChar())
-            if (isCheck) {
+            if (bb != null) {
                 m_gaddr.i = m_gaddr.i shl 4
                 m_gaddr.i = m_gaddr.i or bb.toInt()
             } else
@@ -175,17 +194,18 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         m_Dateerr++
 
         i = 5
+        if(mline[0]==63.toByte())i++ //HACK TODO
         val dbuf = ByteArray(128)
 
 
-        for (j in 0..128) {//INDEX 128>od velicine dbuf pa bi trebalo bit 127??
+        for (j in 0..127) {//INDEX 128>od velicine dbuf pa bi trebalo bit 127??
             var k = 2
             while (k != 0) {
                 k--
                 if (mline[i] == ')'.toByte())
                     break
                 bb = HtoB(mline[i++].toChar())
-                if (isCheck) {
+                if (bb != null) {
                     dbuf[j] = (dbuf[j].toInt() shl 4).toByte()
                     dbuf[j] = dbuf[j] or bb.toByte()
                 } else
@@ -211,16 +231,11 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                     4 -> getDeviceSerNr(dbuf)
                 }
             }
-            in 1..4 -> {
-                globalIndex = 0
-                val oPProg = getTparPar(dbuf)
-                when (mgaddr.group) {
-                    1 -> mPProgR1.add(mgaddr.objectt, oPProg)
-                    2 -> mPProgR2.add(mgaddr.objectt, oPProg)
-                    3 -> mPProgR3.add(mgaddr.objectt, oPProg)
-                    4 -> mPProgR4.add(mgaddr.objectt, oPProg)
-                }
-            }
+            1 -> getTparPar(dbuf,mPProgR1[mgaddr.objectt])
+            2 -> getTparPar(dbuf,mPProgR2[mgaddr.objectt])
+            3 -> getTparPar(dbuf,mPProgR3[mgaddr.objectt])
+            4 -> getTparPar(dbuf,mPProgR4[mgaddr.objectt])
+
             0xC -> getFriRPar(dbuf, mParFilteraCF, mParFiltera)
 
             7->{
@@ -347,12 +362,12 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
     private fun initData() {
-        for (i in 0..15) {
-            mPProgR1.add(Opprog())
-            mPProgR2.add(Opprog())
-            mPProgR3.add(Opprog())
-            mPProgR4.add(Opprog())
-        }
+        //for (i in 0..15) {
+        //    mPProgR1.add(Opprog())
+        //    mPProgR2.add(Opprog())
+        //    mPProgR3.add(Opprog())
+        //    mPProgR4.add(Opprog())
+        //}
         for (i in 0..12)
             mTelegSync.add(Telegram())
 
@@ -366,28 +381,23 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         ponPoffstrs: List<PonPoffStr>,
         tlgAbstrs: List<TlgAbstr>,
         strLoadMngs: List<StrLoadMng>,
-        mPProgR1: List<Opprog>,
-        mPProgR2: List<Opprog>,
-        mPProgR3: List<Opprog>,
-        mPProgR4: List<Opprog>,
         oprij: Oprij
     ): String {
         val htmlBuilder = StringBuilder()
         htmlBuilder.append(Css.css)
+        //htmlBuilder.append("<style>"+ getString(R.string.css3)+"</style>")
+        htmlBuilder.append("</head>")
         htmlBuilder.append(body)
+        htmlBuilder.append("<div class=\"container\">")
         generateContent(
             htmlBuilder,
             wipers,
             ponPoffstrs,
             tlgAbstrs,
             strLoadMngs,
-            mPProgR1,
-            mPProgR2,
-            mPProgR3,
-            mPProgR4,
             oprij
         )
-        htmlBuilder.append("$bodyC$htmlC")
+        htmlBuilder.append("</div>$bodyC$htmlC")
 
         return htmlBuilder.toString()
     }
@@ -398,10 +408,6 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         ponPoffstrs: List<PonPoffStr>,
         tlgAbstrs: List<TlgAbstr>,
         strLoadMngs: List<StrLoadMng>,
-        mPProgR1: List<Opprog>,
-        mPProgR2: List<Opprog>,
-        mPProgR3: List<Opprog>,
-        mPProgR4: List<Opprog>,
         oprij: Oprij
     ) {
         generateGeneral(builder)
@@ -426,7 +432,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             //generateSyncTelegramDoW(builder)
         }
 
-        generateWorkSchedules(mPProgR1, mPProgR2, mPProgR3, mPProgR4, oprij, builder)
+        generateWorkSchedules(builder,  oprij)
         generateWiperAndClosedLoop(builder, wipers)
         generateLearnFunctions(builder, strLoadMngs)
         generateTalegramAbsence(builder, tlgAbstrs)
@@ -599,137 +605,82 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
 
+
     private fun generateEventLog(builder: java.lang.StringBuilder) {
         val mLogEnFlags = arrayOf(mOp50Prij.CLOGENFLGS[0].toInt(), mOp50Prij.CLOGENFLGS[1].toInt())
+        val strYes=getString(R.string.yes)
+        val strNo=getString(R.string.no)
 
         builder.append(h2 + getString(R.string.event_log) + h2C)
         builder.append(table)
 
-        builder.append(tr + thcol2 + getString(R.string.common_log) + thC + trC)
-        var yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.SNE_POFF)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        ///---------------------------
+        builder.append(tr + thcol2bgth + getString(R.string.common_log) + thC + trC)
 
+        var yesNo = if ((mLogEnFlags[0] and Const.Data.SNE_POFF) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.power_on_off_time) + tdC + td + yesNo + tdC + trC)
 
-
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.SNE_SHT)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[0] and Const.Data.SNE_SHT) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.synchronization_telegram_time) + tdC + td + yesNo + tdC + trC)
 
-
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.SNE_SHD)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[0] and Const.Data.SNE_SHD) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.synchronization_telegram_day) + tdC + td + yesNo + tdC + trC)
 
-
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.SNE_LSINH)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[0] and Const.Data.SNE_LSINH) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.local_change_of_time) + tdC + td + yesNo + tdC + trC)
 
+        ///---------------------------
+        builder.append(tr + thcol2bgth + getString(R.string.rtc_log) + thC + trC)
 
-        builder.append(tr + thcol2 + getString(R.string.rtc_log) + thC + trC)
-
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.SNE_RTC_OF)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[0] and Const.Data.SNE_RTC_OF) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.oscillator_fail) + tdC + td + yesNo + tdC + trC)
 
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.SNE_RTC_ST)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[0] and Const.Data.SNE_RTC_ST) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.rtc_stop) + tdC + td + yesNo + tdC + trC)
 
-
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.SNE_RTC_BL)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[0] and Const.Data.SNE_RTC_BL) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.battery_low) + tdC + td + yesNo + tdC + trC)
 
+        ///---------------------------
+        builder.append(tr + thcol2bgth + getString(R.string.relay_log) + thC + trC)
 
-        builder.append(tr + thcol2 + getString(R.string.relay_log) + thC + trC)
-
-
-        yesNo =
-            if ((mLogEnFlags[1]?.and(Const.Data.REL_ON)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[0] and Const.Data.REL_ON) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.relay_switched_by_telegram) + tdC + td + yesNo + tdC + trC)
 
-
-        yesNo =
-            if ((mLogEnFlags[1]?.and(Const.Data.PRO_REL_X)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[0] and Const.Data.PRO_REL_X) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.relay_switched_by_program) + tdC + td + yesNo + tdC + trC)
 
+       // yesNo = if ((mLogEnFlags[0] and Const.Data.REL_WIP_S) != 0) strYes else strNo
+       // builder.append(tr + td + getString(R.string.start_wiper) + tdC + td + yesNo + tdC + trC)
 
-        yesNo =
-            if ((mLogEnFlags[1]?.and(Const.Data.REL_WIP_S)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
-        builder.append(tr + td + getString(R.string.start_wiper) + tdC + td + yesNo + tdC + trC)
-
-        yesNo =
-            if ((mLogEnFlags[1]?.and(Const.Data.REL_WIP_R)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[1] and Const.Data.REL_WIP_R) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.end_wiper) + tdC + td + yesNo + tdC + trC)
 
-
-        yesNo =
-            if ((mLogEnFlags[1]?.and(Const.Data.REL_TA_S)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[1] and Const.Data.REL_TA_S) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.telegram_absence_start) + tdC + td + yesNo + tdC + trC)
 
-        yesNo =
-            if ((mLogEnFlags[1]?.and(Const.Data.REL_TA_R)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[1] and Const.Data.REL_TA_R) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.telegram_absence_restart) + tdC + td + yesNo + tdC + trC)
 
-        yesNo =
-            if ((mLogEnFlags[1]?.and(Const.Data.REL_PROBLOCK)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[1] and Const.Data.REL_PROBLOCK) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.work_schedule_disabled) + tdC + td + yesNo + tdC + trC)
 
-        yesNo =
-            if ((mLogEnFlags[1]?.and(Const.Data.REL_PROUNBLOCK)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[1] and Const.Data.REL_PROUNBLOCK) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.work_schedule_enabled) + tdC + td + yesNo + tdC + trC)
 
+        yesNo = if ((mLogEnFlags[1] and Const.Data.PON_REL_X) != 0) strYes else strNo
+        builder.append(tr + td + getString(R.string.relay_switched_by_pwron) + tdC + td + yesNo + tdC + trC)
 
-        builder.append(tr + thcol2 + getString(R.string.telegram_log) + thC + trC)
+        ///---------------------------
+        builder.append(tr + thcol2bgth + getString(R.string.telegram_log) + thC + trC)
 
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.OPT_LOG_TLG)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[1] and Const.Data.OPT_LOG_TLG) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.log_all_telegrams) + tdC + td + yesNo + tdC + trC)
 
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.OPT_LOG_MYTLG)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[1] and Const.Data.OPT_LOG_MYTLG) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.log_all_telegrams_for_this_rec) + tdC + td + yesNo + tdC + trC)
 
-        yesNo =
-            if ((mLogEnFlags[0]?.and(Const.Data.OPT_LOG_REPTLG)) != 0) getString(R.string.yes) else getString(
-                R.string.no
-            )
+        yesNo = if ((mLogEnFlags[1] and Const.Data.OPT_LOG_REPTLG) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.log_only_telegrams) + tdC + td + yesNo + tdC + trC)
 
         builder.append(tableC)
@@ -851,7 +802,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         builder.append(trC)
 
         builder.append(tr)
-        builder.append(th + getString(R.string.absence_time) + thC)
+        builder.append(th + getString(R.string.rst_timer_on) + thC)
         for (i in 0..3)
             if (tlgAbstrs[i].RestOn < 0x0F)
                 builder.append(td + getStringArray(R.array.rst, tlgAbstrs[i].RestOn.toInt()) + tdC)
@@ -906,7 +857,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         builder.append(tr)
         builder.append(th + getString(R.string.learn_period) + thC)
         for (i in 0..3)
-            if ((strLoadMngs[i].status2.toInt() and Const.Data.LEARN_7DAYS_MASK) == 0)
+            if ((strLoadMngs[i].Status.toInt() and Const.Data.LEARN_7DAYS_MASK) == 0)
                 builder.append(td + getString(R.string.day_h) + tdC)
             else
                 builder.append(td + getString(R.string.seven_days) + tdC)
@@ -948,14 +899,14 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         for (i in 1..4)
             builder.append(th + String.format(getString(R.string.relay_num), i) + thC)
         builder.append(trC)
+
         builder.append(tr)
         builder.append(th + getString(R.string.wiper_enable) + thC)
         for (i in 0..3)
             if ((wipers[i].status.toInt() and Const.Data.WIPER_DISEB_MASK) == 0)
-                builder.append(td + getString(R.string.yes) + tdC)
+                builder.append(tdImpAkt + getString(R.string.yes) + tdC)
             else
-                builder.append(td + getString(R.string.no) + tdC)
-
+                builder.append(tdImpNeAkt + getString(R.string.no) + tdC)
         builder.append(trC)
 
         builder.append(tr)
@@ -965,8 +916,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                 builder.append(td + getString(R.string.yes) + tdC)
             else
                 builder.append(td + getString(R.string.no) + tdC)
-
-
+        builder.append(trC)
 
         builder.append(tr)
         builder.append(th + getString(R.string.activation_command) + thC)
@@ -983,39 +933,51 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         builder.append(th + getString(R.string.switching_delay) + thC)
         for (i in 0..3)
             builder.append(td + getHMSfromInt(wipers[i].Tswdly) + tdC)
-
         builder.append(trC)
 
         builder.append(tr)
         builder.append(th + getString(R.string.wiper_time) + thC)
         for (i in 0..3)
-            builder.append(td + getHMSfromInt(0) + tdC)
-
+            builder.append(td + getDHMSfromInt(wipers[i].TWiper) + tdC)
         builder.append(trC)
 
         builder.append(tr)
         builder.append(th + getString(R.string.scheduled_switching_activation_delay) + thC)
         for (i in 0..3)
             builder.append(td + getHMSfromInt(wipers[i].TBlockPrePro) + tdC)
-
         builder.append(trC)
 
+        //TODO LOOP--------------------
         builder.append(tr)
         builder.append(th + getString(R.string.loop_enable) + thC)
         for (i in 0..3)
             if ((wipers[i].status.toInt() and Const.Data.LOOP_DISEB_MASK) == 0)
-                builder.append(td + getString(R.string.yes) + tdC)
+                builder.append(tdImpAkt + getString(R.string.yes) + tdC)
             else
-                builder.append(td + getString(R.string.no) + tdC)
+                builder.append(tdImpNeAkt + getString(R.string.no) + tdC)
         builder.append(trC)
 
         builder.append(tr)
         builder.append(th + getString(R.string.duration_in_position) + thC)
         for (i in 0..3)
-            builder.append(td + getHMSfromInt(wipers[i].TWiper) + tdC)
+            builder.append(td + getDHMSfromInt(wipers[i].TWiper) + tdC)
         builder.append(trC)
 
         builder.append(tableC)
+    }
+
+    private fun getDHMSfromInt(time: Int): String { //TODO check signed
+        var time = time
+        val hh: Int
+        val mm: Int
+        val ss: Int
+        val dd:Int =time/(24*3600)
+        time=time%(24*3600)
+        ss = time % 60
+        time /= 60
+        mm = time % 60
+        hh = time / 60
+        return String.format("%d d %02d:%02d:%02d", dd,hh, mm, ss)
     }
 
     private fun getHMSfromInt(time: Int): String {
@@ -1048,47 +1010,44 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
     private fun generateWorkSchedules(
-        mPProgR1: List<Opprog>,
-        mPProgR2: List<Opprog>,
-        mPProgR3: List<Opprog>,
-        mPProgR4: List<Opprog>,
-        oprij: Oprij,
-        builder: java.lang.StringBuilder
+        builder: java.lang.StringBuilder,
+        oprij: Oprij
     ) {
-        val buildersWorkSchedTimePairs = mutableListOf<StringBuilder>()
-        if (fVis_Versacom)
-            for (relay in 0..3)
+
+        if (fVis_Versacom) {
+            val buildersWorkSchedTimePairs = mutableListOf<StringBuilder>()
+            for (relay in 0..3) {
+                if ((oprij.VOpRe.StaPrij.toInt() and (0x80 shr relay)) == 0)continue
                 when (relay) {
                     0 -> buildersWorkSchedTimePairs.add(showTimePairs(mPProgR1))
                     1 -> buildersWorkSchedTimePairs.add(showTimePairs(mPProgR2))
                     2 -> buildersWorkSchedTimePairs.add(showTimePairs(mPProgR3))
                     3 -> buildersWorkSchedTimePairs.add(showTimePairs(mPProgR4))
                 }
-
-        val buildersWorkSchedTimeDays = mutableListOf<StringBuilder>()
-
-        for (relay in 0..3) {
-            if (oprij.VOpRe.StaPrij.toInt() and (0x80 shr relay) == 0)
-                continue
-            when (relay) {
-                0 -> buildersWorkSchedTimeDays.add(getRelAkProg(mPProgR1))
-                1 -> buildersWorkSchedTimeDays.add(getRelAkProg(mPProgR2))
-                2 -> buildersWorkSchedTimeDays.add(getRelAkProg(mPProgR3))
-                3 -> buildersWorkSchedTimeDays.add(getRelAkProg(mPProgR4))
             }
-        }
+            val buildersWorkSchedTimeDays = mutableListOf<StringBuilder>()
 
-        for (i in 0..3) {
-            builder.append(h2 + getString(R.string.work_schedules_time_pairs) + (i + 1) + h2C)
-            if (buildersWorkSchedTimeDays.lastIndex >= i)
-                builder.append(buildersWorkSchedTimeDays[i].toString())
-            if (buildersWorkSchedTimePairs.lastIndex >= i)
-                builder.append(buildersWorkSchedTimePairs[i].toString())
+            for (relay in 0..3) {
+                if ((oprij.VOpRe.StaPrij.toInt() and (0x80 shr relay)) == 0)continue
+                when (relay) {
+                    0 -> buildersWorkSchedTimeDays.add(getRelAkProg(mPProgR1))
+                    1 -> buildersWorkSchedTimeDays.add(getRelAkProg(mPProgR2))
+                    2 -> buildersWorkSchedTimeDays.add(getRelAkProg(mPProgR3))
+                    3 -> buildersWorkSchedTimeDays.add(getRelAkProg(mPProgR4))
+                }
+            }
+
+            for (i in 0..3) {
+                builder.append(h2 + getString(R.string.work_schedules_time_pairs) + (i + 1) + h2C)
+                if (buildersWorkSchedTimeDays.lastIndex >= i)
+                    builder.append(buildersWorkSchedTimeDays[i].toString())
+                if (buildersWorkSchedTimePairs.lastIndex >= i)
+                    builder.append(buildersWorkSchedTimePairs[i].toString())
+            }
         }
     }
 
-
-    private fun getRelAkProg(mPProgR: List<Opprog>): StringBuilder {
+    private fun getRelAkProg(mPProgR: Array<Opprog>): StringBuilder {
         val builder = StringBuilder()
         val temp = mutableListOf("", "", "", "", "", "", "", "")
         builder.append(table)
@@ -1125,14 +1084,15 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
 
-    private fun showTimePairs(mPProgR: List<Opprog>): StringBuilder {
+
+    private fun showTimePairs(mPProgR: Array<Opprog>): StringBuilder {
         val timePairsTableBuilder = StringBuilder()
         timePairsTableBuilder.append(table)
         timePairsTableBuilder.append(tr)
-        timePairsTableBuilder.append(th + getString(R.string.work_sched_test_1) + thC)
-        timePairsTableBuilder.append(th + getString(R.string.time_pair_test2) + thC)
-        timePairsTableBuilder.append(th + getString(R.string.t_atest3) + thC)
-        timePairsTableBuilder.append(th + getString(R.string.t_btest3) + thC)
+        timePairsTableBuilder.append(th + getString(R.string.work_scheds) + thC)
+        timePairsTableBuilder.append(th + getString(R.string.time_pair) + thC)
+        timePairsTableBuilder.append(th + getString(R.string.t_a_par) + thC)
+        timePairsTableBuilder.append(th + getString(R.string.t_b_par) + thC)
         timePairsTableBuilder.append(trC)
         cntWork = 0
         for (rp in 0..15)
@@ -1141,7 +1101,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         return timePairsTableBuilder
     }
 
-    private fun getRelVremPar(builder: StringBuilder, rp: Int, mPProgR: List<Opprog>) {
+    private fun getRelVremPar(builder: StringBuilder, rp: Int, mPProgR: Array<Opprog>) {
         var count = 0
         for (itemIndex in 0..m_CFG.cNpar) {
             if ((mPProgR[rp].AkTim and DataUtils.getIVtmask(itemIndex)) != 0) {
@@ -1154,22 +1114,18 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                     builder.append(td + tdC)
 
                 builder.append(td + String.format("%02d", itemIndex + 1) + tdC)
-                builder.append(
-                    td + String.format(
-                        "%02d:%02d",
-                        (mPProgR[rp].TPro[itemIndex].Ton) / 60,
-                        (mPProgR[rp].TPro[itemIndex].Ton) % 60
-                    )
-                            + tdC
-                )
-                builder.append(
-                    td + String.format(
-                        "%02d:%02d",
-                        (mPProgR[rp].TPro[itemIndex].Toff) / 60,
-                        (mPProgR[rp].TPro[itemIndex].Toff) % 60
-                    )
-                            + tdC
-                )
+                val Ton= String.format("%02d:%02d", (mPProgR[rp].TPro[itemIndex].Ton) / 60, (mPProgR[rp].TPro[itemIndex].Ton) % 60)
+                val Toff= String.format("%02d:%02d", (mPProgR[rp].TPro[itemIndex].Toff) / 60, (mPProgR[rp].TPro[itemIndex].Toff) % 60)
+                val Tblank= "--:--"
+
+                var Tm:String=""
+
+                if(mPProgR[rp].TPro[itemIndex].Tonb!=1) Tm=Ton else Tm=Tblank
+                builder.append(td + Tm+ tdC)
+
+                if(mPProgR[rp].TPro[itemIndex].Toffb!=1) Tm=Toff else Tm=Tblank
+                builder.append(td + Tm+ tdC)
+
                 builder.append(trC)
             }
         }
@@ -1942,23 +1898,35 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
     private fun getDaljPar(dbuf: ByteArray, mOpPrij: Oprij) {
-        mOpPrij.apply {
-            VOpRe.VakProR1 = setOprelI(dbuf)
-            VOpRe.VakProR2 = setOprelI(dbuf)
-            VOpRe.VakProR3 = setOprelI(dbuf)
-            VOpRe.VakProR4 = setOprelI(dbuf)
+        mOpPrij.VOpRe.VakProR1 = setOprelI(dbuf)
+        mOpPrij.VOpRe.VakProR2 = setOprelI(dbuf)
+        mOpPrij.VOpRe.VakProR3 = setOprelI(dbuf)
+        mOpPrij.VOpRe.VakProR4 = setOprelI(dbuf)
 
-            VOpRe.StaPrij = dbuf[globalIndex++]
-
-            if (mSoftwareVersionPri < 95) {
-                mOpPrij.ParFlags = dbuf[globalIndex++]
-
-                StaR1PwON_OFF = dbuf[globalIndex++]
-                StaR2PwON_OFF = dbuf[globalIndex++]
-                StaR3PwON_OFF = dbuf[globalIndex++]
-                StaR4PwON_OFF = dbuf[globalIndex++]
-            }
+        if (mSoftwareVersionPri < 98) mOpPrij.VOpRe.StaPrij=dbuf[globalIndex++]
+        if(mSoftwareVersionPri < 95)
+        {
+            mOpPrij.ParFlags=dbuf[globalIndex++]
+            mOpPrij.StaR1PwON_OFF=dbuf[globalIndex++]
+            mOpPrij.StaR2PwON_OFF=dbuf[globalIndex++]
+            mOpPrij.StaR3PwON_OFF=dbuf[globalIndex++]
+            mOpPrij.StaR4PwON_OFF=dbuf[globalIndex++]
         }
+        else	{
+
+            mOpPrij.ParFlags=0;
+
+            mOpPrij.StaR1PwON_OFF=0;
+            mOpPrij.StaR2PwON_OFF=0;
+            mOpPrij.StaR3PwON_OFF=0;
+            mOpPrij.StaR4PwON_OFF=0;
+        }
+
+
+
+
+
+
     }
 
     private fun getKl2VerDatVer96(dbuf: ByteArray, mOp50Prij: Oprij50, mOpPrij: Oprij) {
@@ -1986,8 +1954,8 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             globalIndex++
             globalIndex++
         } else if (m_CFG.cID == 130 || m_CFG.cID == 0x8C) {
-            globalIndex++
-            globalIndex++
+            mOpPrij.VOpRe.StaPrij =dbuf[globalIndex++]
+            mOpPrij.PromjZLjU =dbuf[globalIndex++]
         }
 
         for (i in 0..12)
@@ -2105,7 +2073,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     private fun getStrLoadMng(dbuf: ByteArray)
             : StrLoadMng {
         return StrLoadMng().apply {
-            status2 = dbuf[globalIndex++]
+            Status = dbuf[globalIndex++]
             relPos = dbuf[globalIndex++]
             TPosMin = setOprel3I(dbuf)
             TPosMax = setOprel3I(dbuf)
@@ -2185,9 +2153,9 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         wiper.TBlockPrePro = setOprel3I(dbuf)
     }
 
-    private fun getTparPar(dbuf: ByteArray)
+    private fun getTparPar(dbuf: ByteArray,oPProg:Opprog)
             : Opprog {
-        val oPProg = Opprog()
+        //val oPProg = Opprog()
 
 
         val x = Unitimbyt()
@@ -2203,13 +2171,12 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         else if (mSoftwareVersionPri in 40..95)
             NR_TPAR_MAX
         else
-            11
+            m_CFG.cNpar.toInt()
 
 
         x.b[1] = dbuf[globalIndex++]
+        if (mSoftwareVersionPri >= 40)x.b[0] = dbuf[globalIndex++]
 
-        if (mSoftwareVersionPri >= 40)
-            x.b[0] = dbuf[globalIndex++]
 
         x.updateI()
 
@@ -2273,28 +2240,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
 
-    private fun hasNextLine(data: ByteArray)
-            : Boolean {
-        var i = 0
-        while (m_cntxx < data.size) {
-            if (data[m_cntxx] == 0x0D.toByte()) {
-                mline[i++] = data[m_cntxx++]
 
-                if (data[m_cntxx] == 0x0A.toByte()) {
-                    mline[i++] = data[m_cntxx++]
-                    mline[i] = 0
-                    return true
-                } else {
-                    mline[i] = 0
-                    m_Dateerr++
-                    return false
-                }
-            }
-            mline[i++] = data[m_cntxx++]
-        }
-        m_Dateerr++
-        return false
-    }
 
 
     private fun getVersions(header: ByteArray) {
@@ -2361,18 +2307,10 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         return buf
     }
 
-    private fun HtoB(ch: Char)
-            : Char {
-        if (ch in '0'..'9') {
-            isCheck = true
-            return (ch - '0').toChar()
-        }
-        if (ch in 'A'..'F') {
-            isCheck = true
-            return (ch - 'A' + 0xA).toChar()
-        }
-        isCheck = false
-        return ch
+    private fun HtoB(ch: Char) : Char? {
+        if (ch in '0'..'9') return (ch - '0').toChar()
+        if (ch in 'A'..'F') return (ch - 'A' + 0xA).toChar()
+        return null
     }
 
     private fun HextoD(hb: Byte, lb: Byte)
