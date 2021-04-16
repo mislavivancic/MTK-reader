@@ -3,6 +3,7 @@ package com.mtkreader.services
 import android.content.Context
 import com.mtkreader.R
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.Const.Data.TIP_PASN
 import com.mtkreader.compare
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.data.reading.*
@@ -32,7 +33,24 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
     private var mFileComment = ""
     private val mOprij = Oprij()
     private val mOp50rij = Oprij50()
+    private val mRealloc = listOf(Rreallc(), Rreallc(), Rreallc(), Rreallc())
+    private val mTelegSync = listOf(
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram(),
+        Telegram()
+    ) //TODO must be a better way to do this
     private var mPBuff = ByteArray(256)
+
 
     private val addressMap = mutableMapOf<String, ByteArray>()
 
@@ -56,21 +74,130 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
         extractComment(line)
         fillAddressMap(fileLines.subList(4, fileLines.size))
 
-        var data = addressMap["8080"]
-        if (data != null)
-            mPBuff = data
-
-        if (mSoftwareVersion >= 80) {
+        fillBuffer("8080")
+        if (mSoftwareVersion >= 80)
             getKlDatVer9file()
-        }
 
-        globalIndex = 0
-        data = addressMap["8180"]
-        if (data != null)
-            mPBuff = data
+
+
+        fillBuffer("8180")
         getVerAdrParVer6()
 
+        fillBuffer("8280")
+        getPg2Par()
+
+        fillBuffer("9080")
+        fillTelegRel(mOp50rij.TlgRel1)
+
+        fillBuffer("9180")
+        fillTelegRel(mOp50rij.TlgRel2)
+
+        fillBuffer("9280")
+        fillTelegRel(mOp50rij.TlgRel3)
+
+        fillBuffer("9380")
+        fillTelegRel(mOp50rij.TlgRel4)
+
+        fillBuffer("9480")
+        fillTelegramTlg(mOp50rij.tlg[0])
+
+        fillBuffer("9580")
+        fillTelegramTlg(mOp50rij.tlg[3])
+
+        fillBuffer("9680")
+        fillTelegramTlg(mOp50rij.tlg[5])
+
+        fillBuffer("9880")
+        fillTelegram(mTelegSync[0])
+
+        fillBuffer("9980")
+        fillTelegram(mTelegSync[2])
+
+        fillBuffer("9A80")
+        fillTelegram(mTelegSync[5])
+
+        fillBuffer("9B80")
+        fillTelegram(mTelegSync[8])
+
+        fillBuffer("9C80")
+        fillTelegram(mTelegSync[10])
+
+        fillBuffer("0180")
+        mOprij.VAdrPrij = setOprel3I()
+
+        println()
+    }
+
+    private fun fillTelegram(telegram: Telegram) {
+        telegram.Cmd.fillTelegCMD()
+    }
+
+    private fun fillTelegramTlg(telegram: Tlg) {
+        // this is union struct
+        fillTelegram(telegram.tel1)
+    }
+
+    private fun fillTelegRel(telegram: Telegrel) {
+        with(telegram) {
+            Uk.fillTelegCMD()
+            Isk.fillTelegCMD()
+        }
+    }
+
+    private fun TelegCMD.fillTelegCMD() {
+        for (i in 0 until 7)
+            AktiImp[i] = mPBuff[globalIndex++]
+        BrAkImp = mPBuff[globalIndex++]
+        for (i in 0 until 7)
+            NeutImp[i] = mPBuff[globalIndex++]
+        Fn = mPBuff[globalIndex++]
+    }
+
+    private fun fillBuffer(address: String) {
         globalIndex = 0
+        mPBuff = addressMap[address] ?: throw Exception("Address does not exist!")
+    }
+
+    private fun getPg2Par() {
+        with(mOprij) {
+            VOpRe.StaPrij = mPBuff[globalIndex++]
+            VOpRe.VakProR1 = setOprelI()
+            VOpRe.VakProR2 = setOprelI()
+            VOpRe.VakProR3 = setOprelI()
+            VOpRe.VakProR4 = setOprelI()
+
+            VIdBr = mPBuff[globalIndex++]
+            ParFlags = mPBuff[globalIndex++]
+
+            StaR1PwON_OFF = mPBuff[globalIndex++]
+            StaR2PwON_OFF = mPBuff[globalIndex++]
+            StaR3PwON_OFF = mPBuff[globalIndex++]
+            StaR4PwON_OFF = mPBuff[globalIndex++]
+
+            if (mSoftwareVersion >= 57) {
+                VCRel1Tu = mPBuff[globalIndex++]
+                VCRel2Tu = mPBuff[globalIndex++]
+                VCRel3Tu = mPBuff[globalIndex++]
+                VCRel4Tu = mPBuff[globalIndex++]
+            }
+        }
+
+        if (mSoftwareVersion >= 82) {
+            for (i in 0 until 4) {
+                mRealloc[i].rel_on = mPBuff[globalIndex++]
+                mRealloc[i].rel_off = mPBuff[globalIndex++]
+            }
+        }
+
+        if (mHardwareVersion == TIP_PASN) {
+            with(mOprij) {
+                StaAsat = mPBuff[globalIndex++]
+                AsatKorOn = mPBuff[globalIndex++]
+                AsatKorOff = mPBuff[globalIndex++]
+                PromjZLjU = mPBuff[globalIndex++]
+                FlagLjVr = mPBuff[globalIndex++]
+            }
+        }
     }
 
     private fun getVerAdrParVer6() {
