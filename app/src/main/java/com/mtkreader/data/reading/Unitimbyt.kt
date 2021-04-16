@@ -10,8 +10,8 @@ class Unitimbyt {
         i = 0x0
         var top1 = 0
         top1 = b[3].toInt()
-        top1 = top1 shl 32 // TODO 24 shift
-        top1 = top1 and -0x1000000
+        top1 = top1 shl 24 // TODO 24 shift
+        top1 = top1 and 0xFF00000
 
         var top2 = 0
         top2 = b[2].toInt()
@@ -32,7 +32,7 @@ class Unitimbyt {
 
     fun updateTB() {
         t = Tonoff(i)
-        b[3] = (i shr 32 and 0xFF).toByte()
+        b[3] = (i shr 24 and 0xFF).toByte()
         b[2] = (i shr 16 and 0xFF).toByte()
         b[1] = (i shr 8 and 0xFF).toByte()
         b[0] = (i and 0xFF).toByte()

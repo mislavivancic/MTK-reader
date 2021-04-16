@@ -6,8 +6,8 @@ public class Css {
             "<head>" +
             "<meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\">" +
             "<title>Lista parametara</title>" +
-            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" +
-            "</head>";
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+       //    + "</head>";
 
     public static String cESS = "<!DOCTYPE html>\n" +
             "<html>\n" +
