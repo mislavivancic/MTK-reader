@@ -1,12 +1,14 @@
 package com.mtkreader.services
 
 import android.content.Context
+import android.widget.Toast
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.Const.Data.TIP_PASN
 import com.mtkreader.compare
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.data.reading.*
+import com.mtkreader.toPositiveInt
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.DataUtils.isHexadecimal
 import com.mtkreader.utils.DataUtils.removeNonAlphanumeric
@@ -29,33 +31,38 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
     private val mParFilteraCF = StrParFilVer9()
     private var mBrojRast = 0
     private var mUtfPosto = 0.0
+    private val UTFREFP = 0.9
+    private var mBrUpKalendara: Byte = 0
     private val mCfg = CfgParHwsw()
     private var mFileComment = ""
     private val mOprij = Oprij()
     private val mOp50rij = Oprij50()
-    private val mRealloc = listOf(Rreallc(), Rreallc(), Rreallc(), Rreallc())
-    private val mTelegSync = listOf(
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram(),
-        Telegram()
-    ) //TODO must be a better way to do this
+    private val mRealloc = Array(4) { Rreallc() }
+    private val mTelegSync = Array(13) { Telegram() }
+    private val mPProgR1 = Array(16) { Opprog() }
+    private val mPProgR2 = Array(16) { Opprog() }
+    private val mPProgR3 = Array(16) { Opprog() }
+    private val mPProgR4 = Array(16) { Opprog() }
     private var mPBuff = ByteArray(256)
+    private var mPraznici = PrazniciStr()
+    private var mWipersRx = Array(4) { Wiper() }
+    private var mPonPoffRx = Array(4) { PonPoffStr() }
+    private var mTelegAbsenceRx = Array(4) { TlgAbstr() }
+    private var mLearningRx = Array(4) { StrLoadMng() }
+    private var mRelInterlock = Array(4) { IntrlockStr() }
+    private var mKalendar = Array(72) { StKalend() }
+    private var mInitRelSetProg = InitRelSetting()
+    private var mUkls = Ukls()
+    private var mCFileParData = RecFilParStr()
 
 
     private val addressMap = mutableMapOf<String, ByteArray>()
 
     companion object {
         private const val FILE_TOKEN = "//Programiranje"
+        private const val KALBLOCK_SIZE = 0x30
+        private const val NR_KAL_IN_BLOCK = KALBLOCK_SIZE / 8
+
     }
 
     override fun extractFileData(fileLines: List<String>): Completable {
@@ -125,8 +132,324 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
         fillBuffer("0180")
         mOprij.VAdrPrij = setOprel3I()
 
+
+        var rel = 1
+        var pPProg = Opprog()
+        val x = Unitimbyt()
+        do {
+            var mNProNum = 0
+            do {
+                val address = String.format("%01X%01X80", rel, mNProNum)
+                fillBuffer(address)
+                // TODO check if mPBuff len < 52 then throw error
+                pPProg = getPProg(rel, mNProNum)
+                x.b[1] = mPBuff[globalIndex++]
+                x.b[0] = mPBuff[globalIndex++]
+                x.updateI()
+                pPProg.AkTim = x.i and 0xFFFC
+                pPProg.DanPr = mPBuff[globalIndex++]
+                for (i in 0 until 14) {
+                    x.i = setOprel3I()
+                    x.updateTB()
+                    pPProg.TPro[i] = x.t
+
+                }
+                mNProNum++
+            } while (mNProNum < 16)
+            rel++
+        } while (rel < 5)
+
+
+        fillBuffer("7080")
+        getUklsPar()
+
+        fillBuffer("7280")
+        getAsatPar()
+
+        fillBuffer("7380")
+        getPrazDaniPar()
+
+        if (mSoftwareVersion >= 95) {
+            fillBuffer("5080")
+            getWiperData() //TODO duplicate
+
+            fillBuffer("5180")
+            getPonPoffRDat() // TODO duplicate
+
+            fillBuffer("5280")
+            getTlgAbsenceDat() // TODO duplicate
+
+            fillBuffer("5380")
+            getStrLoadMng()// TODO duplicate
+
+            fillBuffer("0380")
+            getRelInterLock()// TODO duplicate
+        }
+
+        fillBuffer("C080")
+        getFriRParVer9()// TODO duplicate
+
+        if (mSoftwareVersion >= 80) {
+            mBrUpKalendara = 0
+            fillBuffer("A080")
+            getBrUpKalendara()
+            try {
+                for (i in 0 until NR_KAL_IN_BLOCK)
+                    fillKalendar(mKalendar[i])
+            } catch (ex: ArrayIndexOutOfBoundsException) {
+                // failed to mem cpy
+            }
+            if (mBrUpKalendara > 5) {
+                val sizeOfStKalend = 8
+                var nrBlok: Int = (mBrUpKalendara - 5) / (sizeOfStKalend / (NR_KAL_IN_BLOCK - 1))
+                if ((mBrUpKalendara - 5) / (sizeOfStKalend / (NR_KAL_IN_BLOCK - 1)) != 0) nrBlok++
+
+                var cnt = 1
+                do {
+                    val address = String.format("A%01X80", cnt)
+                    fillBuffer(address)
+                    rel = (cnt * NR_KAL_IN_BLOCK) - 1
+                    fillKalendar(mKalendar[rel])
+                    cnt++
+                } while (cnt < nrBlok)
+            }
+        }
+
+        if (mSoftwareVersion >= 96) {
+            fillBuffer("G6")
+            getAfterProgSetting(true)
+
+            fillBuffer("G7")
+            readCreatedId(true)
+        }
         println()
     }
+
+    private fun readCreatedId(buff: Boolean) {
+        if (!buff) return
+
+        for (i in 0 until RecFilParStr.PARID_SIZE)
+            mCFileParData.CreateSite[i] = mPBuff[globalIndex++]
+
+        for (i in 0 until RecFilParStr.PARID_SIZE)
+            mCFileParData.IDCreate[i] = mPBuff[globalIndex++]
+
+        for (i in 0 until RecFilParStr.PARIDFILE_SIZE)
+            mCFileParData.IDFile[i] = mPBuff[globalIndex++]
+
+    }
+
+    private fun getAfterProgSetting(buff: Boolean) {
+        if (buff) {
+            mInitRelSetProg.setPar = mPBuff[globalIndex++]
+            for (i in 0 until 4)
+                mInitRelSetProg.status[i] = mPBuff[globalIndex++]
+        }
+    }
+
+
+    private fun fillKalendar(kalendar: StKalend) {
+        with(kalendar) {
+            broj = mPBuff[globalIndex++]
+            danuTj = mPBuff[globalIndex++]
+            akPr1do8 = mPBuff[globalIndex++]
+            akPr9do15 = mPBuff[globalIndex++]
+            fillDatum(PocDan)
+        }
+    }
+
+    private fun fillDatum(datum: Datum) {
+        datum.mje = mPBuff[globalIndex++]
+        datum.dan = mPBuff[globalIndex++]
+    }
+
+    private fun getBrUpKalendara() {
+        globalIndex++
+        globalIndex++
+        globalIndex++
+        globalIndex++
+        globalIndex++
+        globalIndex++
+        globalIndex++
+        mBrUpKalendara = mPBuff[globalIndex++]
+    }
+
+    private fun getFriRParVer9() {
+        with(mParFilteraCF) {
+            NYM1 = mPBuff[globalIndex++]
+            NYM2 = mPBuff[globalIndex++]
+            K_V = setOprelI()
+            REZ = setOprelI()
+            UTHMIN = setOprelI()
+            UTLMAX = setOprelI()
+            PERIOD = setOprelI()
+            FORMAT = setOprelI()
+            BROJ = mPBuff[globalIndex++].toInt()
+            globalIndex++
+            mBrojRast = setOprelI()
+            setUfPosto()
+        }
+    }
+
+    private fun setUfPosto() {
+        val broj = mParFilteraCF.BROJ
+        if (broj >= 0) {
+            var KvUt = mParFilteraCF.K_V
+            if (KvUt == 0) {
+                KvUt = DataUtils.getTbParFilteraVer9()[broj].K_V
+                Toast.makeText(context, "Error 'Kv = 0' ", Toast.LENGTH_SHORT).show()
+            }
+
+            val utth = mParFilteraCF.UTHMIN.toDouble()
+            var uthMin = utth / KvUt.toDouble()
+
+            uthMin *= 1.002
+            var utlMax = mParFilteraCF.UTLMAX.toDouble() / KvUt.toDouble()
+            utlMax *= 1.002
+
+            var uthMinRef = 0.0
+            val ith = getFrUTHDefVer9(broj)
+            if (ith != 0) {
+                uthMinRef = ith.toDouble()
+                mUtfPosto = (utth * UTFREFP) / uthMinRef
+            } else
+                mUtfPosto = 0.0
+        }
+    }
+
+    private fun getFrUTHDefVer9(broj: Int): Int {
+        var uth = 0
+        if (broj >= 0)
+            uth = DataUtils.getTbParFilteraVer9()[broj].UTHMIN
+
+        return uth
+    }
+
+    private fun getRelInterLock() {
+        for (i in 0 until 4) {
+            with(mRelInterlock[i]) {
+                wBitsOn = setOprelI()
+                wBitsOff = setOprelI()
+                PcCnfg[0] = setOprelI()
+                PcCnfg[1] = setOprelI()
+            }
+        }
+    }
+
+    private fun getStrLoadMng() {
+        for (i in 0 until 4) {
+            with(mLearningRx[i]) {
+                Status = mPBuff[globalIndex++]
+                relPos = mPBuff[globalIndex++]
+                TPosMin = setOprel3I()
+                TPosMax = setOprel3I()
+            }
+        }
+    }
+
+    private fun getTlgAbsenceDat() {
+        for (i in 0 until 4) {
+            with(mTelegAbsenceRx[i]) {
+                OnRes = mPBuff[globalIndex++]
+                TDetect = setOprel3I()
+                RestOn = mPBuff[globalIndex++]
+                OnTaExe = mPBuff[globalIndex++]
+            }
+        }
+    }
+
+    private fun getPonPoffRDat() {
+        setPonPoffReData(mPonPoffRx[0])
+        setPonPoffReData(mPonPoffRx[1])
+        setPonPoffReData(mPonPoffRx[2])
+        setPonPoffReData(mPonPoffRx[3])
+    }
+
+    private fun setPonPoffReData(ponPoffStr: PonPoffStr) {
+        with(ponPoffStr) {
+            OnPonExe = mPBuff[globalIndex++]
+            lperIgno = mPBuff[globalIndex++]
+            TminSwdly = setOprel3I()
+            TrndSwdly = setOprel3I()
+            Tlng = setOprel3I()
+
+            if ((Tlng and 0x800000) != 0)
+                lperIgno = 0x80.toByte()
+            else
+                lperIgno = 0x00.toByte()
+
+            Tlng = Tlng and 0x7fffff
+            lOnPonExe = mPBuff[globalIndex++]
+            OnPoffExe = mPBuff[globalIndex++]
+            TBlockPrePro = setOprel3I()
+        }
+
+    }
+
+
+    private fun getWiperData() {
+        for (i in 0 until 4) {
+            mWipersRx[i].status = (0x80 + 0x20).toByte()
+            setWiperRelData(mWipersRx[i])
+        }
+    }
+
+    private fun setWiperRelData(wiper: Wiper) {
+        wiper.status = mPBuff[globalIndex++]
+        wiper.Tswdly = setOprel3I()
+        wiper.TWiper = setOprel3I()
+        wiper.TBlockPrePro = setOprel3I()
+    }
+
+    private fun getPrazDaniPar() {
+        var brpraz: Int = mPBuff[globalIndex++].toPositiveInt()
+        brpraz = brpraz shl 8
+        brpraz = brpraz or mPBuff[globalIndex++].toPositiveInt()
+        mPraznici.brpraz = brpraz.toShort()
+        if (brpraz <= 16) {
+            for (i in 0 until brpraz) {
+                mPraznici.datum[i].mje = mPBuff[globalIndex++]
+                mPraznici.datum[i].dan = mPBuff[globalIndex++]
+            }
+        }
+
+    }
+
+    private fun getAsatPar() {
+        with(mOprij) {
+            StaAsat = mPBuff[globalIndex++]
+            AsatKorOn = mPBuff[globalIndex++]
+            AsatKorOff = mPBuff[globalIndex++]
+            PromjZLjU = mPBuff[globalIndex++]
+            FlagLjVr = mPBuff[globalIndex++]
+        }
+    }
+
+    private fun getUklsPar() {
+        mUkls.BrProg = mPBuff[globalIndex++]
+        mUkls.rel3p = mPBuff[globalIndex++]
+        if (mUkls.BrProg <= 16) {
+            val x = UniUksByt()
+            for (i in 0 until mUkls.BrProg) {
+                x.i = setOprel3I()
+                x.updateP()
+                mUkls.TPro[i] = x.p
+            }
+
+        }
+
+    }
+
+    private fun getPProg(rel: Int, mNProNum: Int): Opprog {
+        return when (rel) {
+            1 -> mPProgR1[mNProNum]
+            2 -> mPProgR2[mNProNum]
+            3 -> mPProgR3[mNProNum]
+            4 -> mPProgR4[mNProNum]
+            else -> mPProgR1[mNProNum]
+        }
+    }
+
 
     private fun fillTelegram(telegram: Telegram) {
         telegram.Cmd.fillTelegCMD()
@@ -155,7 +478,8 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
 
     private fun fillBuffer(address: String) {
         globalIndex = 0
-        mPBuff = addressMap[address] ?: throw Exception("Address does not exist!")
+        mPBuff = addressMap[address]
+            ?: throw Exception(context.getString(R.string.address_does_not_exist))
     }
 
     private fun getPg2Par() {
@@ -329,7 +653,7 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
                             if (c == ',') {
                                 value += (192 * 10.0.pow(i)).toInt()
                             } else
-                                value += ((c - '0').toInt() * 10.0.pow(i)).toInt()
+                                value += ((c - '0') * 10.0.pow(i)).toInt()
                         }
                         return@map (value and 0xFF).toByte()
 
@@ -359,7 +683,7 @@ class ParamsWriteService : ParamsWriteContract.Service, KoinComponent {
                 val ptabpar = DataUtils.getTbparfiltera98mhz()[FR - 1]
                 mParFiltera.UTHMIN = ptabpar.UTHMIN
                 mParFiltera.UTLMAX = ptabpar.UTLMAX
-            } else throw Error("Wrong software version")
+            } else throw Error(context.getString(R.string.wrong_software_version))
 
             val RA = getInt(chars[1])
             mBrojRast = RA

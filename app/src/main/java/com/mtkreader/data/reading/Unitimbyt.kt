@@ -1,5 +1,7 @@
 package com.mtkreader.data.reading
 
+import com.mtkreader.toPositiveInt
+
 class Unitimbyt {
 
     var t: Tonoff = Tonoff(0)
@@ -9,22 +11,22 @@ class Unitimbyt {
     fun updateI() {
         i = 0x0
         var top1 = 0
-        top1 = b[3].toInt()
-        top1 = top1 shl 24 // TODO 24 shift
+        top1 = b[3].toPositiveInt()
+        top1 = top1 shl 24
         top1 = top1 and 0xFF00000
 
         var top2 = 0
-        top2 = b[2].toInt()
+        top2 = b[2].toPositiveInt()
         top2 = top2 shl 16
         top2 = top2 and 0x00FF0000
 
         var top3 = 0
-        top3 = b[1].toInt()
+        top3 = b[1].toPositiveInt()
         top3 = top3 shl 8
         top3 = top3 and 0x0000FF00
 
         var top4 = 0
-        top4 = b[0].toInt()
+        top4 = b[0].toPositiveInt()
         top4 = top4 and 0x000000FF
 
         i = i or top1 or top2 or top3 or top4
