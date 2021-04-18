@@ -39,6 +39,7 @@
     <string name="clock">Clock</string>
     <string name="rtc_time_base">RTC time base</string>
     <string name="quartz">Quartz 32768 Hz</string>
+    <string name="rtc_dst">Automatic daylight saving time</string>
     <string-array name="rtcloss">
         <item>None</item>
         <item>a</item>
@@ -71,9 +72,36 @@
     <string name="fixed">Fixed</string>
     <string name="classic_telegram">Classic telegram</string>
     <string name="telegram">Telegram</string>
+    <string name="IDSI_COL_NAME">Tarrif/name</string>
+
+    <string name="IDSI_REZIM">Mode of operation</string>
+    <string name="IDSI_REZIM_HDO">Ripple control receiver</string>
+    <string name="IDSI_REZIM_TIMESWITCH">Time switch</string>
+
+    <string name="IDSI_LASTREPARAMTIME">Last reparametrization:</string>
+    <string name="IDSI_CREATED_UID">Created - User ID:</string>
+    <string name="IDSI_CREATED_PCUID">Created - PC Username:</string>
+    <string name="IDSI_REPARM_UID">Reparametrized - User ID:</string>
+    <string name="IDSI_REPARM_PCUID">Reparametrized - PC Username:</string>
+    <string name="IDSI_PARM_FILE">Parameter file:</string>
+    <string name="IDSI_SERIALNUM">Serial number:</string>
+    <string name="IDSI_PARAMS">Parameters</string>
+    <string name="IDSI_COMMENT">Comment</string>
+
+
+    <string name="IDSI_PARM_FROM_DEVICE"> (from device)</string>
+    <string name="IDSI_PARM_FROM_FILE"> (from file)</string>
+    <string name="IDSI_PARM_FROM_NEW"> (new)</string>
+
+
+
+
     <string name="name">Name</string>
     <string name="a">A</string>
+    <string name="IDSI_ON"> a</string>
+    <string name="IDSI_OFF"> b</string>
     <string name="b">B</string>
+    <string name="c">C</string>
     <string name="v">V</string>
     <string name="z">Z</string>
     <string name="unknown">Unknown</string>
@@ -83,6 +111,37 @@
     <string name="sync_telegrams">Synchronization telegrams</string>
     <string name="sync_telegrams_dow">Synchronization telegrams - day of the week</string>
 
+    <string name="IDSI_EMERGTLG">Emergency tel. </string>
+
+
+    <string name="IDSCB_FN_TELEG1_0">---</string>
+    <string name="IDSCB_FN_TELEG1_1">Cyclic R1</string>
+    <string name="IDSCB_FN_TELEG1_2">Cyclic R2</string>
+    <string name="IDSCB_FN_TELEG1_3">Cyclic R3</string>
+    <string name="IDSCB_FN_TELEG1_4">Cyclic R4</string>
+    <string name="IDSCB_FN_TELEG1_5">Sync weekday</string>
+    <string name="IDSCB_FN_TELEG1_6">Disable learn function</string>
+    <string name="IDSCB_FN_TELEG1_7">Enable learn function</string>
+    <string name="IDSCB_FN_TELEG1_8">Activate WS for all R</string>
+    <string name="IDSCB_FN_TELEG1_9">Activate WS for R1</string>
+    <string name="IDSCB_FN_TELEG1_10">Activate WS for R2</string>
+    <string name="IDSCB_FN_TELEG1_11">Activate WS for R3</string>
+    <string name="IDSCB_FN_TELEG1_12">Activate WS for R4</string>
+    <string name="IDSCB_FN_TELEG1_13">Stop WS for all R</string>
+    <string name="IDSCB_FN_TELEG1_14">Stop WS for R1</string>
+    <string name="IDSCB_FN_TELEG1_15">Stop WS for R2</string>
+    <string name="IDSCB_FN_TELEG1_16">Stop WS for R3</string>
+    <string name="IDSCB_FN_TELEG1_17">Stop WS for R4</string>
+    <string name="IDSCB_FN_TELEG1_18">Inter. learn function</string>
+
+
+
+
+
+
+
+
+
     <string-array name="dan_sync_tg">
         <item>Mon</item>
         <item>Tue</item>
@@ -91,7 +150,7 @@
         <item>Fri</item>
         <item>Sat</item>
         <item>Sun</item>
-        <item>Time only</item>
+        <item>----</item>
     </string-array>
 
     <string name="work_scheds">Work Schedules</string>
@@ -159,8 +218,8 @@
 
     <string-array name="act">
         <item>----</item>
-        <item>a</item>
-        <item>b</item>
+        <item>"a"</item>
+        <item>"b"</item>
         <item>Enable work schedule</item>
         <item>Disable work schedule</item>
         <item>Switch to work sched.</item>
@@ -169,30 +228,30 @@
 
     <string-array name="poffS">
         <item>None</item>
-        <item>a</item>
-        <item>b</item>
-        <item>a with delayed sched.</item>
-        <item>b with delayed sched.</item>
+        <item>"a"</item>
+        <item>"b"</item>
+        <item>"a" with delayed sched.</item>
+        <item>"b" with delayed sched.</item>
         <item>As before power loss</item>
         <item>Switch to work sched.</item>
         <item>Enable work sched.</item>
         <item>Disable work sched.</item>
-        <item>Cyclic switching</item>
+        <item>Loop switching</item>
     </string-array>
 
     <string-array name="poffL">
         <item>None</item>
-        <item>a</item>
-        <item>b</item>
-        <item>a with delayed sched.</item>
-        <item>b with delayed sched.</item>
+        <item>"a"</item>
+        <item>"b"</item>
+        <item>"a" with delayed sched.</item>
+        <item>"b" with delayed sched.</item>
         <item>As before power loss</item>
     </string-array>
 
     <string-array name="poffAct">
         <item>None</item>
-        <item>a</item>
-        <item>b</item>
+        <item>"a"</item>
+        <item>"b"</item>
     </string-array>
 
 
@@ -223,7 +282,7 @@
 
 
     <string name="logic_function">Logic function</string>
-    <string name="not">NOT</string>
+    <string name="not">NOT </string>
     <string name="none">none</string>
 
     <string name="and">and</string>
@@ -273,4 +332,7 @@
     <string name="no_file_picked">No file picked</string>
     <string name="not_mtk_file">Not MTK file!</string>
     <string name="pick_last_read_file">Pick last read file</string>
+    <string name="css4">/*  html5doctor.com Reset Stylesheet v1.6.1 Last Updated: 2010-09-17 Author: Richard Clark - http://richclarkdesign.com  Twitter: @rich_clark */  html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, figcaption, figure,  footer, header, hgroup, menu, nav, section, summary, time, mark, audio, video {     margin:0;     padding:0;     border:0;     outline:0;     font-size:100%;     vertical-align:baseline;     background:transparent; }  body {     line-height:1; }  article,aside,details,figcaption,figure, footer,header,hgroup,menu,nav,section {  \tdisplay:block; }  nav ul {     list-style:none; }  blockquote, q {     quotes:none; }  blockquote:before, blockquote:after, q:before, q:after {     content:\'\';     content:none; }  a {     margin:0;     padding:0;     font-size:100%;     vertical-align:baseline;     background:transparent; }  /* change colours to suit your needs */ ins {     background-color:#ff9;     color:#000;     text-decoration:none; }  /* change colours to suit your needs */ mark {     background-color:#ff9;     color:#000;      font-style:italic;     font-weight:bold; }  del {     text-decoration: line-through; }  abbr[title], dfn[title] {     border-bottom:1px dotted;     cursor:help; }  table {     border-collapse:collapse;     border-spacing:0; }  /* change border colour to suit your needs */ hr {     display:block;     height:1px;     border:0;        border-top:1px solid #cccccc;     margin:1em 0;     padding:0; }  input, select {     vertical-align:middle; }         /* Custom ------------------------- */  th  {border: 1px solid #888; background:#D2D2D2; } /*header*/ .impAkt  {background: #F7FF4A; } /*zel*/ .impNeAkt{background: #E87671 ;} /*crv*/  .impAkt  {background: #B8FF40; } /*zel*/ .impNeAkt{background: #FF897F ;} /*crv*/  .impNeutr{background: WhiteSmoke ;}   .impAkt  {background: #c4efb4 ; } /*zel*/ .impNeAkt{background: #f2c2c2 ;} /*crv*/ .impNeutr{background: #f5f5f5 ;}   .impAkt  ,.impNeAkt,.impNeutr {text-align: center; border: 1px solid #aaa;min-width: 12px !important;max-width: 12px !important;}/* width:15px;*/  .impTable {border-spacing: 1px;width:100%}  table.impTable th,table.impTable td {padding: 1px 1px; white-space:nowrap; width:237px; vertical-align:top;}   /* Grid ------------------------- */ .container {   position: relative;   width: 100%;   /* max-width: 960px; */   margin: 0 auto;   padding: 0 20px;   /*! box-sizing: border-box; */ }  a {   color: #1EAEDB; } a:hover {   color: #0FA0CE; }            /* Base Styles ------------------------- */ /* NOTE html is set to 62.5% so that all the REM measurements throughout Skeleton are based on 10px sizing. So basically 1.5rem = 15px :) */ html { /*   font-size: 62.5%;    font-size: 39.0625%; */   font-size: 27.0%;    } body {   font-size: 2.7em; /* currently ems cause chrome bug misinterpreting rems on body element */   line-height: 1.6;   font-weight: 400;   font-family: \"Raleway\", \"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;   color: #222; }        .container {     width: 90%; }     /* Typography ------------------------- */ h1, h2, h3, h4, h5, h6 {   margin-top: 0;   margin-bottom: 2rem;   /*! font-weight: 300; */       border-bottom: 1px solid;   margin-top: 35px;   } h1 { font-size: 4.0rem; line-height: 1.2;  letter-spacing: -.1rem;} h2 { font-size: 3.6rem; line-height: 1.25; letter-spacing: -.1rem; color: #5ea226;} h3 { font-size: 3.0rem; line-height: 1.3;  letter-spacing: -.1rem; } h4 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; } h5 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; } h6 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }  /* Larger than phablet */ @media (min-width: 550px) {   h1 { font-size: 5.0rem; }   h2 { font-size: 4.2rem; }   h3 { font-size: 3.6rem; }   h4 { font-size: 3.0rem; }   h5 { font-size: 2.4rem; }   h6 { font-size: 1.5rem; } }         /* Tables ------------------------- */  table th, table td {     border: 1px solid #aaa;     border-collapse: collapse;     padding: 2px 5px; }  table {     font-family: \"Helvetica Neue\",Helvetica,sans-serif;     font-size: 12px; \twidth: 50%; \t  page-break-inside: avoid; }   table tr td, table tr th {         page-break-inside: avoid;     } table thead {   background: SteelBlue;   color: white; }   table tbody tr:nth-child(even) {   background: WhiteSmoke; }  table th { /*   background: SteelBlue;   color: white;  */     white-space: nowrap;   text-align: left;      border-right: 1px solid #aaa;       }  table {margin:20pt;} span{font-size:12pt;} \t</string>
+    <string name="css5"> html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary, time, mark, audio, video { margin : 0; padding : 0; border : 0; outline : 0; font-size : 100%; vertical-align : baseline; background : transparent; } body { line-height : 1; } article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display : block; } nav ul { list-style : none; } blockquote, q { quotes : none; } a { margin : 0; padding : 0; font-size : 100%; vertical-align : baseline; background : transparent; } ins { background-color : #ff9; color : #000; text-decoration : none; } mark { background-color : #ff9; color : #000; font-style : italic; font-weight : bold; } del { text-decoration : line-through; } abbr[title], dfn[title] { border-bottom : 1px dotted; cursor : help; } table { border-collapse : collapse; border-spacing : 0; } hr { display : block; height : 1px; border : 0; border-top : 1px solid #cccccc; margin : 1em 0; padding : 0; } input, select { vertical-align : middle; } th { border : #888 solid 1px; background : #D2D2D2; } .impAkt { background : #F7FF4A; } .impNeAkt { background : #E87671; } .impAkt { background : #B8FF40; } .impNeAkt { background : #FF897F; } .impNeutr { background : whitesmoke; } .impAkt { background : #c4efb4; } .impNeAkt { background : #f2c2c2; } .impNeutr { background : #f5f5f5; } .impAkt, .impNeAkt, .impNeutr { text-align : center; border : #aaa solid 1px; min-width : 12px !important ; max-width : 12px !important ; } .impTable { border-spacing : 1px; width : 100%; } table.impTable th, table.impTable td { padding : 1px 1px; white-space : nowrap; width : 237px; vertical-align : top; } .container { position : relative; width : 100%; margin : 0 auto; padding : 0 20px; } a { color : #1EAEDB; } a:hover { color : #0FA0CE; } html { font-size : 27.0%; } body { font-size : 2.7em; line-height : 1.6; font-weight : 400; font-family : \"Raleway\", \"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, sans-serif; color : #222; } .container { width : 90%; } h1, h2, h3, h4, h5, h6 { margin-top : 0; margin-bottom : 2rem; border-bottom : 1px solid; margin-top : 35px; } h1 { font-size : 4.0rem; line-height : 1.2; letter-spacing : -0.1rem; } h2 { font-size : 3.6rem; line-height : 1.25; letter-spacing : -0.1rem; color : #5ea226; } h3 { font-size : 3.0rem; line-height : 1.3; letter-spacing : -0.1rem; } h4 { font-size : 2.4rem; line-height : 1.35; letter-spacing : -0.08rem; } h5 { font-size : 1.8rem; line-height : 1.5; letter-spacing : -0.05rem; } h6 { font-size : 1.5rem; line-height : 1.6; letter-spacing : 0; }   table th, table td { border : #aaa solid 1px; border-collapse : collapse; padding : 2px 5px; } table { font-family : \"Helvetica Neue\", Helvetica, sans-serif; font-size : 12px; width : 50%; page-break-inside : avoid; } table tr td, table tr th { page-break-inside : avoid; } table thead { background : steelblue; color : white; } table tbody tr:nth-child(even) { background : whitesmoke; } table th { white-space : nowrap; text-align : left; border-right : 1px solid #aaa; } table { margin : 20pt; } span { font-size : 12pt; } </string>
+    <string name="ccs6min">body{background: #E87671 ;}  </string>
 </resources>

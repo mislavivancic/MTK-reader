@@ -69,6 +69,7 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         webView.apply {
             settings.javaScriptEnabled = true
             webViewClient = WebViewClient()
+            /*
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
             settings.setSupportZoom(true)
@@ -76,11 +77,13 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
             settings.displayZoomControls = false
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
-            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL
+            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL*/
+            //settings.
         }
     }
 
     override fun displayData(dataString: String) {
+
         webView.loadData(dataString, "text/html", "UTF-8")
 
     }

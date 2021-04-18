@@ -8,7 +8,250 @@ public class Css {
             "<title>Lista parametara</title>" +
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
        //    + "</head>";
+       public static String htmlstart="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n" +
+               "<html>\n" +
+               "\t<head>\n" +
+               "     <meta content=\"text/html; charset=windows-1250\" http-equiv=\"Content-Type\">\n" +
+               "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=7\" > ";
 
+    public static String cssx="/* \n" +
+               "html5doctor.com Reset Stylesheet\n" +
+               "v1.6.1\n" +
+               "Last Updated: 2010-09-17\n" +
+               "Author: Richard Clark - http://richclarkdesign.com \n" +
+               "Twitter: @rich_clark\n" +
+               "*/\n" +
+               "\n" +
+               "html, body, div, span, object, iframe,\n" +
+               "h1, h2, h3, h4, h5, h6, p, blockquote, pre,\n" +
+               "abbr, address, cite, code,\n" +
+               "del, dfn, em, img, ins, kbd, q, samp,\n" +
+               "small, strong, sub, sup, var,\n" +
+               "b, i,\n" +
+               "dl, dt, dd, ol, ul, li,\n" +
+               "fieldset, form, label, legend,\n" +
+               "table, caption, tbody, tfoot, thead, tr, th, td,\n" +
+               "article, aside, canvas, details, figcaption, figure, \n" +
+               "footer, header, hgroup, menu, nav, section, summary,\n" +
+               "time, mark, audio, video {\n" +
+               "    margin:0;\n" +
+               "    padding:0;\n" +
+               "    border:0;\n" +
+               "    outline:0;\n" +
+               "    font-size:100%;\n" +
+               "    vertical-align:baseline;\n" +
+               "    background:transparent;\n" +
+               "}\n" +
+               "\n" +
+               "body {\n" +
+               "    line-height:1;\n" +
+               "}\n" +
+               "\n" +
+               "article,aside,details,figcaption,figure,\n" +
+               "footer,header,hgroup,menu,nav,section { \n" +
+               "\tdisplay:block;\n" +
+               "}\n" +
+               "\n" +
+               "nav ul {\n" +
+               "    list-style:none;\n" +
+               "}\n" +
+               "\n" +
+               "blockquote, q {\n" +
+               "    quotes:none;\n" +
+               "}\n" +
+               "\n" +
+               "blockquote:before, blockquote:after,\n" +
+               "q:before, q:after {\n" +
+               "    content:'';\n" +
+               "    content:none;\n" +
+               "}\n" +
+               "\n" +
+               "a {\n" +
+               "    margin:0;\n" +
+               "    padding:0;\n" +
+               "    font-size:100%;\n" +
+               "    vertical-align:baseline;\n" +
+               "    background:transparent;\n" +
+               "}\n" +
+               "\n" +
+               "/* change colours to suit your needs */\n" +
+               "ins {\n" +
+               "    background-color:#ff9;\n" +
+               "    color:#000;\n" +
+               "    text-decoration:none;\n" +
+               "}\n" +
+               "\n" +
+               "/* change colours to suit your needs */\n" +
+               "mark {\n" +
+               "    background-color:#ff9;\n" +
+               "    color:#000; \n" +
+               "    font-style:italic;\n" +
+               "    font-weight:bold;\n" +
+               "}\n" +
+               "\n" +
+               "del {\n" +
+               "    text-decoration: line-through;\n" +
+               "}\n" +
+               "\n" +
+               "abbr[title], dfn[title] {\n" +
+               "    border-bottom:1px dotted;\n" +
+               "    cursor:help;\n" +
+               "}\n" +
+               "\n" +
+               "table {\n" +
+               "    border-collapse:collapse;\n" +
+               "    border-spacing:0;\n" +
+               "}\n" +
+               "\n" +
+               "/* change border colour to suit your needs */\n" +
+               "hr {\n" +
+               "    display:block;\n" +
+               "    height:1px;\n" +
+               "    border:0;   \n" +
+               "    border-top:1px solid #cccccc;\n" +
+               "    margin:1em 0;\n" +
+               "    padding:0;\n" +
+               "}\n" +
+               "\n" +
+               "input, select {\n" +
+               "    vertical-align:middle;\n" +
+               "}\n" +
+               "\n" +
+               "\n" +
+               "\n" +
+               "  \n" +
+               "  /* Custom\n" +
+               "------------------------- */\n" +
+               "\n" +
+               "th  {border: 1px solid #888; background:#D2D2D2; } /*header*/\n" +
+               ".impAkt  {background: #F7FF4A; } /*zel*/\n" +
+               ".impNeAkt{background: #E87671 ;} /*crv*/\n" +
+               "\n" +
+               ".impAkt  {background: #B8FF40; } /*zel*/\n" +
+               ".impNeAkt{background: #FF897F ;} /*crv*/\n" +
+               "\n" +
+               ".impNeutr{background: WhiteSmoke ;}\n" +
+               "\n" +
+               "\n" +
+               ".impAkt  {background: #c4efb4 ; } /*zel*/\n" +
+               ".impNeAkt{background: #f2c2c2 ;} /*crv*/\n" +
+               ".impNeutr{background: #f5f5f5 ;}\n" +
+               "\n" +
+               "\n" +
+               ".impAkt  ,.impNeAkt,.impNeutr {text-align: center; border: 1px solid #aaa;min-width: 12px !important;max-width: 12px !important;}/* width:15px;*/\n" +
+               "\n" +
+               ".impTable {border-spacing: 1px;width:100%}\n" +
+               "\n" +
+               "table.impTable th,table.impTable td {padding: 1px 1px; white-space:nowrap; width:237px; vertical-align:top;}\n" +
+               "\n" +
+               "\n" +
+               "/* Grid\n" +
+               "------------------------- */\n" +
+               ".container {\n" +
+               "  position: relative;\n" +
+               "  width: 100%;\n" +
+               "  /* max-width: 960px; */\n" +
+               "  margin: 0 auto;\n" +
+               "  padding: 0 20px;\n" +
+               "  /*! box-sizing: border-box; */ }\n" +
+               "\n" +
+               "a {\n" +
+               "  color: #1EAEDB; }\n" +
+               "a:hover {\n" +
+               "  color: #0FA0CE; }\n" +
+               "  \n" +
+               "  \n" +
+               "  \n" +
+               "  /* Base Styles\n" +
+               "------------------------- */\n" +
+               "/* NOTE\n" +
+               "html is set to 62.5% so that all the REM measurements throughout Skeleton\n" +
+               "are based on 10px sizing. So basically 1.5rem = 15px :) */\n" +
+               "html {\n" +
+               "/*   font-size: 62.5%; \n" +
+               "  font-size: 39.0625%; */\n" +
+               "  font-size: 27.0%; \n" +
+               "  }\n" +
+               "body {\n" +
+               "  font-size: 2.7em; /* currently ems cause chrome bug misinterpreting rems on body element */\n" +
+               "  line-height: 1.6;\n" +
+               "  font-weight: 400;\n" +
+               "  font-family: \"Raleway\", \"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n" +
+               "  color: #222; }\n" +
+               "  \n" +
+               "    .container {\n" +
+               "    width: 90%; }\n" +
+               "\n" +
+               "  \n" +
+               "/* Typography\n" +
+               "------------------------- */\n" +
+               "h1, h2, h3, h4, h5, h6 {\n" +
+               "  margin-top: 0;\n" +
+               "  margin-bottom: 2rem;\n" +
+               "  /*! font-weight: 300; */ \n" +
+               "  \n" +
+               "  border-bottom: 1px solid;\n" +
+               "  margin-top: 35px;\n" +
+               "  }\n" +
+               "h1 { font-size: 4.0rem; line-height: 1.2;  letter-spacing: -.1rem;}\n" +
+               "h2 { font-size: 3.6rem; line-height: 1.25; letter-spacing: -.1rem; color: #5ea226;}\n" +
+               "h3 { font-size: 3.0rem; line-height: 1.3;  letter-spacing: -.1rem; }\n" +
+               "h4 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; }\n" +
+               "h5 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }\n" +
+               "h6 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }\n" +
+               "\n" +
+               "/* Larger than phablet */\n" +
+               "@media (min-width: 550px) {\n" +
+               "  h1 { font-size: 5.0rem; }\n" +
+               "  h2 { font-size: 4.2rem; }\n" +
+               "  h3 { font-size: 3.6rem; }\n" +
+               "  h4 { font-size: 3.0rem; }\n" +
+               "  h5 { font-size: 2.4rem; }\n" +
+               "  h6 { font-size: 1.5rem; }\n" +
+               "}\n" +
+               "  \n" +
+               "  \n" +
+               "  /* Tables\n" +
+               "------------------------- */\n" +
+               "\n" +
+               "table th, table td {\n" +
+               "    border: 1px solid #aaa;\n" +
+               "    border-collapse: collapse;\n" +
+               "    padding: 2px 5px;\n" +
+               "}\n" +
+               "\n" +
+               "table {\n" +
+               "    font-family: \"Helvetica Neue\",Helvetica,sans-serif;\n" +
+               "    font-size: 12px;\n" +
+               "\twidth: 50%;\n" +
+               "\t  page-break-inside: avoid;\n" +
+               "}\n" +
+               "\n" +
+               " table tr td, table tr th {\n" +
+               "        page-break-inside: avoid;\n" +
+               "    }\n" +
+               "table thead {\n" +
+               "  background: SteelBlue;\n" +
+               "  color: white;\n" +
+               "}\n" +
+               "\n" +
+               "\n" +
+               "table tbody tr:nth-child(even) {\n" +
+               "  background: WhiteSmoke;\n" +
+               "}\n" +
+               "\n" +
+               "table th {\n" +
+               "/*   background: SteelBlue;\n" +
+               "  color: white;\n" +
+               " */  \n" +
+               "  white-space: nowrap;\n" +
+               "  text-align: left;\n" +
+               "     border-right: 1px solid #aaa;\n" +
+               "  \n" +
+               "  \n" +
+               "}\n" +
+               "\n" +
+               "table {margin:20pt;} span{font-size:12pt;}\n";
     public static String cESS = "<!DOCTYPE html>\n" +
             "<html>\n" +
             "   <head>\n" +

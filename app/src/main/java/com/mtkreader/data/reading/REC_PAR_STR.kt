@@ -17,18 +17,16 @@ class REC_PAR_STR {
     var IDRePara = ByteArray(PARID_SIZE)
     var IDFile = ByteArray(PARIDFILE_SIZE)
 
+    val CreateSiteS:String get()=TrimByteArrToString(CreateSite)
+    val IDCreateS:String get()=TrimByteArrToString(IDCreate)
+    val ReParaSiteS:String get()=TrimByteArrToString(ReParaSite)
+    val IDReParaS:String get()=TrimByteArrToString(IDRePara)
+    val IDFileS:String get()=TrimByteArrToString(IDFile)
+
 
     override fun toString(): String {
 
-        val str1 = String.format(
-            "%02X-%02X-%02X %02X:%02X",
-            DataTime[3],
-            DataTime[4],
-            DataTime[5],
-            DataTime[2],
-            DataTime[1]
 
-        )
 
         val str2 = String.format(
             "IDCreate %s CreateSite %s IDRePara %s ReParaSite %s IDFile %s .mtk",
@@ -39,14 +37,22 @@ class REC_PAR_STR {
             TrimByteArrToString(IDFile)
 
         )
-        return str1 + str2
+        return DataTimeS + str2
     }
 
-    fun get(ba: ByteArray): Unit {
+    val DataTimeS: String get()=
+        String.format(
+            "%02X-%02X-%02X %02X:%02X",
+            DataTime[3],
+            DataTime[4],
+            DataTime[5],
+            DataTime[2],
+            DataTime[1]
 
-    }
+        )
 
-    fun TrimByteArrToString(s: ByteArray): String {
+
+     public fun TrimByteArrToString(s: ByteArray): String {
         var trim = s.filter { it != 0.toByte() }.toByteArray()
         return trim.toString(Charsets.US_ASCII)
     }

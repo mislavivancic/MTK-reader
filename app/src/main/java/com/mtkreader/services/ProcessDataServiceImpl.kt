@@ -34,10 +34,13 @@ import com.mtkreader.utils.HtmlTags.th
 import com.mtkreader.utils.HtmlTags.thC
 import com.mtkreader.utils.HtmlTags.thcol2
 import com.mtkreader.utils.HtmlTags.thcol2bgth
+import com.mtkreader.utils.HtmlTags.thcol6
 import com.mtkreader.utils.HtmlTags.thcol4
 import com.mtkreader.utils.HtmlTags.thcol8
 import com.mtkreader.utils.HtmlTags.tr
 import com.mtkreader.utils.HtmlTags.trC
+import com.mtkreader.utils.HtmlTags.thrw2
+import com.mtkreader.utils.HtmlTags.thrw3
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import kotlin.experimental.or
@@ -386,8 +389,11 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         oprij: Oprij
     ): String {
         val htmlBuilder = StringBuilder()
-        htmlBuilder.append(Css.css)
-        //htmlBuilder.append("<style>"+ getString(R.string.css3)+"</style>")
+        htmlBuilder.append(Css.htmlstart)
+        var title="Naslov"
+        htmlBuilder.append("<title>"+ title+"</title>")
+        htmlBuilder.append("<style>"+ getString(R.string.ccs6min)+"</style>")
+        //htmlBuilder.append("<style>"+ Css.cssx+"</style>")
         htmlBuilder.append("</head>")
         htmlBuilder.append(body)
         htmlBuilder.append("<div class=\"container\">")
@@ -441,30 +447,8 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         generateArrivalAndLossOfSupply(builder, ponPoffstrs)
         generateEventLog(builder)
 
-        builder.append(h2 + getString(R.string.logic_function) + h2C)
-        builder.append(table)
-        for (rel in 0..5) {
-            val cfg = mRelInterLock[rel].PcCnfg[0]
-            val res = unPackLadderString(rel, cfg)
-            if (rel < 3) {
-                builder.append(
-                    tr + th + String.format(
-                        getString(R.string.relay_num_char),
-                        rel + 1,
-                        getString(R.string.a)
-                    ) + thC + td + res + tdC + trC
-                )
-            } else {
-                builder.append(
-                    tr + th + String.format(
-                        getString(R.string.relay_num_char),
-                        rel % 3 + 1,
-                        getString(R.string.b)
-                    ) + thC + td + res + tdC + trC
-                )
-            }
-        }
-        builder.append(tableC)
+        generateInterlock(builder)
+
     }
 
     private fun unPackLadderString(rel: Int, pccNfg: Int): String {
@@ -472,39 +456,42 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         val varRel = mutableListOf(0.toByte(), 0.toByte(), 0.toByte(), 0.toByte())
         val rr = mutableListOf("", "", "", "")
 
+        val R_NC=2.toByte()
+        val R_NO=1.toByte()
+
 
         var tmp = (pccNfg shr 13) and 0x07
         if (tmp != 0) {
             varRel[0] = (tmp and 0x3).toByte()
-            state[0] = if ((tmp and 0x04) != 0) 0 else 0
+            state[0] = if ((tmp and 0x04) != 0) R_NC else R_NO
             val str = if ((tmp and 0x04) != 0) getString(R.string.not) else ""
             val num = tmp and 0x3
-            rr[0].format("%sR%d", str, num)
+            rr[0]=String.format("%s R%d", str, num)
         }
 
         tmp = (pccNfg shr 10) and 0x07
         if (tmp != 0) {
             varRel[2] = (tmp and 0x3).toByte()
-            state[2] = if ((tmp and 0x04) != 0) 0 else 0
+            state[2] = if ((tmp and 0x04) != 0) R_NC else R_NO
             val str = if ((tmp and 0x04) != 0) getString(R.string.not) else ""
             val num = tmp and 0x3
-            rr[2].format("%sR%d", str, num)
+            rr[2]=String.format("%s R%d", str, num)
         }
         tmp = (pccNfg shr 7) and 0x07
         if (tmp != 0) {
             varRel[1] = (tmp and 0x3).toByte()
-            state[1] = if ((tmp and 0x04) != 0) 0 else 0
+            state[1] = if ((tmp and 0x04) != 0) R_NC else R_NO
             val str = if ((tmp and 0x04) != 0) getString(R.string.not) else ""
             val num = tmp and 0x3
-            rr[1].format("%sR%d", str, num)
+            rr[1]=String.format("%s R%d", str, num)
         }
-        tmp = (pccNfg shr 13) and 0x07
+        tmp = (pccNfg shr 4) and 0x07
         if (tmp != 0) {
             varRel[3] = (tmp and 0x3).toByte()
-            state[3] = if ((tmp and 0x04) != 0) 0 else 0
+            state[3] = if ((tmp and 0x04) != 0) R_NC else R_NO
             val str = if ((tmp and 0x04) != 0) getString(R.string.not) else ""
             val num = tmp and 0x3
-            rr[3].format("%sR%d", str, num)
+            rr[3]=String.format("%s R%d", str, num)
         }
 
         val idx = pccNfg and 0x0F
@@ -523,10 +510,8 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
         if (isFound) {
             for (i in 0..3) {
-                ladderStates[0].m_RelState[i] =
-                    (DataUtils.getPLCfg(indexFound).RelState[i].toInt() and state[i].toInt()).toByte()
-                ladderStates[0].m_RelNr[i] =
-                    (DataUtils.getPLCfg(indexFound).RelNr[i].toInt() and varRel[i].toInt()).toByte()
+                ladderStates[0].m_RelState[i] = (DataUtils.getPLCfg(indexFound).RelState[i].toInt() and state[i].toInt()).toByte()
+                ladderStates[0].m_RelNr[i] = (DataUtils.getPLCfg(indexFound).RelNr[i].toInt() and varRel[i].toInt()).toByte()
                 ladderStates[0].m_isSeries[i] = DataUtils.getPLCfg(indexFound).isSeries[i]
                 ladderStates[0].m_notsernotpar[i] = DataUtils.getPLCfg(indexFound).notsernotpar[i]
                 ladderStates[0].m_conectshort[i] = DataUtils.getPLCfg(indexFound).conectshort[i]
@@ -537,76 +522,52 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         var relst = 0
         var relser = 0
         for (i in 0..3) {
-            if (ladderStates[0].m_RelNr[i].toInt() != 0)
-                relst = relst or (1 shl i)
-            if (ladderStates[0].m_isSeries[i])
-                relser = relser or (1 shl i)
+            if (ladderStates[0].m_RelNr[i].toInt() != 0) relst = relst or (1 shl i)
+            if (ladderStates[0].m_isSeries[i]) relser = relser or (1 shl i)
         }
 
-        if (relst == 0)
+        if (relst == 0b0000)
             res = getString(R.string.none).toUpperCase() + rr[0] + rr[1] + rr[2] + rr[3]
         else if (relst == 0b0111) {
             if (ladderStates[0].m_conectshort[3])
-                res = String.format(
-                    "(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} %s ",
-                    rr[0],
-                    rr[2],
-                    rr[1]
-                )
+                res = String.format("(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} %s ", rr[0], rr[2], rr[1])
             else
-                res = String.format(
-                    "(%s ${getString(R.string.or)} %s) ${getString(R.string.and)} %s ",
-                    rr[0],
-                    rr[1],
-                    rr[2]
-                )
+                res = String.format("(%s ${getString(R.string.or)} %s) ${getString(R.string.and)} %s ", rr[0], rr[1], rr[2])
         } else if (relst == 0b1101) {
             if (ladderStates[0].m_conectshort[1])
-                res = String.format(
-                    "(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} %s ",
-                    rr[0],
-                    rr[2],
-                    rr[3]
-                )
+                res = String.format("(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} %s ", rr[0], rr[2], rr[3])
             else
-                res = String.format(
-                    "%s ${getString(R.string.and)} (%s ${getString(R.string.or)} %s) ",
-                    rr[0],
-                    rr[2],
-                    rr[3]
-                )
-        } else if (relst == 0b0011)
-            res = String.format("%s ${getString(R.string.or)} %s", rr[0], rr[1])
-        else if (relst == 0b1100)
-            res = String.format("%s ${getString(R.string.or)} %s", rr[2], rr[3])
-        else if (relst == 0b0001)
-            res = String.format("%s", rr[0])
-        else if (relst == 0b0100)
-            res = String.format("%s", rr[2])
-        else if (relst == 0b0101)
-            res = String.format("%s ${getString(R.string.and)} %s", rr[0], rr[2])
+                res = String.format("%s ${getString(R.string.and)} (%s ${getString(R.string.or)} %s) ", rr[0], rr[2], rr[3])
+        }
+        else if (relst == 0b0011) res = String.format("%s ${getString(R.string.or)} %s", rr[0], rr[1])
+        else if (relst == 0b1100) res = String.format("%s ${getString(R.string.or)} %s", rr[2], rr[3])
+        else if (relst == 0b0001) res = String.format("%s", rr[0])
+        else if (relst == 0b0100) res = String.format("%s", rr[2])
+        else if (relst == 0b0101) res = String.format("%s ${getString(R.string.and)} %s", rr[0], rr[2])
         else if (relst == 0b1111)
             if (ladderStates[0].m_isSeries[0])
-                res = String.format(
-                    "(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} (%s ${getString(R.string.and)}  %s)",
-                    rr[0],
-                    rr[1],
-                    rr[2],
-                    rr[3]
-                )
+                res = String.format("(%s ${getString(R.string.and)} %s) ${getString(R.string.or)} (%s ${getString(R.string.and)}  %s)", rr[0], rr[1], rr[2], rr[3])
             else
-                res = String.format(
-                    "(%s ${getString(R.string.or)} %s) ${getString(R.string.and)} (%s ${getString(R.string.or)}  %s)",
-                    rr[0],
-                    rr[1],
-                    rr[2],
-                    rr[3]
-                )
+                res = String.format("(%s ${getString(R.string.or)} %s) ${getString(R.string.and)} (%s ${getString(R.string.or)}  %s)", rr[0], rr[1], rr[2], rr[3])
 
         return res
     }
 
+    private fun generateInterlock(builder: java.lang.StringBuilder) {
 
+        builder.append(h2 + getString(R.string.logic_function) + h2C)
+        builder.append(table)
+        for (rel in 0..5) {
+            val cfg = mRelInterLock[rel].PcCnfg[0]
+            val res = unPackLadderString(rel, cfg)
+            if (rel < 3) {
+                builder.append(tr + th + String.format("R%d %s", rel + 1, getString(R.string.a)) + thC + td + res + tdC + trC)
+            } else {
+                builder.append(tr + th + String.format("R%d %s", rel % 3 + 1, getString(R.string.b)) + thC + td + res + tdC + trC)
+            }
+        }
+        builder.append(tableC)
+    }
 
     private fun generateEventLog(builder: java.lang.StringBuilder) {
         val mLogEnFlags = arrayOf(mOp50Prij.CLOGENFLGS[0].toInt(), mOp50Prij.CLOGENFLGS[1].toInt())
@@ -676,13 +637,13 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         ///---------------------------
         builder.append(tr + thcol2bgth + getString(R.string.telegram_log) + thC + trC)
 
-        yesNo = if ((mLogEnFlags[1] and Const.Data.OPT_LOG_TLG) != 0) strYes else strNo
+        yesNo = if ((mLogEnFlags[0] and Const.Data.OPT_LOG_TLG) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.log_all_telegrams) + tdC + td + yesNo + tdC + trC)
 
-        yesNo = if ((mLogEnFlags[1] and Const.Data.OPT_LOG_MYTLG) != 0) strYes else strNo
+        yesNo = if ((mLogEnFlags[0] and Const.Data.OPT_LOG_MYTLG) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.log_all_telegrams_for_this_rec) + tdC + td + yesNo + tdC + trC)
 
-        yesNo = if ((mLogEnFlags[1] and Const.Data.OPT_LOG_REPTLG) != 0) strYes else strNo
+        yesNo = if ((mLogEnFlags[0] and Const.Data.OPT_LOG_REPTLG) != 0) strYes else strNo
         builder.append(tr + td + getString(R.string.log_only_telegrams) + tdC + td + yesNo + tdC + trC)
 
         builder.append(tableC)
@@ -1139,27 +1100,17 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     ) {
         builder.append(h2 + getString(R.string.sync_telegrams) + h2C)
         builder.append(table)
-        getRasterHeadStringH(builder)
-        getRasterHeadStringTop(builder)
-        getRasterHeadStringBottom(builder)
-        for (i in 0..7)
-            getRasterStringSync(builder, mTelegSync[i].Cmd, i)
 
-        builder.append(tableC)
-    }
+        builder.append(tr)
+        SetRasterHead(builder,getString(R.string.IDSI_COL_NAME), getString(R.string.telegram))
+        builder.append(trC)
 
-    private fun generateSyncTelegramDoW(
-        builder: java.lang.StringBuilder
-    ) {
-        builder.append(h2 + getString(R.string.sync_telegrams_dow) + h2C)
-        builder.append(table)
-        getRasterHeadStringH(builder)
-        getRasterHeadStringTop(builder)
-        getRasterHeadStringBottom(builder)
-
-        for (i in 0..7)
-            getRasterString(builder, mTlgFnD[i].Cmd, i, 'a')
-
+        for (i in 0..7) {
+            builder.append(tr)
+                builder.append(th+"DBQ:GetTlgNameByContent"+ thC)
+                builder.append(th + getSyncTime(mOp50Prij.SinhTime[i], m_HWVerPri) + thC)
+                getRasterString(builder, mTelegSync[i].Cmd)
+        }
         builder.append(tableC)
     }
 
@@ -1168,102 +1119,77 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     ) {
         builder.append(h2 + getString(R.string.additional_telegrams) + h2C)
         builder.append(table)
-        getRasterHeadStringH(builder)
-        getRasterHeadStringTop(builder)
-        getRasterHeadStringBottom(builder)
 
-        getRasterString(builder, mOp50Prij.tlg[0].tel1.Cmd, 1, 'a')
-        getRasterString(builder, mOp50Prij.tlg[1].tel1.Cmd, 1, 'b')
+        builder.append(tr)
+        SetRasterHead(builder,getString(R.string.IDSI_COL_NAME), getString(R.string.telegram))
+        builder.append(trC)
 
-        getRasterString(builder, mOp50Prij.tlg[2].tel1.Cmd, 1, 'a')
-        getRasterString(builder, mOp50Prij.tlg[3].tel1.Cmd, 1, 'b')
+        var TGFN= arrayOf( R.string.IDSCB_FN_TELEG1_0 ,R.string.IDSCB_FN_TELEG1_6 ,R.string.IDSCB_FN_TELEG1_7 ,R.string.IDSCB_FN_TELEG1_18 ,R.string.IDSCB_FN_TELEG1_8 ,R.string.IDSCB_FN_TELEG1_9 ,R.string.IDSCB_FN_TELEG1_10 ,R.string.IDSCB_FN_TELEG1_11 ,R.string.IDSCB_FN_TELEG1_12 ,R.string.IDSCB_FN_TELEG1_13 ,R.string.IDSCB_FN_TELEG1_14 ,R.string.IDSCB_FN_TELEG1_15 ,R.string.IDSCB_FN_TELEG1_16 ,R.string.IDSCB_FN_TELEG1_17)
 
-        getRasterString(builder, mOp50Prij.tlg[4].tel1.Cmd, 1, 'a')
-        getRasterString(builder, mOp50Prij.tlg[5].tel1.Cmd, 1, 'b')
+        if(fVis_Cz96P) {
+            for(i in 0..7)
+            {
+                builder.append(tr)
+                builder.append(th+"DBQ:GetTlgNameByContent"+ thC)
+                var f:Int=mOp50Prij.tlg[i].tel1.Cmd.Fn.toInt()
 
-        getRasterString(builder, mOp50Prij.tlg[6].tel1.Cmd, 1, 'a')
-        getRasterString(builder, mOp50Prij.tlg[7].tel1.Cmd, 1, 'b')
+                if (i in 0..6)
+                    builder.append(th+getString(TGFN[f])+thC)
 
+                if(i==7){
+                    if(f==0x40) builder.append(th +getString(R.string.IDSI_EMERGTLG)+ " '" +getString(R.string.IDSI_OFF)+"'"+thC) //AKT_SET_OFF
+                    if(f==0x80) builder.append(th +getString(R.string.IDSI_EMERGTLG)+ " '" +getString(R.string.IDSI_ON)+"'"+thC) //AKT_SET_ON
+                }
+
+                getRasterString(builder, mOp50Prij.tlg[i].tel1.Cmd)
+                builder.append(trC)
+            }
+        }
         builder.append(tableC)
     }
 
-    private fun generateClassicTelegram(
-        builder: StringBuilder
-    ) {
+    private fun generateClassicTelegram(builder: StringBuilder) {
         builder.append(h2 + getString(R.string.classic_telegram) + h2C)
         builder.append(table)
-        getRasterHeadStringH(builder)
-        getRasterHeadStringTop(builder)
-        getRasterHeadStringBottom(builder)
 
-        getRasterString(builder, mOp50Prij.TlgRel1.Uk, 1, 'a')
-        getRasterString(builder, mOp50Prij.TlgRel1.Isk, 1, 'b')
+        builder.append(tr)
+        SetRasterHead(builder,getString(R.string.IDSI_COL_NAME), getString(R.string.telegram))
+        builder.append(trC)
 
-        getRasterString(builder, mOp50Prij.TlgRel2.Uk, 1, 'a')
-        getRasterString(builder, mOp50Prij.TlgRel2.Isk, 1, 'b')
-
-        getRasterString(builder, mOp50Prij.TlgRel3.Uk, 1, 'a')
-        getRasterString(builder, mOp50Prij.TlgRel3.Isk, 1, 'b')
-
-        getRasterString(builder, mOp50Prij.TlgRel4.Uk, 1, 'a')
-        getRasterString(builder, mOp50Prij.TlgRel4.Isk, 1, 'b')
+        GetRelTlgs(builder,mOp50Prij.TlgRel1,1)
+        GetRelTlgs(builder,mOp50Prij.TlgRel2,2)
+        GetRelTlgs(builder,mOp50Prij.TlgRel3,3)
+        GetRelTlgs(builder,mOp50Prij.TlgRel4,4)
 
         builder.append(tableC)
     }
 
 
-    private fun getRasterString(builder: StringBuilder, t: TelegCMD, num: Int, ch: Char) {
-        builder.append(tr)
-        builder.append(th + getString(R.string.unknown) + thC)
-        builder.append(th + String.format("R%d %c", num, ch) + thC)
-        for (iBimp in 0..49) {
-            val nBitNumber = iBimp % 8
-            val nByteNumber = iBimp / 8
-//TODO  null??
-            val N = t.NeutImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
-            val A = t.AktiImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
-
-            if (IsCZ44raster && iBimp == 44)
-                break
-
-            if (A != 0 && N != 0)
-                builder.append(tdImpNeAkt + b + getString(R.string.plus) + bC + tdC)
-            else if (A == 0 && N != 0)
-                builder.append(tdImpAkt + b + getString(R.string.minus) + bC + tdC)
-            else
-                builder.append(tdImpNeutr + tdC)
-        }
-        builder.append(trC)
-    }
-
-    private fun getRasterStringSync(builder: StringBuilder, t: TelegCMD, x: Int) {
-        builder.append(tr)
-        builder.append(th + getString(R.string.unknown) + thC)
-        builder.append(th + getSyncTime(mOp50Prij.SinhTime.get(x), m_HWVerPri) + thC)
+    private fun getRasterString(builder: StringBuilder, t: TelegCMD) {
 
         for (iBimp in 0..49) {
             val nBitNumber = iBimp % 8
             val nByteNumber = iBimp / 8
 
-            val N = t.NeutImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
-            val A = t.AktiImp?.get(nByteNumber)!!.toInt() and (0x80 shr nBitNumber)
-            if (IsCZ44raster && iBimp == 44)
-                break
+            val N = t.NeutImp[nByteNumber].toInt() and (0x80 shr nBitNumber)
+            val A = t.AktiImp[nByteNumber].toInt() and (0x80 shr nBitNumber)
 
-            if (A != 0 && N != 0)
-                builder.append(tdImpNeAkt + b + getString(R.string.plus) + bC + tdC)
-            else if (A == 0 && N != 0)
-                builder.append(tdImpAkt + b + getString(R.string.minus) + bC + tdC)
-            else
-                builder.append(tdImpNeutr + tdC)
+            if (IsCZ44raster && iBimp == 44) break
+
+            if (A != 0 && N != 0) builder.append(tdImpNeAkt + b + getString(R.string.plus) + bC + tdC)
+            else if (A == 0 && N != 0) builder.append(tdImpAkt + b + getString(R.string.minus) + bC + tdC)
+            else builder.append(tdImpNeutr + tdC)
         }
-        builder.append(trC)
+
     }
+
 
     private fun getSyncTime(t: Int, ver: Int): String? {
-        val datstr: String
-        val tstr: String
-        val stime: Int
+        var datstr: String
+        var str: String=""
+        var tstr: String
+        var dstr: String
+        var stime: Int
         var tmpi: Int
         if (ver == TIP_PA) {
             stime = t and 0x000FFFFF
@@ -1279,53 +1205,82 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             }
         } else {
             val rtctime = Uni4byt(t)
-            datstr = String.format(
-                "%02d:%02d:%02d",
-                rtctime.b?.get(2)!!.toInt() and 0x1F,
-                rtctime.b?.get(1)!!.toInt(),
-                rtctime.b?.get(0)!!.toInt()
-            )
-            tmpi = rtctime.b!![2].toInt() shr 5
-            if (tmpi == 0) {
-                tmpi = 7
-            } else {
-                tmpi--
+            tstr = String.format("%02d:%02d:%02d", rtctime.b?.get(2)!!.toInt() and 0x1F, rtctime.b?.get(1)!!.toInt(), rtctime.b?.get(0)!!.toInt())
+            var b3:Int=rtctime.b!![3].toInt()
+
+            var sday=b3 and 0x07
+            if(sday==0) sday=7 else sday=sday-1
+            dstr=getStringArray(R.array.dan_sync_tg, sday % 8)
+            if( ( b3 and 0x40) >0 ) //samo dan
+            {
+                if(sday==7) str="---"
+                else str = dstr
             }
+            else if(b3==0) str=tstr                 //samo vrijeme
+            else if( ( b3 and 0x80) >0 ) str="---"  //nijedno
+            else str= tstr + " " + dstr             //oboje
+
+
         }
-        tstr =
-            String.format("%s>> %s", getStringArray(R.array.dan_sync_tg, tmpi % 8), datstr)
-        return tstr
+        return str
     }
 
-    private fun getRasterHeadStringH(builder: StringBuilder) {
-        builder.append(tr)
+    private fun GetRasterHeadStringABDPC(builder: StringBuilder) {
 
-        builder.append(th + getString(R.string.name) + thC)
-        builder.append(th + getString(R.string.telegram) + thC)
         builder.append(thcol4 + getString(R.string.a) + thC)
         builder.append(thcol8 + getString(R.string.b) + thC)
-        for (i in 4..19)
-            builder.append(thcol2 + String.format("DP%d", i - 3) + thC)
-        builder.append(trC)
+        for (i in 1..16) builder.append(thcol2 + String.format("DP%d", i) + thC)
+        if (!IsCZ44raster) builder.append(thcol6 + getString(R.string.c) + thC)
+
     }
 
-    private fun getRasterHeadStringTop(builder: StringBuilder) {
-        builder.append(tr)
-        builder.append(th + thC)
-        builder.append(th + thC)
+    private fun GetRasterHeadStringNUM(builder: StringBuilder, isCz:Boolean) {
+        if(isCz){
+            for (i in 1..50) {
+                if(IsCZ44raster && i>44) break
+                builder.append(th + i + thC)
+            }
+        }else {
+            for (i in 1..4) builder.append(th + i + thC)
+            for (i in 1..8) builder.append(th + i + thC)
 
-        for (i in 1..4)
-            builder.append(th + i + thC)
-
-
-        for (i in 1..8)
-            builder.append(th + i + thC)
-
-        for (i in 14..45 step 2) {
-            builder.append(th + getString(R.string.z) + thC)
-            builder.append(th + getString(R.string.v) + thC)
+            for (i in 14..45 step 2) {
+                builder.append(th + getString(R.string.z) + thC)
+                builder.append(th + getString(R.string.v) + thC)
+            }
+            if (!IsCZ44raster)
+                for (i in 1..6) builder.append(th + i + thC)
         }
 
+    }
+    private fun SetRasterHead(builder: StringBuilder, s1:String, s2:String) {
+        if (IsCZRaster) {
+            builder.append(tr);
+                builder.append(thrw3+ s1 +thC)
+                builder.append(thrw3+ s2 +thC)
+                GetRasterHeadStringABDPC(builder);
+            builder.append(trC);
+            builder.append(tr);GetRasterHeadStringNUM(builder,false);builder.append(trC);
+            builder.append(tr);GetRasterHeadStringNUM(builder,true);builder.append(trC);
+        }
+        else{
+            builder.append(tr);GetRasterHeadStringNUM(builder,false);builder.append(trC);
+            builder.append(tr+trC);
+            builder.append(tr+trC);
+        }
+
+    }
+
+    private fun GetRelTlgs(builder: StringBuilder, T:Telegrel,index:Int) {
+        builder.append(tr)
+            builder.append(thrw2+"DBQ:GetTlgNameByContentK"+ thC)
+            builder.append(th+"R"+index+getString(R.string.IDSI_ON)+ thC)
+            getRasterString(builder,T.Uk)
+        builder.append(trC)
+
+        builder.append(tr)
+            builder.append(th+"R"+index+getString(R.string.IDSI_OFF)+ thC)
+            getRasterString(builder,T.Isk)
         builder.append(trC)
     }
 
@@ -1499,11 +1454,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
         builder.append(tr)
         builder.append(th + getString(R.string.device_type) + thC)
-        builder.append(
-            td +
-                    String.format("MTK-%d-%s-V-%d", mTip + 1, version, mSoftwareVersionPri)
-                    + tdC
-        )
+        builder.append(td + String.format("MTK-%d-%s-V-%d", mTip + 1, version, mSoftwareVersionPri) + tdC)
         builder.append(trC)
 
         if (fVis_RefPrij) {
@@ -1512,29 +1463,13 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
             if (mSoftwareVersionPri >= 90) {
                 if (mParFilteraCF.BROJ >= 0)
-                    builder.append(
-                        td + String.format(
-                            "%4.2f Hz",
-                            DataUtils.getTbparfiltera98mhz()[mParFilteraCF.BROJ].fre
-                        )
-                                + tdC
-                    )
+                    builder.append(td + String.format("%4.2f Hz", DataUtils.getTbparfiltera98mhz()[mParFilteraCF.BROJ].fre) + tdC)
             } else
                 if (mParFiltera.BROJ >= 0)
                     if (mSoftwareVersionPri < 80)
-                        builder.append(
-                            td + String.format(
-                                "%4.2f Hz",
-                                DataUtils.tbParFiltera()[mParFiltera.BROJ].fre
-                            ) + tdC
-                        )
+                        builder.append(td + String.format("%4.2f Hz", DataUtils.tbParFiltera()[mParFiltera.BROJ].fre) + tdC)
                     else
-                        builder.append(
-                            td + String.format(
-                                "%4.2f Hz",
-                                DataUtils.getTbparfiltera98mhz()[mParFiltera.BROJ].fre
-                            ) + tdC
-                        )
+                        builder.append(td + String.format("%4.2f Hz", DataUtils.getTbparfiltera98mhz()[mParFiltera.BROJ].fre) + tdC)
 
             builder.append(trC)
 
@@ -1569,6 +1504,34 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         else
             builder.append(td + getString(R.string.network50hz) + tdC)
         builder.append(trC)
+
+
+        if (fVis_Cz96HDOBAT){
+            builder.append(tr)
+            builder.append(th + getString(R.string.rtc_dst) + thC)
+            if(mOpPrij.PromjZLjU.toInt()!=0)
+                builder.append(td + getString(R.string.yes) + tdC)
+            else
+                builder.append(td + getString(R.string.yes) + tdC)
+            builder.append(trC)
+
+
+            var rezim =-1
+            var sta2=(mOpPrij.VOpRe.StaPrij.toInt() and 0x02)==0x2
+            var sta1=(mOpPrij.VOpRe.StaPrij.toInt() and 0x01)==0x1
+            if(!sta2 and sta1) rezim=1 // HDO =1 TIMESWITCH=0
+            if(sta2 and sta1) rezim=0
+
+            builder.append(tr)
+            builder.append(th + getString(R.string.IDSI_REZIM) + thC)
+            if(rezim==1)
+                builder.append(td + getString(R.string.IDSI_REZIM_HDO) + tdC)
+            else
+                builder.append(td + getString(R.string.IDSI_REZIM_TIMESWITCH) + tdC)
+
+
+        }
+
 
 
         if (!fVis_VersacomPS) {
@@ -1607,10 +1570,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
                 builder.append(tr)
                 builder.append(th + getString(R.string.day_cycle_active) + thC)
-                val dataStr =
-                    if ((mOpPrij.ParFlags.toInt() and 0x1) != 0)
-                        getString(R.string.yes)
-                    else getString(R.string.no)
+                val dataStr = if ((mOpPrij.ParFlags.toInt() and 0x1) != 0) getString(R.string.yes) else getString(R.string.no)
                 builder.append(td + dataStr + tdC)
                 builder.append(trC)
 
@@ -1641,6 +1601,38 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         val timeBridge = (mOp50Prij.CPWBRTIME * 5.0 / 1000.0).toFloat()
         builder.append(td + String.format("%.2f s", timeBridge) + tdC)
         builder.append(trC)
+
+        var PARAMSRC_FILE =0
+        var PARAMSRC_DEVICE =1
+        var PARAMSRC_NEW =2
+        var m_paramSrc=PARAMSRC_DEVICE
+        builder.append(tr+ thcol2bgth +getString(R.string.IDSI_PARAMS)+thC+trC)
+
+
+        if(m_paramSrc==PARAMSRC_DEVICE)
+        {
+            builder.append(tr+th+getString(R.string.IDSI_LASTREPARAMTIME)+thC+td+pLastPa.DataTimeS+tdC+trC)
+            builder.append(tr+th+getString(R.string.IDSI_CREATED_UID)+thC+td+pLastPa.IDCreateS+tdC+trC)
+            builder.append(tr+th+getString(R.string.IDSI_CREATED_PCUID)+thC+td+pLastPa.CreateSiteS+tdC+trC)
+            builder.append(tr+th+getString(R.string.IDSI_REPARM_UID)+thC+td+pLastPa.IDReParaS+tdC+trC)
+            builder.append(tr+th+getString(R.string.IDSI_REPARM_PCUID)+thC+td+pLastPa.ReParaSiteS+tdC+trC)
+
+            builder.append(tr+th+getString(R.string.IDSI_PARM_FILE)+thC+td+pLastPa.IDFileS+".mtk"+tdC+trC)
+            builder.append(tr+th+getString(R.string.IDSI_SERIALNUM)+thC+td+m_dwDeviceSerNr+tdC+trC)
+        }
+        else if(m_paramSrc==PARAMSRC_FILE)
+        {
+            builder.append(tr+th+getString(R.string.IDSI_CREATED_UID)+thC+td+pLastPa.IDCreateS+tdC+trC)
+            builder.append(tr+th+getString(R.string.IDSI_CREATED_PCUID)+thC+td+pLastPa.CreateSiteS+tdC+trC)
+            builder.append(tr+th+getString(R.string.IDSI_PARM_FILE)+thC+td+pLastPa.IDFileS+".mtk"+tdC+trC)
+
+            builder.append(tr+th+getString(R.string.IDSI_COMMENT)+thC+td+"Comment"+tdC+trC) //TODO add comment iz fajla
+
+        }
+        else if(m_paramSrc==PARAMSRC_NEW)
+        {
+            builder.append(tr+ td +getString(R.string.IDSI_PARM_FROM_NEW)+thC+trC)
+        }
 
         builder.append(tableC)
     }
