@@ -6,10 +6,7 @@ import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.contracts.TimeContract
-import com.mtkreader.services.DisplayServiceImpl
-import com.mtkreader.services.ParamsWriteService
-import com.mtkreader.services.ProcessDataServiceImpl
-import com.mtkreader.services.TimeServiceImpl
+import com.mtkreader.services.*
 import io.reactivex.exceptions.UndeliverableException
 import io.reactivex.plugins.RxJavaPlugins
 import org.koin.core.context.startKoin
@@ -23,7 +20,8 @@ class MtkApplication : Application() {
         single<DisplayDataContract.DisplayService> { DisplayServiceImpl() }
         single<DisplayDataContract.ProcessService> { ProcessDataServiceImpl() }
         single<TimeContract.Service> { TimeServiceImpl() }
-        single<ParamsWriteContract.Service> { ParamsWriteService() }
+        single<ParamsWriteContract.FillDataStructuresService> { ParamsWriteFillDataStructuresService() }
+        single<ParamsWriteContract.WriteDataService> { WriteDataService() }
 
         // utils
         single { RxBluetooth(this@MtkApplication) }

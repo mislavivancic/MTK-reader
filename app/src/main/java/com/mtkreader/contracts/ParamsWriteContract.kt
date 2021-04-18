@@ -2,7 +2,8 @@ package com.mtkreader.contracts
 
 import com.mtkreader.commons.base.AutoDisposePresenter
 import com.mtkreader.commons.base.ErrorHandlingFragment
-import io.reactivex.Completable
+import com.mtkreader.data.DataStructures
+import io.reactivex.Single
 
 interface ParamsWriteContract {
     interface View : ErrorHandlingFragment {
@@ -19,7 +20,11 @@ interface ParamsWriteContract {
         // fun closeConnection()
     }
 
-    interface Service {
-        fun extractFileData(fileLines: List<String>): Completable
+    interface FillDataStructuresService {
+        fun extractFileData(fileLines: List<String>): Single<DataStructures>
+    }
+
+    interface WriteDataService {
+        fun generateStrings(data: DataStructures): Single<String>
     }
 }

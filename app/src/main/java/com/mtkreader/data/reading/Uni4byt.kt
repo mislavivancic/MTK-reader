@@ -4,7 +4,7 @@ import com.mtkreader.toPositiveInt
 
 class Uni4byt {
     var i = 0
-    var b: ByteArray? = null
+    var b: ByteArray = ByteArray(4)
 
     constructor(b: ByteArray) {
         this.b = b

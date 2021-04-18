@@ -1,0 +1,38 @@
+package com.mtkreader.data
+
+import com.mtkreader.data.reading.*
+
+class DataStructures {
+    var globalIndex = 0
+
+    var mTip = 0
+    var mHardwareVersion = 0
+    var mSoftwareVersion = 0
+    var mParFiltera = StrParFil()
+    val mParFilteraCF = StrParFilVer9()
+    var mBrojRast = 0
+    var mUtfPosto = 0.0
+    val UTFREFP = 0.9
+    var mBrUpKalendara: Byte = 0
+    val mCfg = CfgParHwsw()
+    var mFileComment = ""
+    val mOprij = Oprij()
+    val mOp50rij = Oprij50()
+    val mRealloc = Array(4) { Rreallc() }
+    val mTelegSync = Array(13) { Telegram() }
+    val mPProgR1 = Array(16) { Opprog() }
+    val mPProgR2 = Array(16) { Opprog() }
+    val mPProgR3 = Array(16) { Opprog() }
+    val mPProgR4 = Array(16) { Opprog() }
+    var mPBuff = ByteArray(256)
+    var mPraznici = PrazniciStr()
+    var mWipersRx = Array(4) { Wiper() }
+    var mPonPoffRx = Array(4) { PonPoffStr() }
+    var mTelegAbsenceRx = Array(4) { TlgAbstr() }
+    var mLearningRx = Array(4) { StrLoadMng() }
+    var mRelInterlock = Array(4) { IntrlockStr() }
+    var mKalendar = Array(72) { StKalend() }
+    var mInitRelSetProg = InitRelSetting()
+    var mUkls = Ukls()
+    var mCFileParData = RecFilParStr()
+}
