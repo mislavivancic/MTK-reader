@@ -9,6 +9,7 @@ import com.mtkreader.compare
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.data.DataStructures
 import com.mtkreader.data.reading.*
+import com.mtkreader.getBytes
 import com.mtkreader.toPositiveInt
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.DataUtils.isHexadecimal
@@ -61,40 +62,88 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
         getPg2Par()
 
         fillBuffer("9080")
-        fillTelegRel(data.mOp50rij.TlgRel1)
+        var numTelegrams = data.mPBuff.size / data.mOp50rij.TlgRel1.getBytes().size
+        when (numTelegrams) {
+            1 -> fillTelegRel(data.mOp50rij.TlgRel1)
+            2 -> {
+                fillTelegRel(data.mOp50rij.TlgRel1)
+                fillTelegRel(data.mOp50rij.TlgRel2)
+            }
+            3 -> {
+                fillTelegRel(data.mOp50rij.TlgRel1)
+                fillTelegRel(data.mOp50rij.TlgRel2)
+                fillTelegRel(data.mOp50rij.TlgRel3)
+            }
+        }
 
         fillBuffer("9180")
-        fillTelegRel(data.mOp50rij.TlgRel2)
+        numTelegrams = data.mPBuff.size / data.mOp50rij.TlgRel1.getBytes().size
+        when (numTelegrams) {
+            1 -> fillTelegRel(data.mOp50rij.TlgRel2)
+            2 -> {
+                fillTelegRel(data.mOp50rij.TlgRel2)
+                fillTelegRel(data.mOp50rij.TlgRel3)
+            }
+            3 -> {
+                fillTelegRel(data.mOp50rij.TlgRel2)
+                fillTelegRel(data.mOp50rij.TlgRel3)
+                fillTelegRel(data.mOp50rij.TlgRel4)
+            }
+        }
 
         fillBuffer("9280")
-        fillTelegRel(data.mOp50rij.TlgRel3)
+        numTelegrams = data.mPBuff.size / data.mOp50rij.TlgRel1.getBytes().size
+        when (numTelegrams) {
+            1 -> fillTelegRel(data.mOp50rij.TlgRel3)
+            2 -> {
+                fillTelegRel(data.mOp50rij.TlgRel3)
+                fillTelegRel(data.mOp50rij.TlgRel4)
+            }
+            3 -> {
+                fillTelegRel(data.mOp50rij.TlgRel3)
+                fillTelegRel(data.mOp50rij.TlgRel4)
+                fillTelegramTlg(data.mOp50rij.tlg[0])
+            }
+        }
 
         fillBuffer("9380")
-        fillTelegRel(data.mOp50rij.TlgRel4)
+        numTelegrams = data.mPBuff.size / data.mOp50rij.TlgRel1.getBytes().size
+        when (numTelegrams) {
+            1 -> fillTelegRel(data.mOp50rij.TlgRel4)
+            2 -> {
+                fillTelegRel(data.mOp50rij.TlgRel4)
+                fillTelegramTlg(data.mOp50rij.tlg[0])
+            }
+            3 -> {
+                fillTelegRel(data.mOp50rij.TlgRel4)
+                fillTelegramTlg(data.mOp50rij.tlg[0])
+                fillTelegramTlg(data.mOp50rij.tlg[1])
+            }
+        }
 
         fillBuffer("9480")
-        fillTelegramTlg(data.mOp50rij.tlg[0])
+        fillTelegramTlgGroup(data.mOp50rij.tlg, 0)
 
         fillBuffer("9580")
-        fillTelegramTlg(data.mOp50rij.tlg[3])
+        fillTelegramTlgGroup(data.mOp50rij.tlg, 3)
 
         fillBuffer("9680")
-        fillTelegramTlg(data.mOp50rij.tlg[5])
+        fillTelegramTlgGroup(data.mOp50rij.tlg, 5)
 
         fillBuffer("9880")
-        fillTelegram(data.mTelegSync[0])
+        fillTelegramGroup(data.mTelegSync.toList(), 0)
 
         fillBuffer("9980")
-        fillTelegram(data.mTelegSync[2])
+        fillTelegramGroup(data.mTelegSync.toList(), 2)
 
         fillBuffer("9A80")
-        fillTelegram(data.mTelegSync[5])
+        fillTelegramGroup(data.mTelegSync.toList(), 5)
 
         fillBuffer("9B80")
-        fillTelegram(data.mTelegSync[8])
+        fillTelegramGroup(data.mTelegSync.toList(), 8)
 
         fillBuffer("9C80")
-        fillTelegram(data.mTelegSync[10])
+        fillTelegramGroup(data.mTelegSync.toList(), 10)
 
         fillBuffer("0180")
         data.mOprij.VAdrPrij = setOprel3I()
@@ -212,7 +261,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
         if (buff) {
             data.mInitRelSetProg.setPar = data.mPBuff[data.globalIndex++]
             for (i in 0 until 4)
-                data.mInitRelSetProg.status[i] =data. mPBuff[data.globalIndex++]
+                data.mInitRelSetProg.status[i] = data.mPBuff[data.globalIndex++]
         }
     }
 
@@ -280,7 +329,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
             val ith = getFrUTHDefVer9(broj)
             if (ith != 0) {
                 uthMinRef = ith.toDouble()
-                data. mUtfPosto = (utth * data.UTFREFP) / uthMinRef
+                data.mUtfPosto = (utth * data.UTFREFP) / uthMinRef
             } else
                 data.mUtfPosto = 0.0
         }
@@ -309,7 +358,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
         for (i in 0 until 4) {
             with(data.mLearningRx[i]) {
                 Status = data.mPBuff[data.globalIndex++]
-                relPos =data. mPBuff[data.globalIndex++]
+                relPos = data.mPBuff[data.globalIndex++]
                 TPosMin = setOprel3I()
                 TPosMax = setOprel3I()
             }
@@ -321,7 +370,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
             with(data.mTelegAbsenceRx[i]) {
                 OnRes = data.mPBuff[data.globalIndex++]
                 TDetect = setOprel3I()
-                RestOn =data. mPBuff[data.globalIndex++]
+                RestOn = data.mPBuff[data.globalIndex++]
                 OnTaExe = data.mPBuff[data.globalIndex++]
             }
         }
@@ -364,7 +413,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
     }
 
     private fun setWiperRelData(wiper: Wiper) {
-        wiper.status =data. mPBuff[data.globalIndex++]
+        wiper.status = data.mPBuff[data.globalIndex++]
         wiper.Tswdly = setOprel3I()
         wiper.TWiper = setOprel3I()
         wiper.TBlockPrePro = setOprel3I()
@@ -389,13 +438,13 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
             StaAsat = data.mPBuff[data.globalIndex++]
             AsatKorOn = data.mPBuff[data.globalIndex++]
             AsatKorOff = data.mPBuff[data.globalIndex++]
-            PromjZLjU =data. mPBuff[data.globalIndex++]
-            FlagLjVr =data. mPBuff[data.globalIndex++]
+            PromjZLjU = data.mPBuff[data.globalIndex++]
+            FlagLjVr = data.mPBuff[data.globalIndex++]
         }
     }
 
     private fun getUklsPar() {
-        data.mUkls.BrProg =data. mPBuff[data.globalIndex++]
+        data.mUkls.BrProg = data.mPBuff[data.globalIndex++]
         data.mUkls.rel3p = data.mPBuff[data.globalIndex++]
         if (data.mUkls.BrProg <= 16) {
             val x = UniUksByt()
@@ -415,13 +464,25 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
             2 -> data.mPProgR2[mNProNum]
             3 -> data.mPProgR3[mNProNum]
             4 -> data.mPProgR4[mNProNum]
-            else ->data. mPProgR1[mNProNum]
+            else -> data.mPProgR1[mNProNum]
         }
     }
 
 
+    private fun fillTelegramGroup(telegrams: List<Telegram>, startIndex: Int) {
+        val numTelegrams = data.mPBuff.size / telegrams[startIndex].getBytes().size
+        for (i in startIndex until startIndex + numTelegrams)
+            fillTelegram(telegrams[i])
+    }
+
     private fun fillTelegram(telegram: Telegram) {
         telegram.Cmd.fillTelegCMD()
+    }
+
+    private fun fillTelegramTlgGroup(tlgs: List<Tlg>, startIndex: Int) {
+        val numTelegrams = data.mPBuff.size / tlgs[startIndex].tel1.getBytes().size
+        for (i in startIndex until startIndex + numTelegrams)
+            fillTelegramTlg(tlgs[i])
     }
 
     private fun fillTelegramTlg(telegram: Tlg) {
@@ -442,12 +503,12 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
         BrAkImp = data.mPBuff[data.globalIndex++]
         for (i in 0 until 7)
             NeutImp[i] = data.mPBuff[data.globalIndex++]
-        Fn =data. mPBuff[data.globalIndex++]
+        Fn = data.mPBuff[data.globalIndex++]
     }
 
     private fun fillBuffer(address: String) {
         data.globalIndex = 0
-        data. mPBuff = addressMap[address]
+        data.mPBuff = addressMap[address]
             ?: throw Exception(context.getString(R.string.address_does_not_exist))
     }
 
@@ -478,7 +539,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
         if (data.mSoftwareVersion >= 82) {
             for (i in 0 until 4) {
                 data.mRealloc[i].rel_on = data.mPBuff[data.globalIndex++]
-                data. mRealloc[i].rel_off = data.mPBuff[data.globalIndex++]
+                data.mRealloc[i].rel_off = data.mPBuff[data.globalIndex++]
             }
         }
 
@@ -488,7 +549,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
                 AsatKorOn = data.mPBuff[data.globalIndex++]
                 AsatKorOff = data.mPBuff[data.globalIndex++]
                 PromjZLjU = data.mPBuff[data.globalIndex++]
-                FlagLjVr =data. mPBuff[data.globalIndex++]
+                FlagLjVr = data.mPBuff[data.globalIndex++]
             }
         }
     }
@@ -506,13 +567,13 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
         data.mOprij.VC1R4 = setOprelI()
 
         for (i in 0 until 4)
-            data.mOprij.CRelXSw[i] =data. mPBuff[data.globalIndex++]
+            data.mOprij.CRelXSw[i] = data.mPBuff[data.globalIndex++]
     }
 
     private fun setVerAdrData(vadrr: Vadrr) {
         var adrxx: Byte = 0
         var bitadrxx: Byte = 0
-        adrxx =data. mPBuff[data.globalIndex++]
+        adrxx = data.mPBuff[data.globalIndex++]
         vadrr.VAdrRA = if (adrxx == 0.toByte()) 0 else getAdrNr(adrxx)
 
         adrxx = data.mPBuff[data.globalIndex++]
@@ -529,7 +590,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
             if ((adrxx.compare(0x80) == 0) || bitadrxx == 0.toByte()) 0 else (adrxx * 8 + bitadrxx).toByte()
 
         adrxx = data.mPBuff[data.globalIndex++]
-        bitadrxx =data. mPBuff[data.globalIndex++]
+        bitadrxx = data.mPBuff[data.globalIndex++]
         bitadrxx = getAdrNr(bitadrxx)
         vadrr.VAdrRD =
             if ((adrxx.compare(0x80) == 0) || bitadrxx == 0.toByte()) 0 else (adrxx * 8 + bitadrxx).toByte()
@@ -561,7 +622,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
     }
 
     private fun getKlDatVer6() {
-        data.mOprij.VDuzAdr =data. mPBuff[data.globalIndex++]
+        data.mOprij.VDuzAdr = data.mPBuff[data.globalIndex++]
         data.mOprij.KlOpR1 = setDlyRelData()
         data.mOprij.KlOpR2 = setDlyRelData()
         data.mOprij.KlOpR3 = setDlyRelData()
@@ -583,7 +644,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
 
     private fun setOprelI(): Int {
         val b1 = data.mPBuff[data.globalIndex++]
-        val b0 =data. mPBuff[data.globalIndex++]
+        val b0 = data.mPBuff[data.globalIndex++]
         val tempi = Uni4byt(byteArrayOf(b0, b1, 0, 0))
         return tempi.i
     }
@@ -674,7 +735,7 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
                 val chars = line.split("-")
                 var ch = chars[1].toInt()
                 if (ch in 0..2)
-                    data. mTip = ch - 1
+                    data.mTip = ch - 1
                 ch = chars[3].toInt()
                 if (ch >= 0)
                     data.mHardwareVersion = ch - 1
