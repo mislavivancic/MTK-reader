@@ -2,10 +2,10 @@ package com.mtkreader.views.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebSettings
 import android.webkit.WebViewClient
 import com.mtkreader.R
 import com.mtkreader.commons.Const
@@ -83,8 +83,8 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
     }
 
     override fun displayData(dataString: String) {
-
-        webView.loadData(dataString, "text/html", "UTF-8")
+        val encodedHtml: String =           Base64.encodeToString(dataString.toByteArray(Charsets.UTF_8), Base64.NO_PADDING)
+        webView.loadData(encodedHtml, "text/html", "base64")
 
     }
 }

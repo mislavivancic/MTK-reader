@@ -392,8 +392,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         htmlBuilder.append(Css.htmlstart)
         var title="Naslov"
         htmlBuilder.append("<title>"+ title+"</title>")
-        htmlBuilder.append("<style>"+ getString(R.string.ccs6min)+"</style>")
-        //htmlBuilder.append("<style>"+ Css.cssx+"</style>")
+        htmlBuilder.append("<style>"+ getString(R.string.css)+"</style>")
         htmlBuilder.append("</head>")
         htmlBuilder.append(body)
         htmlBuilder.append("<div class=\"container\">")
