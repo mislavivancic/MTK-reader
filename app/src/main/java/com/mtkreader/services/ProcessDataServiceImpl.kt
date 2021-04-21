@@ -13,6 +13,7 @@ import com.mtkreader.commons.Const.Data.TIP_SN
 import com.mtkreader.commons.Const.Data.TIP_SPA
 import com.mtkreader.commons.Const.Data.TIP_SPN
 import com.mtkreader.contracts.DisplayDataContract
+import com.mtkreader.data.DataStructures
 import com.mtkreader.data.reading.*
 import com.mtkreader.utils.Css
 import com.mtkreader.utils.DataUtils
@@ -48,7 +49,7 @@ import kotlin.experimental.or
 class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent {
 
     val context: Context by inject()
-
+    private lateinit var data: DataStructures
     // move this elsewhere
 
     var fVis_VersacomPS = false
@@ -339,12 +340,12 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         //}REC_FILPAR_STR;
 
 
-        for (i in 0..REC_PAR_STR.DataTime_SIZE - 1) pLastPa.DataTime[i] = dbuf[globalIndex++]
-        for (i in 0..REC_PAR_STR.PARID_SIZE - 1) pLastPa.CreateSite[i] = dbuf[globalIndex++]
-        for (i in 0..REC_PAR_STR.PARID_SIZE - 1) pLastPa.IDCreate[i] = dbuf[globalIndex++]
-        for (i in 0..REC_PAR_STR.PARID_SIZE - 1) pLastPa.ReParaSite[i] = dbuf[globalIndex++]
-        for (i in 0..REC_PAR_STR.PARID_SIZE - 1) pLastPa.IDRePara[i] = dbuf[globalIndex++]
-        for (i in 0..REC_PAR_STR.PARIDFILE_SIZE - 1) pLastPa.IDFile[i] = dbuf[globalIndex++]
+        for (i in 0 until REC_PAR_STR.DataTime_SIZE) pLastPa.DataTime[i] = dbuf[globalIndex++]
+        for (i in 0 until REC_PAR_STR.PARID_SIZE) pLastPa.CreateSite[i] = dbuf[globalIndex++]
+        for (i in 0 until REC_PAR_STR.PARID_SIZE) pLastPa.IDCreate[i] = dbuf[globalIndex++]
+        for (i in 0 until REC_PAR_STR.PARID_SIZE) pLastPa.ReParaSite[i] = dbuf[globalIndex++]
+        for (i in 0 until REC_PAR_STR.PARID_SIZE) pLastPa.IDRePara[i] = dbuf[globalIndex++]
+        for (i in 0 until REC_PAR_STR.PARIDFILE_SIZE) pLastPa.IDFile[i] = dbuf[globalIndex++]
 
         var s = pLastPa.toString()
 
@@ -390,64 +391,50 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     ): String {
         val htmlBuilder = StringBuilder()
         htmlBuilder.append(Css.htmlstart)
-        var title="Naslov"
+        val title="Naslov"
         htmlBuilder.append("<title>"+ title+"</title>")
         htmlBuilder.append("<style>"+ getString(R.string.css)+"</style>")
         htmlBuilder.append("</head>")
         htmlBuilder.append(body)
         htmlBuilder.append("<div class=\"container\">")
-        generateContent(
-            htmlBuilder,
-            wipers,
-            ponPoffstrs,
-            tlgAbstrs,
-            strLoadMngs,
-            oprij
-        )
-        htmlBuilder.append("</div>$bodyC$htmlC")
-
-        return htmlBuilder.toString()
-    }
-
-    private fun generateContent(
-        builder: java.lang.StringBuilder,
-        wipers: List<Wiper>,
-        ponPoffstrs: List<PonPoffStr>,
-        tlgAbstrs: List<TlgAbstr>,
-        strLoadMngs: List<StrLoadMng>,
-        oprij: Oprij
-    ) {
-        generateGeneral(builder)
 
 
-        generateRelaySettings(builder, oprij)
+        generateGeneral(htmlBuilder)
+
+
+        generateRelaySettings(htmlBuilder, oprij)
 
         if (fVis_Realoc)
-            generateRelaySwitchAssignement(builder)
+            generateRelaySwitchAssignement(htmlBuilder)
 
         if (fVis_RefPrij) {
-            generateSwitchingDelay(builder, oprij)
-            generateClassicTelegram(builder)
+            generateSwitchingDelay(htmlBuilder, oprij)
+            generateClassicTelegram(htmlBuilder)
         }
 
         if (fVis_Cz96P) {
-            generateAdditionalTelegram(builder)
+            generateAdditionalTelegram(htmlBuilder)
         }
 
         if (fVis_RefPrij && fVis_Cz95P) {
-            generateTelegramSync(builder)
+            generateTelegramSync(htmlBuilder)
             //generateSyncTelegramDoW(builder)
         }
 
-        generateWorkSchedules(builder,  oprij)
-        generateWiperAndClosedLoop(builder, wipers)
-        generateLearnFunctions(builder, strLoadMngs)
-        generateTalegramAbsence(builder, tlgAbstrs)
-        generateArrivalAndLossOfSupply(builder, ponPoffstrs)
-        generateEventLog(builder)
+        generateWorkSchedules(htmlBuilder,  oprij)
+        generateWiperAndClosedLoop(htmlBuilder, wipers)
+        generateLearnFunctions(htmlBuilder, strLoadMngs)
+        generateTalegramAbsence(htmlBuilder, tlgAbstrs)
+        generateArrivalAndLossOfSupply(htmlBuilder, ponPoffstrs)
+        generateEventLog(htmlBuilder)
 
-        generateInterlock(builder)
+        generateInterlock(htmlBuilder)
 
+
+
+        htmlBuilder.append("</div>$bodyC$htmlC")
+
+        return htmlBuilder.toString()
     }
 
     private fun unPackLadderString(rel: Int, pccNfg: Int): String {
@@ -1080,7 +1067,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                 val Toff= String.format("%02d:%02d", (mPProgR[rp].TPro[itemIndex].Toff) / 60, (mPProgR[rp].TPro[itemIndex].Toff) % 60)
                 val Tblank= "--:--"
 
-                var Tm:String=""
+                var Tm=""
 
                 if(mPProgR[rp].TPro[itemIndex].Tonb!=1) Tm=Ton else Tm=Tblank
                 builder.append(td + Tm+ tdC)
@@ -1123,14 +1110,14 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         SetRasterHead(builder,getString(R.string.IDSI_COL_NAME), getString(R.string.telegram))
         builder.append(trC)
 
-        var TGFN= arrayOf( R.string.IDSCB_FN_TELEG1_0 ,R.string.IDSCB_FN_TELEG1_6 ,R.string.IDSCB_FN_TELEG1_7 ,R.string.IDSCB_FN_TELEG1_18 ,R.string.IDSCB_FN_TELEG1_8 ,R.string.IDSCB_FN_TELEG1_9 ,R.string.IDSCB_FN_TELEG1_10 ,R.string.IDSCB_FN_TELEG1_11 ,R.string.IDSCB_FN_TELEG1_12 ,R.string.IDSCB_FN_TELEG1_13 ,R.string.IDSCB_FN_TELEG1_14 ,R.string.IDSCB_FN_TELEG1_15 ,R.string.IDSCB_FN_TELEG1_16 ,R.string.IDSCB_FN_TELEG1_17)
+        val TGFN= arrayOf( R.string.IDSCB_FN_TELEG1_0 ,R.string.IDSCB_FN_TELEG1_6 ,R.string.IDSCB_FN_TELEG1_7 ,R.string.IDSCB_FN_TELEG1_18 ,R.string.IDSCB_FN_TELEG1_8 ,R.string.IDSCB_FN_TELEG1_9 ,R.string.IDSCB_FN_TELEG1_10 ,R.string.IDSCB_FN_TELEG1_11 ,R.string.IDSCB_FN_TELEG1_12 ,R.string.IDSCB_FN_TELEG1_13 ,R.string.IDSCB_FN_TELEG1_14 ,R.string.IDSCB_FN_TELEG1_15 ,R.string.IDSCB_FN_TELEG1_16 ,R.string.IDSCB_FN_TELEG1_17)
 
         if(fVis_Cz96P) {
             for(i in 0..7)
             {
                 builder.append(tr)
                 builder.append(th+"DBQ:GetTlgNameByContent"+ thC)
-                var f:Int=mOp50Prij.tlg[i].tel1.Cmd.Fn.toInt()
+                val f:Int=mOp50Prij.tlg[i].tel1.Cmd.Fn.toInt()
 
                 if (i in 0..6)
                     builder.append(th+getString(TGFN[f])+thC)
@@ -1184,15 +1171,14 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
 
     private fun getSyncTime(t: Int, ver: Int): String? {
-        var datstr: String
-        var str: String=""
+        var str=""
         var tstr: String
         var dstr: String
         var stime: Int
         var tmpi: Int
         if (ver == TIP_PA) {
             stime = t and 0x000FFFFF
-            datstr = String.format(
+            str = String.format(
                 "%02d:%02d:%02d",
                 stime / 60 / 60 % 24,
                 stime / 60 % 60,
@@ -1204,16 +1190,15 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             }
         } else {
             val rtctime = Uni4byt(t)
-            tstr = String.format("%02d:%02d:%02d", rtctime.b?.get(2)!!.toInt() and 0x1F, rtctime.b?.get(1)!!.toInt(), rtctime.b?.get(0)!!.toInt())
-            var b3:Int=rtctime.b!![3].toInt()
+            tstr = String.format("%02d:%02d:%02d", rtctime.b[2].toInt() and 0x1F, rtctime.b[1].toInt(), rtctime.b[0].toInt())
+            var b3:Int=rtctime.b[3].toInt()
 
             var sday=b3 and 0x07
             if(sday==0) sday=7 else sday=sday-1
             dstr=getStringArray(R.array.dan_sync_tg, sday % 8)
             if( ( b3 and 0x40) >0 ) //samo dan
             {
-                if(sday==7) str="---"
-                else str = dstr
+                str = if(sday==7) "---" else dstr
             }
             else if(b3==0) str=tstr                 //samo vrijeme
             else if( ( b3 and 0x80) >0 ) str="---"  //nijedno
@@ -1257,15 +1242,15 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             builder.append(tr);
                 builder.append(thrw3+ s1 +thC)
                 builder.append(thrw3+ s2 +thC)
-                GetRasterHeadStringABDPC(builder);
-            builder.append(trC);
-            builder.append(tr);GetRasterHeadStringNUM(builder,false);builder.append(trC);
-            builder.append(tr);GetRasterHeadStringNUM(builder,true);builder.append(trC);
+                GetRasterHeadStringABDPC(builder)
+            builder.append(trC)
+            builder.append(tr);GetRasterHeadStringNUM(builder,false);builder.append(trC)
+            builder.append(tr);GetRasterHeadStringNUM(builder,true);builder.append(trC)
         }
         else{
-            builder.append(tr);GetRasterHeadStringNUM(builder,false);builder.append(trC);
-            builder.append(tr+trC);
-            builder.append(tr+trC);
+            builder.append(tr);GetRasterHeadStringNUM(builder,false);builder.append(trC)
+            builder.append(tr+trC)
+            builder.append(tr+trC)
         }
 
     }
@@ -1307,34 +1292,34 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
         builder.append(tr)
         builder.append(th + getString(R.string.delay_a) + thC)
-        builder.append(td + getZatez(oprij.KlOpR1?.KRelDela, 't') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR2?.KRelDela, 't') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR3?.KRelDela, 't') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR4?.KRelDela, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR1.KRelDela, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR2.KRelDela, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR3.KRelDela, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR4.KRelDela, 't') + tdC)
         builder.append(trC)
 
         builder.append(tr)
         builder.append(th + getString(R.string.delay_a) + thC)
-        builder.append(td + getZatez(oprij.KlOpR1?.KRelDela, 'm') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR2?.KRelDela, 'm') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR3?.KRelDela, 'm') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR4?.KRelDela, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR1.KRelDela, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR2.KRelDela, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR3.KRelDela, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR4.KRelDela, 'm') + tdC)
         builder.append(trC)
 
         builder.append(tr)
         builder.append(th + getString(R.string.delay_b) + thC)
-        builder.append(td + getZatez(oprij.KlOpR1?.KRelDelb, 't') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR2?.KRelDelb, 't') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR3?.KRelDelb, 't') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR4?.KRelDelb, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR1.KRelDelb, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR2.KRelDelb, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR3.KRelDelb, 't') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR4.KRelDelb, 't') + tdC)
         builder.append(trC)
 
         builder.append(tr)
         builder.append(th + getString(R.string.delay_b) + thC)
-        builder.append(td + getZatez(oprij.KlOpR1?.KRelDelb, 'm') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR2?.KRelDelb, 'm') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR3?.KRelDelb, 'm') + tdC)
-        builder.append(td + getZatez(oprij.KlOpR4?.KRelDelb, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR1.KRelDelb, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR2.KRelDelb, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR3.KRelDelb, 'm') + tdC)
+        builder.append(td + getZatez(oprij.KlOpR4.KRelDelb, 'm') + tdC)
         builder.append(trC)
 
         builder.append(tableC)
@@ -1516,8 +1501,8 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
 
             var rezim =-1
-            var sta2=(mOpPrij.VOpRe.StaPrij.toInt() and 0x02)==0x2
-            var sta1=(mOpPrij.VOpRe.StaPrij.toInt() and 0x01)==0x1
+            val sta2=(mOpPrij.VOpRe.StaPrij.toInt() and 0x02)==0x2
+            val sta1=(mOpPrij.VOpRe.StaPrij.toInt() and 0x01)==0x1
             if(!sta2 and sta1) rezim=1 // HDO =1 TIMESWITCH=0
             if(sta2 and sta1) rezim=0
 
@@ -1601,36 +1586,35 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         builder.append(td + String.format("%.2f s", timeBridge) + tdC)
         builder.append(trC)
 
-        var PARAMSRC_FILE =0
-        var PARAMSRC_DEVICE =1
-        var PARAMSRC_NEW =2
+        val PARAMSRC_FILE =0
+        val PARAMSRC_DEVICE =1
+        val PARAMSRC_NEW =2
         var m_paramSrc=PARAMSRC_DEVICE
         builder.append(tr+ thcol2bgth +getString(R.string.IDSI_PARAMS)+thC+trC)
 
 
-        if(m_paramSrc==PARAMSRC_DEVICE)
-        {
-            builder.append(tr+th+getString(R.string.IDSI_LASTREPARAMTIME)+thC+td+pLastPa.DataTimeS+tdC+trC)
-            builder.append(tr+th+getString(R.string.IDSI_CREATED_UID)+thC+td+pLastPa.IDCreateS+tdC+trC)
-            builder.append(tr+th+getString(R.string.IDSI_CREATED_PCUID)+thC+td+pLastPa.CreateSiteS+tdC+trC)
-            builder.append(tr+th+getString(R.string.IDSI_REPARM_UID)+thC+td+pLastPa.IDReParaS+tdC+trC)
-            builder.append(tr+th+getString(R.string.IDSI_REPARM_PCUID)+thC+td+pLastPa.ReParaSiteS+tdC+trC)
+        when (m_paramSrc) {
+            PARAMSRC_DEVICE -> {
+                builder.append(tr+th+getString(R.string.IDSI_LASTREPARAMTIME)+thC+td+pLastPa.DataTimeS+tdC+trC)
+                builder.append(tr+th+getString(R.string.IDSI_CREATED_UID)+thC+td+pLastPa.IDCreateS+tdC+trC)
+                builder.append(tr+th+getString(R.string.IDSI_CREATED_PCUID)+thC+td+pLastPa.CreateSiteS+tdC+trC)
+                builder.append(tr+th+getString(R.string.IDSI_REPARM_UID)+thC+td+pLastPa.IDReParaS+tdC+trC)
+                builder.append(tr+th+getString(R.string.IDSI_REPARM_PCUID)+thC+td+pLastPa.ReParaSiteS+tdC+trC)
 
-            builder.append(tr+th+getString(R.string.IDSI_PARM_FILE)+thC+td+pLastPa.IDFileS+".mtk"+tdC+trC)
-            builder.append(tr+th+getString(R.string.IDSI_SERIALNUM)+thC+td+m_dwDeviceSerNr+tdC+trC)
-        }
-        else if(m_paramSrc==PARAMSRC_FILE)
-        {
-            builder.append(tr+th+getString(R.string.IDSI_CREATED_UID)+thC+td+pLastPa.IDCreateS+tdC+trC)
-            builder.append(tr+th+getString(R.string.IDSI_CREATED_PCUID)+thC+td+pLastPa.CreateSiteS+tdC+trC)
-            builder.append(tr+th+getString(R.string.IDSI_PARM_FILE)+thC+td+pLastPa.IDFileS+".mtk"+tdC+trC)
+                builder.append(tr+th+getString(R.string.IDSI_PARM_FILE)+thC+td+pLastPa.IDFileS+".mtk"+tdC+trC)
+                builder.append(tr+th+getString(R.string.IDSI_SERIALNUM)+thC+td+m_dwDeviceSerNr+tdC+trC)
+            }
+            PARAMSRC_FILE -> {
+                builder.append(tr+th+getString(R.string.IDSI_CREATED_UID)+thC+td+pLastPa.IDCreateS+tdC+trC)
+                builder.append(tr+th+getString(R.string.IDSI_CREATED_PCUID)+thC+td+pLastPa.CreateSiteS+tdC+trC)
+                builder.append(tr+th+getString(R.string.IDSI_PARM_FILE)+thC+td+pLastPa.IDFileS+".mtk"+tdC+trC)
 
-            builder.append(tr+th+getString(R.string.IDSI_COMMENT)+thC+td+"Comment"+tdC+trC) //TODO add comment iz fajla
+                builder.append(tr+th+getString(R.string.IDSI_COMMENT)+thC+td+"Comment"+tdC+trC) //TODO add comment iz fajla
 
-        }
-        else if(m_paramSrc==PARAMSRC_NEW)
-        {
-            builder.append(tr+ td +getString(R.string.IDSI_PARM_FROM_NEW)+thC+trC)
+            }
+            PARAMSRC_NEW -> {
+                builder.append(tr+ td +getString(R.string.IDSI_PARM_FROM_NEW)+thC+trC)
+            }
         }
 
         builder.append(tableC)
