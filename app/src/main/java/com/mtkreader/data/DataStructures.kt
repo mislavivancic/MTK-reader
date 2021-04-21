@@ -20,6 +20,7 @@ class DataStructures {
     val mOp50rij = Oprij50()
     val mRealloc = Array(4) { Rreallc() }
     val mTelegSync = Array(13) { Telegram() }
+    val m_TlgFnD = Array(8) { Telegram() }
     val mPProgR1 = Array(16) { Opprog() }
     val mPProgR2 = Array(16) { Opprog() }
     val mPProgR3 = Array(16) { Opprog() }
@@ -37,7 +38,7 @@ class DataStructures {
     var mCFileParData = RecFilParStr()  //upisano u file;
     var m_cLastParData = REC_PAR_STR() //proèitano iz ureðaja
     var m_cNewParData = REC_PAR_STR()  //upisano u ureðaj;
-
-
+    var m_dwDeviceSerNr=0
+    var m_LoopPar = Array(4) { LOOPTIMSTR() }
 
 }

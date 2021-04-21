@@ -1,6 +1,6 @@
 package com.mtkreader.data.reading
 
-class m_LoopPar {
+class LOOPTIMSTR {
 
     var State:Byte=0
     var LastCmd:Byte=0    //0 nepoznata  1 ON 2 OFF
