@@ -1,9 +1,7 @@
 package com.mtkreader.commons.base
 
-import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.fragment_connect.*
 
 interface ErrorHandlingFragment {
     fun displayErrorPopup(throwable: Throwable)

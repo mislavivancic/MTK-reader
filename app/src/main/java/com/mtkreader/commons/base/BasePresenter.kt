@@ -32,6 +32,7 @@ abstract class BasePresenter(private val view: ErrorHandlingFragment) : AutoDisp
     }
 
     override fun onErrorOccurred(throwable: Throwable) {
+        throwable.printStackTrace()
         view.displayErrorPopup(throwable)
     }
 

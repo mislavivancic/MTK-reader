@@ -12,6 +12,7 @@ class REC_PAR_STR {
             {
                 if(i<s.length) L[i]=b[i]
                 else L[i]=0
+                i++
             }
 
             return L.take(len).toByteArray()
