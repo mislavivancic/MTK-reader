@@ -34,5 +34,10 @@ class DataStructures {
     var mKalendar = Array(72) { StKalend() }
     var mInitRelSetProg = InitRelSetting()
     var mUkls = Ukls()
-    var mCFileParData = RecFilParStr()
+    var mCFileParData = RecFilParStr()  //upisano u file;
+    var m_cLastParData = REC_PAR_STR() //proèitano iz ureðaja
+    var m_cNewParData = REC_PAR_STR()  //upisano u ureðaj;
+
+
+
 }

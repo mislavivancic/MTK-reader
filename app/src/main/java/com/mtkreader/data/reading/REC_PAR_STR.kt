@@ -4,6 +4,19 @@ package com.mtkreader.data.reading
 
 class REC_PAR_STR {
     companion object {
+        fun StringToByteArrTrimed(s: String, len: Int): ByteArray {
+            var b= s.toByteArray(Charsets.US_ASCII)
+            var L=ByteArray(PARIDFILE_SIZE)
+            var i=0
+            while(i<len)
+            {
+                if(i<s.length) L[i]=b[i]
+                else L[i]=0
+            }
+
+            return L.take(len).toByteArray()
+        }
+
         public const val DataTime_SIZE = 6
         public const val PARID_SIZE = 8
         public const val PARIDFILE_SIZE = 18
@@ -56,6 +69,8 @@ class REC_PAR_STR {
         var trim = s.filter { it != 0.toByte() }.toByteArray()
         return trim.toString(Charsets.US_ASCII)
     }
+
+
     //byte	DataTime[6];
     //byte  CreateSite[PARID_SIZE];
     //byte  IDCreate[PARID_SIZE];

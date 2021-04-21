@@ -3,10 +3,10 @@ package com.mtkreader.data.reading
 class Oprij {
     var DuzAdr: Byte = 0
     var VDuzAdr: Byte = 0
-    var KlOpR1: Klopr? = null
-    var KlOpR2: Klopr? = null
-    var KlOpR3: Klopr? = null
-    var KlOpR4: Klopr? = null
+    var KlOpR1: Klopr = Klopr()
+    var KlOpR2: Klopr = Klopr()
+    var KlOpR3: Klopr = Klopr()
+    var KlOpR4: Klopr = Klopr()
     var Dly24H: Int = 0
     var PolUKRe: Byte = 0
     var VerKomAdr: Int = 0
