@@ -25,66 +25,59 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         var adrstr: String
         var cmdstr: String
 
-        //imgWR.clear();
-        //CString datstr, adrstr, cmdstr;
-        //CMainFrame* pFrameWnd = ((CMainFrame*)AfxGetMainWnd());
+        //imgWR.clear()
+        //CString datstr, adrstr, cmdstr
+        //CMainFrame* pFrameWnd = ((CMainFrame*)AfxGetMainWnd())
 
 
         adrstr = "C080"
         cmdstr = "W3"
         datstr = setFrRaParVer9(false)
         setFrRaParVer9(false)
-        setTlgData(0, 2)
-        setTlgData(1, 2)
-        setTlgData(2, 2)
-        setTlgData(3, 2)
-        setTlgData(4, 3)
-        setTlgData(5, 2)
-        setTlgData(6, 3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("C080", datstr)
 
         //TELEGRAMI
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("9080", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(1, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("9180", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(2, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("9280", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(3, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("9380", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(4, 3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("9480", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(5, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("9580", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(6, 3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("9680", datstr)
 
 
@@ -93,19 +86,19 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         adrstr = ""
         cmdstr = "W3"
         datstr = SetKlDatVerPS981()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("8080", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetKl2VerDatVerPS981()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("8180", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetWiperDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false";
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
         AddToImg("5080", datstr)
 
         adrstr = ""
@@ -132,31 +125,31 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         cmdstr = "W3"
         datstr = setTlgData(8, 2)
         if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        AddToImg("9280", datstr)
+        AddToImg("9880", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(9, 3)
         if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        AddToImg("9380", datstr)
+        AddToImg("9980", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0A, 3)
         if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        AddToImg("9480", datstr)
+        AddToImg("9A80", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0B, 2)
         if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        AddToImg("9580", datstr)
+        AddToImg("9B80", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0C, 3)
         if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        AddToImg("9680", datstr)
+        AddToImg("9C80", datstr)
 
 //---------------------------------
 
@@ -170,7 +163,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         cmdstr = "W3"
         datstr = SetNewRecParData()
         if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        AddToImg("0280", datstr)
+        //AddToImg("0280", datstr)
 
 
         data.mOprij.VAdrPrij = 0
@@ -178,7 +171,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         cmdstr = "W3"
         datstr = SetIDParVer9()
         if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        //AddToImg("0280", datstr)
+        AddToImg("0280", datstr)
 
 
         var res = WrProgPgPS981()
@@ -239,6 +232,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
     private fun setTlgData(grupa: Int, nrTlg: Int): String {
         var pchData = ""
         val pbuf = mutableListOf<Byte>()
+        val numToTake = nrTlg * 16  // 16 size of telegram
         when (grupa) {
             0 -> {
                 when (nrTlg) {
@@ -300,7 +294,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
             0x0C -> pbuf.addAll(getTelegramBytesGroup(data.mTelegSync, 10, nrTlg))
         }
 
-        for (byte in pbuf) {
+        for (byte in pbuf.take(numToTake)) {
             pchData += String.format("%02X", byte)
         }
         return pchData
@@ -329,8 +323,10 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         for (i in 0..3) {
             res += String.format("%02X%02X", data.mRealloc[i].rel_on, data.mRealloc[i].rel_off)
         }
+
+        data.mOp50rij.CLOGENFLGS[2] = 0x0 // nekakva rezerva
         res += String.format(
-            "%02X%02X",
+            "%04X%04X%04X%04X",
             data.mOp50rij.CPWBRTIME,
             data.mOp50rij.CLOGENFLGS[0],
             data.mOp50rij.CLOGENFLGS[1],
@@ -367,7 +363,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         var res: String = ""
         for (i in 0..3) {
             var t3 = data.mPonPoffRx[i].Tlng.toInt()
-            if (data.mPonPoffRx[i].lperIgno.toInt() != 0) t3 = t3 and 0x800000
+            if (data.mPonPoffRx[i].lperIgno.toInt() != 0) t3 = t3 or 0x800000
             //var ign=data.mPonPoffRx[i].lperIgno //TODO check
             var ign = 0
             res += String.format(
@@ -484,17 +480,17 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         res = String.format("%08X", data.mOprij.VAdrPrij)
 
         if (V > 0) {
-            i = sz;
+            i = sz
             while (V > 0) {
-                i--;
-                buf[i] = (V % 10).toChar();
+                i--
+                buf[i] = (V % 10).toChar()
                 V = V / 10
                 if (i == 0) break
             }
             while (i < sz) {
                 res += String.format("%02X", buf[i] + '0'.toInt())
                 i++
-            };
+            }
 
         }
         res += "0000000000000000000000000000000000000000"
@@ -515,7 +511,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         adrstr = String.format("10%02X", rel)
         datstr = String.format("FFFF")
         if (!Snd_D_Chk(cmdstr, adrstr, datstr, 0)) return false
-        //AddToImg("8280", datstr)
+        AddToImg(adrstr, datstr)
 
         cmdstr = "W3"
         adrstr = String.format("8280")
@@ -527,29 +523,32 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         //upis  programa koji nisu prazni
         var len: Int = 35
         var NrTpar = data.mCfg.cNpar
-        var brProg = data.mCfg.cNprog;
-        var brRel = data.mCfg.cNrel + 1;
-        len = 35;
-        rel = 1;
+        NrTpar = 11 // TODO(remove hardcoding)
+        var brProg = data.mCfg.cNprog
+        brProg = 9 // TODO(remove hardcoding)
+        var brRel = data.mCfg.cNrel + 1
+        brRel = 3 + 1 // TODO(remove hardcoding)
+        len = 35
+        rel = 1
         var nProNum: Int = 0
 
         do {
-            nProNum = 0;
+            nProNum = 0
             do {
                 adrstr = ""
                 cmdstr = "W3"
                 datstr = SetProgDat(rel, nProNum, len, NrTpar.toInt())
                 if (datstr != "") {
                     adrstr = String.format("%01X%01X80", rel, nProNum)
-                    if (!Snd_D_Chk(cmdstr, adrstr, datstr, 0)) return false;
-                    AddToImg(adrstr, datstr);
+                    if (!Snd_D_Chk(cmdstr, adrstr, datstr, 0)) return false
+                    AddToImg(adrstr, datstr)
 
                 }
-                nProNum++;
-            } while (nProNum < brProg);//16
+                nProNum++
+            } while (nProNum < brProg)//16
 
-            rel++;
-        } while (rel < brRel);
+            rel++
+        } while (rel < brRel)
 
 
 
@@ -588,7 +587,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         if (pPProg.AkTim == 0) return ""
         res = String.format("%04X%02X", pPProg.AkTim, pPProg.DanPr)
         ncount = 2
-        for (i in 0..NrTpar) {
+        for (i in 0 until NrTpar) {
             res += String.format("%06X", pPProg.TPro[i].I)
             ncount += 3
         }
@@ -596,23 +595,24 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
 
         if (ncount < len) {
             do res += "FF"
-            while (++ncount < len);
+            while (++ncount < len)
         }
-        //nProNum++;
-        //return(rval);
+        //nProNum++
+        //return(rval)
 
         return res
     }
 
     fun Snd_D_Chk(cmdstr: String, adrstr: String, datstr: String, nrblock: Int): Boolean {
-        Log.i(Const.Logging.PACK, "\nSND CMD $cmdstr ADR $adrstr::$datstr")
-        return true;
+        //Log.i(Const.Logging.PACK, "\nSND CMD $cmdstr ADR $adrstr::$datstr")
+        //Log.i(Const.Logging.PACK, "($adrstr)$datstr\n")
+        return true
 
     }
 
     fun AddToImg(adrstr: String, datstr: String): Boolean {
-        Log.i(Const.Logging.PACK, "\nIMG $adrstr($datstr)")
-        return true;
+        Log.i(Const.Logging.PACK, "$adrstr($datstr)\n")
+        return true
 
     }
 
