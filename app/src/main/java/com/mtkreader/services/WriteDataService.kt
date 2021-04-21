@@ -6,7 +6,13 @@ import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.data.DataStructures
 import com.mtkreader.data.reading.*
 import com.mtkreader.utils.DataUtils
+import com.mtkreader.data.reading.Telegram
+import com.mtkreader.data.reading.Tlg
+import com.mtkreader.data.reading.Uni4byt
+import com.mtkreader.getBytes
+import com.mtkreader.data.reading.*
 import io.reactivex.Single
+import java.util.*
 import java.util.*
 import kotlin.experimental.inv
 
@@ -19,7 +25,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         return Single.fromCallable { setData() }
     }
 
-    private fun setData(): Boolean {
+    private fun setData(): String {
         var datstr: String
         var adrstr: String
         var cmdstr: String
@@ -32,50 +38,58 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         adrstr = "C080"
         cmdstr = "W3"
         datstr = setFrRaParVer9(false)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        setFrRaParVer9(false)
+        setTlgData(0, 2)
+        setTlgData(1, 2)
+        setTlgData(2, 2)
+        setTlgData(3, 2)
+        setTlgData(4, 3)
+        setTlgData(5, 2)
+        setTlgData(6, 3)
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
         AddToImg("C080", datstr)
 
         //TELEGRAMI
             adrstr = ""
             cmdstr = "W3"
             datstr = setTlgData(0,2)
-            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
             AddToImg("9080", datstr)
 
             adrstr = ""
             cmdstr = "W3"
             datstr = setTlgData(1,2)
-            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
             AddToImg("9180", datstr)
 
             adrstr = ""
             cmdstr = "W3"
             datstr = setTlgData(2,2)
-            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
             AddToImg("9280", datstr)
 
             adrstr = ""
             cmdstr = "W3"
             datstr = setTlgData(3,2)
-            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
             AddToImg("9380", datstr)
 
             adrstr = ""
             cmdstr = "W3"
             datstr = setTlgData(4,3)
-            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
             AddToImg("9480", datstr)
 
             adrstr = ""
             cmdstr = "W3"
             datstr = setTlgData(5,2)
-            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
             AddToImg("9580", datstr)
 
             adrstr = ""
             cmdstr = "W3"
             datstr = setTlgData(6,3)
-            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+            if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
             AddToImg("9680", datstr)
 
 
@@ -84,37 +98,37 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         adrstr = ""
         cmdstr = "W3"
         datstr = SetKlDatVerPS981()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
         AddToImg("8080", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetKl2VerDatVerPS981()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
         AddToImg("8180", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetWiperDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false";
         AddToImg("5080", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetPonPoffRDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("5180", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetTlgAbsensceDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("5280", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetLearningDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("5380", datstr)
 
 //---------------------------------
@@ -122,31 +136,31 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(8,2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("9280", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(9,3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("9380", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0A,3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("9480", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0B,2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("9580", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0C,3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("9680", datstr)
 
 //---------------------------------
@@ -154,13 +168,13 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         adrstr = ""
         cmdstr = "W3"
         datstr = SetRelInterLock()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("0380", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetNewRecParData()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         AddToImg("0280", datstr)
 
 
@@ -168,25 +182,16 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         adrstr = ""
         cmdstr = "W3"
         datstr = SetIDParVer9()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return false;
+        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1))return "false"
         //AddToImg("0280", datstr)
 
 
         var res=WrProgPgPS981()
 
-//---------------------------
-       //pFrameWnd->ShowData("\r\n--WRIMG-\r\n");
-       //for (auto it = imgWR.begin(); it != imgWR.end(); ++it) {
-       //    CString ff;
-       //    ff.Format("\r\n%s(%s)",it->first,it->second);
-       //    pFrameWnd->ShowData(ff);
-       //}
-       //pFrameWnd->ShowData("\r\n---\r\n");
-
-        return res
+        return ""
     }
 
-    private fun setFrRaParVer9(bbdefault: Boolean):String {
+    private fun setFrRaParVer9(bbdefault: Boolean): String {
         val broj = data.mParFilteraCF.BROJ
         if (broj >= 0) {
             val ptabpar = DataUtils.getTbParFilteraVer9()[broj]
@@ -205,9 +210,9 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
             data.mParFilteraCF.BROJ = ptabpar.BROJ
         }
 
-        var pchData: String = ""
+
         val ttt = Uni4byt(data.mParFilteraCF.BROJ)
-        pchData = String.format(
+        var pchData = String.format(
             "%02X%02X%04X%04X%04X%04X%04X%04X%02X00",
             data.mParFilteraCF.NYM1, data.mParFilteraCF.NYM1,
             data.mParFilteraCF.K_V, data.mParFilteraCF.REZ,
@@ -235,10 +240,91 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
 
         return pchData
     }
-    private fun setTlgData(grupa: Int, nrTlg: Int): String {
 
-        return ""
+    private fun setTlgData(grupa: Int, nrTlg: Int): String {
+        var pchData = ""
+        val pbuf = mutableListOf<Byte>()
+        when (grupa) {
+            0 -> {
+                when (nrTlg) {
+                    1 -> pbuf.addAll(data.mOp50rij.TlgRel1.getBytes().toList())
+                    2 -> {
+                        pbuf.addAll(data.mOp50rij.TlgRel1.getBytes().toList())
+                        pbuf.addAll(data.mOp50rij.TlgRel2.getBytes().toList())
+                    }
+                    3 -> {
+                        pbuf.addAll(data.mOp50rij.TlgRel1.getBytes().toList())
+                        pbuf.addAll(data.mOp50rij.TlgRel2.getBytes().toList())
+                        pbuf.addAll(data.mOp50rij.TlgRel3.getBytes().toList())
+                    }
+                }
+            }
+            1 -> when (nrTlg) {
+                1 -> pbuf.addAll(data.mOp50rij.TlgRel2.getBytes().toList())
+                2 -> {
+                    pbuf.addAll(data.mOp50rij.TlgRel2.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.TlgRel3.getBytes().toList())
+                }
+                3 -> {
+                    pbuf.addAll(data.mOp50rij.TlgRel2.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.TlgRel3.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.TlgRel4.getBytes().toList())
+                }
+            }
+            2 -> when (nrTlg) {
+                1 -> pbuf.addAll(data.mOp50rij.TlgRel3.getBytes().toList())
+                2 -> {
+                    pbuf.addAll(data.mOp50rij.TlgRel3.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.TlgRel4.getBytes().toList())
+                }
+                3 -> {
+                    pbuf.addAll(data.mOp50rij.TlgRel3.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.TlgRel4.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.tlg[0].tel1.getBytes().toList())
+                }
+            }
+            3 -> when (nrTlg) {
+                1 -> pbuf.addAll(data.mOp50rij.TlgRel4.getBytes().toList())
+                2 -> {
+                    pbuf.addAll(data.mOp50rij.TlgRel4.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.tlg[0].tel1.getBytes().toList())
+                }
+                3 -> {
+                    pbuf.addAll(data.mOp50rij.TlgRel4.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.tlg[0].tel1.getBytes().toList())
+                    pbuf.addAll(data.mOp50rij.tlg[1].tel1.getBytes().toList())
+                }
+            }
+            4 -> pbuf.addAll(getTlgBytesGroup(data.mOp50rij.tlg, 0, nrTlg))
+            5 -> pbuf.addAll(getTlgBytesGroup(data.mOp50rij.tlg, 3, nrTlg))
+            6 -> pbuf.addAll(getTlgBytesGroup(data.mOp50rij.tlg, 5, nrTlg))
+            8 -> pbuf.addAll(getTelegramBytesGroup(data.mTelegSync, 0, nrTlg))
+            9 -> pbuf.addAll(getTelegramBytesGroup(data.mTelegSync, 2, nrTlg))
+            0x0A -> pbuf.addAll(getTelegramBytesGroup(data.mTelegSync, 5, nrTlg))
+            0x0B -> pbuf.addAll(getTelegramBytesGroup(data.mTelegSync, 8, nrTlg))
+            0x0C -> pbuf.addAll(getTelegramBytesGroup(data.mTelegSync, 10, nrTlg))
+        }
+
+        for (byte in pbuf) {
+            pchData += String.format("%02X", byte)
+        }
+        return pchData
     }
+
+    private fun getTlgBytesGroup(tlgs: List<Tlg>, startIndex: Int, telegNum: Int): List<Byte> {
+        val buf = mutableListOf<Byte>()
+        for (i in startIndex until startIndex + telegNum)
+            buf.addAll(tlgs[i].tel1.getBytes().toList())
+        return buf
+    }
+
+    private fun getTelegramBytesGroup(telegrams: Array<Telegram>, startIndex: Int, telegNum: Int): List<Byte> {
+        val buf = mutableListOf<Byte>()
+        for (i in startIndex until startIndex + telegNum)
+            buf.addAll(telegrams[i].getBytes().toList())
+        return buf
+    }
+
     private fun SetKlDatVerPS981(): String {
         var res: String = ""
         res += GetDlyRelDV9(data.mOprij.KlOpR1)
@@ -352,12 +438,12 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
     }
     private fun SetNewRecParData(): String {
         var res: String = ""
-        val sek=Calendar.getInstance().get(Calendar.SECOND)
-        val min=Calendar.getInstance().get(Calendar.MINUTE)
-        val sat=Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val dat=Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-        val mje=Calendar.getInstance().get(Calendar.MONTH)
-        val god=Calendar.getInstance().get(Calendar.YEAR)
+        val sek= Calendar.getInstance().get(Calendar.SECOND)
+        val min= Calendar.getInstance().get(Calendar.MINUTE)
+        val sat= Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val dat= Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+        val mje= Calendar.getInstance().get(Calendar.MONTH)
+        val god= Calendar.getInstance().get(Calendar.YEAR)
 
         data.m_cNewParData.DataTime[0]=toBCD(sek).toByte()
         data.m_cNewParData.DataTime[1]=toBCD(min).toByte()
@@ -367,15 +453,15 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         data.m_cNewParData.DataTime[5]=toBCD(god/100).toByte()
 
         var IDRePara:String="IDREPAR"
-        data.m_cNewParData.IDRePara= REC_PAR_STR.StringToByteArrTrimed(IDRePara,REC_PAR_STR.PARID_SIZE)
+        data.m_cNewParData.IDRePara= REC_PAR_STR.StringToByteArrTrimed(IDRePara, REC_PAR_STR.PARID_SIZE)
         var ReParaSite:String="ReParaSite"
-        data.m_cNewParData.ReParaSite=REC_PAR_STR.StringToByteArrTrimed(ReParaSite,REC_PAR_STR.PARID_SIZE)
+        data.m_cNewParData.ReParaSite= REC_PAR_STR.StringToByteArrTrimed(ReParaSite, REC_PAR_STR.PARID_SIZE)
         var IDCreate:String="IDCreate"
-        data.m_cNewParData.IDCreate=REC_PAR_STR.StringToByteArrTrimed(IDCreate,REC_PAR_STR.PARID_SIZE)
+        data.m_cNewParData.IDCreate= REC_PAR_STR.StringToByteArrTrimed(IDCreate, REC_PAR_STR.PARID_SIZE)
         var CreateSite:String="CreateSite"
-        data.m_cNewParData.CreateSite=REC_PAR_STR.StringToByteArrTrimed(CreateSite,REC_PAR_STR.PARID_SIZE)
+        data.m_cNewParData.CreateSite= REC_PAR_STR.StringToByteArrTrimed(CreateSite, REC_PAR_STR.PARID_SIZE)
         var IDFile:String="IDFile135613316136136"
-        data.m_cNewParData.IDFile=REC_PAR_STR.StringToByteArrTrimed(IDFile,REC_PAR_STR.PARIDFILE_SIZE)
+        data.m_cNewParData.IDFile= REC_PAR_STR.StringToByteArrTrimed(IDFile, REC_PAR_STR.PARIDFILE_SIZE)
 
         for(i in 0..REC_PAR_STR.DataTime_SIZE)  res += String.format("%02",data.m_cNewParData.DataTime[i])
         for(i in 0..REC_PAR_STR.PARID_SIZE)  res += String.format("%02",data.m_cNewParData.IDRePara[i])
@@ -487,8 +573,8 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         var res: String = ""
         var ncount=0
         var rval=true
-        var  pPProg=Opprog()
-        var x: Unitimbyt=Unitimbyt()
+        var  pPProg= Opprog()
+        var x: Unitimbyt = Unitimbyt()
         when(rel) {
             1->pPProg= data.mPProgR1[nProNum]
             2->pPProg= data.mPProgR2[nProNum]
@@ -505,12 +591,12 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         }
 
 
-    if (ncount < len) {
-        do  res += "FF"
-        while (++ncount < len);
-    }
-       //nProNum++;
-       //return(rval);
+        if (ncount < len) {
+            do  res += "FF"
+            while (++ncount < len);
+        }
+        //nProNum++;
+        //return(rval);
 
         return res
     }
@@ -527,7 +613,5 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         return true;
 
     }
-
-
 
 }
