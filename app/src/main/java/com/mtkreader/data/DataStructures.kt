@@ -1,10 +1,11 @@
 package com.mtkreader.data
 
+import com.mtkreader.commons.Const
 import com.mtkreader.data.reading.*
 
 class DataStructures {
     var globalIndex = 0
-
+    var m_paramSrc= Const.PARAMSRC.NEW
     var mTip = 0
     var mHardwareVersion = 0
     var mSoftwareVersion = 0
@@ -31,7 +32,7 @@ class DataStructures {
     var mPonPoffRx = Array(4) { PonPoffStr() }
     var mTelegAbsenceRx = Array(4) { TlgAbstr() }
     var mLearningRx = Array(4) { StrLoadMng() }
-    var mRelInterlock = Array(4) { IntrlockStr() }
+    var mRelInterlock = Array(8) { IntrlockStr() }
     var mKalendar = Array(72) { StKalend() }
     var mInitRelSetProg = InitRelSetting()
     var mUkls = Ukls()

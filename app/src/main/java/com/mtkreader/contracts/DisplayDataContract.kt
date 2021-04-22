@@ -2,6 +2,7 @@ package com.mtkreader.contracts
 
 import com.mtkreader.commons.base.AutoDisposePresenter
 import com.mtkreader.commons.base.ErrorHandlingFragment
+import com.mtkreader.data.DataStructures
 
 interface DisplayDataContract {
 
@@ -14,10 +15,12 @@ interface DisplayDataContract {
     }
 
     interface DisplayService {
-        fun generateHtml(): String
+       // fun generateHtml(): String
+        fun generateHtml(dataStructures: DataStructures): String
     }
 
     interface ProcessService {
-        fun processData(header: ByteArray, data: ByteArray): String
+       // fun processData(header: ByteArray, data: ByteArray): String
+        fun processData(header: ByteArray, data: ByteArray): DataStructures
     }
 }

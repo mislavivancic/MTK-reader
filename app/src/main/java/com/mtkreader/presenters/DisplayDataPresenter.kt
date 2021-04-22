@@ -2,6 +2,7 @@ package com.mtkreader.presenters
 
 import com.mtkreader.commons.base.BasePresenter
 import com.mtkreader.contracts.DisplayDataContract
+import com.mtkreader.data.DataStructures
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -19,8 +20,18 @@ class DisplayDataPresenter(private val view: DisplayDataContract.View) : BasePre
         val disposable = Single.fromCallable { processService.processData(header, data) }
             .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::a, view::displayErrorPopup)
+
+        addDisposable(disposable)
+    }
+    private fun a(data:DataStructures){
+        val disposable = Single.fromCallable {displayService.generateHtml(data)  }
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(view::displayData, view::displayErrorPopup)
 
         addDisposable(disposable)
     }
+
+
 }

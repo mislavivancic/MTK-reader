@@ -34,13 +34,17 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
     }
 
     override fun extractFileData(fileLines: List<String>): Single<DataStructures> {
-        return Single.fromCallable { extract(fileLines) }
+        return Single.fromCallable {
+            val dat = extract(fileLines)
+            return@fromCallable dat
+        }
     }
 
     private fun extract(fileLines: List<String>): DataStructures {
         if (!fileLines.first().startsWith(FILE_TOKEN, ignoreCase = true)) {
             throw Error(context.getString(R.string.not_mtk_file))
         }
+        data.m_paramSrc=Const.PARAMSRC.FILE
         var line = fileLines.getOrNull(1)
         extractDeviceInfo(line)
         line = fileLines.getOrNull(2)

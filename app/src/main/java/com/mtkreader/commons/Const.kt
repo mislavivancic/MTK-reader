@@ -57,7 +57,11 @@ object Const {
         const val RESET = "01810382"
         const val ACK = "015503560D0A"
     }
-
+    object PARAMSRC {
+       const val FILE = 0
+       const val DEVICE = 1
+       const val NEW = 2
+    }
     object Data {
         const val TIM_LOSS_RTC_POS = 0x02
         const val SINH_REL_POS_MASK = 0x40

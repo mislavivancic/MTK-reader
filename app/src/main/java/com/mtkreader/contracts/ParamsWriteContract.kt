@@ -13,6 +13,10 @@ interface ParamsWriteContract {
         fun onError(throwable: Throwable)
     }
 
+    interface ViewDisplay : ErrorHandlingFragment {
+        fun displayData(dataString: String)
+    }
+
     interface Presenter : AutoDisposePresenter {
         fun extractFileData(fileLines: List<String>)
         // fun connectToDevice(device: BluetoothDevice)
