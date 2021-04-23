@@ -6,14 +6,9 @@ import android.util.Log
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.TimeContract
-import com.mtkreader.data.DataStructMon
-import com.mtkreader.data.DataStructures
-import com.mtkreader.data.DeviceDate
-import com.mtkreader.data.DeviceTime
-import com.mtkreader.data.reading.Opprog
-import com.mtkreader.data.reading.TimeDate
-import com.mtkreader.data.reading.Uni4byt
-import com.mtkreader.data.reading.Unitimbyt
+import com.mtkreader.data.*
+import com.mtkreader.data.REL24HCSTR2.Companion.SIZE_24HC_TPAR2
+import com.mtkreader.data.reading.*
 import com.mtkreader.data.writing.DataRXMessage
 import com.mtkreader.data.writing.DataTXTMessage
 import com.mtkreader.hasFlag
@@ -26,6 +21,7 @@ import java.util.*
 import kotlin.experimental.and
 import kotlin.experimental.or
 import kotlin.experimental.xor
+
 
 class MonitorServiceImpl : TimeContract.Service,KoinComponent {
     val context: Context by inject()
@@ -372,7 +368,7 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
             0x00->UpTimPri(dbuf)
             0X04->UpWTimPri(dbuf)
             0X03->UpAktRel(dbuf)
-          //  0X09->GetPrijFlg(dbuf)
+           0X09->GetPrijFlg(dbuf)
 
             0X08->UpProgFile(dbuf)
 
@@ -393,7 +389,7 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
             0x28->GetPrijStatus(dbuf)
             0x29->GetAktFnRx(dbuf)
 
-            //0x2A, 0x2B, 0x2C, 0x2D->Get24HLearn(dbuf,monadr-0x2A)
+            0x2A, 0x2B, 0x2C, 0x2D->Get24HLearn(dbuf,monadr-0x2A)
             0x30, 0x31, 0x32, 0x33->GetProg24h(dbuf, monadr and 0x7)
             0x14->GetRTCFlags(dbuf)
         }
@@ -401,7 +397,102 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
 
     }
 
+    private fun GetPrijFlg(dbuf: ByteArray) {
+        var b1=dbuf[globalIndex++]
+        var b2=dbuf[globalIndex++]
+        var str=String.format("b1 %02x b2 %02x", b1,b2)
+    }
+
+    private fun Get24HLearn(dbuf: ByteArray, rel: Int) {
+        var mTab24HCX: REL24HCSTR2=REL24HCSTR2()
+
+        val uk7D=if(dataS.mCfg.cID>=100) true else false
+        var LearnedDaysRel=Array(4){Array(7){false} }
+        if(uk7D){
+            mTab24HCX.Sta7DC.currDay=dbuf[globalIndex++].toInt()
+            mTab24HCX.Sta7DC.StartDay=dbuf[globalIndex++].toInt()
+            mTab24HCX.Sta7DC.BrUpProg=dbuf[globalIndex++].toInt()
+            mTab24HCX.Sta7DC.ctl=dbuf[globalIndex++].toInt()
+
+            if (mTab24HCX.Sta7DC.ctl.hasFlag(mTab24HCX.Sta7DC.BrUpProg)){
+                var startD = mTab24HCX.Sta7DC.StartDay;
+                for(sh in 0 until mTab24HCX.Sta7DC.BrUpProg){
+                    LearnedDaysRel[rel][startD++] = true;
+                    if (startD >= 7) startD = 0; //TODO ??BrUpProg
+                }
+            }
+        }
+        mTab24HCX.State24h=dbuf[globalIndex++].toInt()
+        mTab24HCX.RelWrPos=dbuf[globalIndex++].toInt()
+        mTab24HCX.LastCmd=dbuf[globalIndex++].toInt()
+        mTab24HCX.NrTpar=dbuf[globalIndex++].toInt()
+        mTab24HCX.Tsta1Off = BtoLEndian(dbuf)
+
+        for (upar in 0 until SIZE_24HC_TPAR2) {
+            mTab24HCX.Tpar[upar].ton = BtoLEndian(dbuf).toShort()
+            mTab24HCX.Tpar[upar].toff = BtoLEndian(dbuf).toShort()
+        }
+
+        //getStringArray(R.array.IDSI_LRN_ST, sday % 8)
+        //var SRelWrPosA=arrayOf("NONE", getString(R.string.IDSI_XON),getString(R.string.IDSI_XOFF),getString(R.string.IDSI_XON)+"-"+getString(R.string.IDSI_XOFF))
+        //DEBUG ISPIS skip
+
+        var head=""
+        if (uk7D and ((mTab24HCX.Sta7DC.ctl)!=0))
+        {
+            head=String.format(getString(R.string.IDSI_LEARNPERIOD), rel + 1, getString(R.string.IDSCB_LEARING_PERIODR1_1));
+            var sdan=context.resources.getStringArray(R.array.a_days)
+            if(mTab24HCX.Sta7DC.StartDay!=-1){
+                head+=String.format("\r\n %s %s", getString(R.string.IDSI_LRN_STARTDAY),sdan[mTab24HCX.Sta7DC.StartDay % 7] );
+                head+=String.format("\r\n %s %d/7", getString(R.string.IDSI_LRN_LEARNEDDAYS), mTab24HCX.Sta7DC.BrUpProg);
+                head+=String.format("\r\n %s [%s]", getString(R.string.IDSI_LRN_TPLEARNED),sdan[mTab24HCX.Sta7DC.currDay % 7] );
+            }
+            else{
+                head+=String.format("\r\n %s %s", getString(R.string.IDSI_LRN_STARTDAY),getString(R.string.IDSI_LRN_NOTSTARTED) );
+            }
+        }
+        else{
+            head+=String.format(getString(R.string.IDSI_LEARNPERIOD), rel + 1, getString(R.string.IDSCB_LEARING_PERIODR1_0));
+        }
+
+        var maxP = SIZE_24HC_TPAR2
+        var res=""
+        if (mTab24HCX.NrTpar <= SIZE_24HC_TPAR2) maxP = mTab24HCX.NrTpar
+
+            var upar = 0
+            var TP= WTONOFF()
+            while (upar < maxP) {
+                TP=mTab24HCX.Tpar[upar]
+                res+=String.format(
+                    "    \r\n    T-a: %02d:%02d T-b: %02d:%02d",
+                    mTab24HCX.Tpar[upar].ton / 60, mTab24HCX.Tpar[upar].ton % 60,
+                    mTab24HCX.Tpar[upar].toff / 60, mTab24HCX.Tpar[upar].toff % 60
+                )
+                upar++
+            }
+
+        if (mTab24HCX.RelWrPos == 1 && mTab24HCX.LastCmd == 1)
+            res+=String.format("    \r\n    T-a: %02d:%02d T-b: --:--", mTab24HCX.Tpar[upar].ton / 60, mTab24HCX.Tpar[upar].ton % 60)
+        if (mTab24HCX.RelWrPos == 2 && mTab24HCX.LastCmd == 2)
+            res+=String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", mTab24HCX.Tpar[upar].toff / 60, mTab24HCX.Tpar[upar].toff % 60)
+        if (mTab24HCX.Tsta1Off >= 0)
+            res+=String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", mTab24HCX.Tsta1Off / 60, mTab24HCX.Tsta1Off % 60)
+
+
+        if (res.isBlank()) res = "    \r\n    T-a: --:-- T-b: --:--"
+        if (rel == 0) m_24cikN = ""
+        m_24cikN += (head +res +"\r\n")
+            
+    }
+
+    var m_24cikN=""
+
+
     private fun GetProg24h(dbuf: ByteArray, rel: Int) {
+        m_24cikN += String.format("\n\r" + getString(R.string.IDSI_RELTP), rel +1)
+        GetProg(dbuf)
+    }
+    private fun GetProg(dbuf: ByteArray) {
         var nrTpar = 8//dataS.mCfg.cNpar
         val x = Unitimbyt()
         var pPProg = Opprog()
@@ -415,14 +506,41 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         for(i in 0..nrTpar)
         {
             x.i = 0;
-            x.b[2] = *pdbuf++;
-            x.b[1] = *pdbuf++;
-            x.b[0] = *pdbuf++;
+            x.b[2] = dbuf[globalIndex++]
+            x.b[1] = dbuf[globalIndex++]
+            x.b[0] = dbuf[globalIndex++]
             x.updateI()
-            pPProg.AkTim
+            x.updateTB()
+
+            pPProg.TPro[i]=x.t
         }
 
-        context.resources.getStringArray(R.array.a_days)[i]
+        val akdani = mutableListOf<String>()
+        for(i in 0..7)
+            if(pPProg.DanPr.toInt().hasFlag(0x1 shl i))
+                akdani.add(context.resources.getStringArray(R.array.a_days)[i])
+
+        var res=""
+        if(pPProg.DanPr.toInt()!=0)
+            res=getString(R.string.IDSI_LRN_ACTDAYS)+akdani.joinToString()
+
+
+        for(i in 0..nrTpar)
+        {
+            val TP=pPProg.TPro[i]
+            var par=""
+            if((!TP.bTonb) && (!TP.bToffb))
+                par=String.format("    \r\n    T-a: %02d:%02d T-b: %02d:%02d", TP.Ton /60,TP.Ton%60, TP.Toff/60,TP.Toff%60)
+            if((!TP.bTonb) && (TP.bToffb))
+                par=String.format("    \r\n    T-a: %02d:%02d T-b: --:--",  TP.Ton /60, TP.Ton % 60)
+            if((TP.bTonb) && (!TP.bToffb))
+                par=String.format("    \r\n    T-a: --:-- T-b: %02d:%02d",  TP.Toff/60, TP.Toff%60)
+            if((!TP.bTonb) || (!TP.bToffb))
+                res += par;
+        }
+        if(res.isBlank())
+            res="    \r\n    T-a: --:-- T-b: --:--"
+        m_24cikN+= res+"\r\n"
     }
 
     private fun GetRTCFlags(dbuf: ByteArray) {
@@ -826,4 +944,19 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         val tempi = Uni4byt(byteArrayOf(b0, b1, b2, b3))
         return tempi.i
     }
+    private fun BtoLEndian(dbuf: ByteArray) : Int {
+        //UNW2BYT tempw;
+        //tempw.w=0;
+        //tempw.b[1]=*m_pbbuf++;
+        //tempw.b[0]=*m_pbbuf++;
+        //return(tempw.w);
+
+
+        val b1 = dbuf[globalIndex++]
+        val b0 = dbuf[globalIndex++]
+        val tempi = Uni4byt(byteArrayOf(b0, b1, 0, 0))
+        return tempi.i
+    }
+
+
 }
