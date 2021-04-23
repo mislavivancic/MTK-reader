@@ -430,7 +430,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
     }
 
     private fun toBCD(x: Int): Int {
-        return ((x / 10) shl 4) and (x % 10)
+        return ((x / 10) shl 4) or (x % 10)
     }
 
     private fun SetNewRecParData(): String {
