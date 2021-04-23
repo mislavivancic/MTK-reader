@@ -46,6 +46,7 @@ object Const {
         const val SENT = "MESSAGE SENT"
         const val RECEIVED = "MESSAGE RECEIVED"
         const val PACK = "PACK"
+        const val MONITOR = "MONITOR"
     }
 
     object DeviceConstants {
@@ -74,9 +75,7 @@ object Const {
         const val PON_DISLRN_I_W_MASK = 0x80
         const val PON_LPERIOD_DIS_MASK = 0x80
         const val TLGA_ON_DISLRN = 0x80
-        const val LEARN_7DAYS_MASK = 0x10
-        const val LEARN_R_ON_MASK = 0x40
-        const val LEARN_R_OFF_MASK = 0x20
+
 
 
         const val SNE_POFF = 0x0001
@@ -122,6 +121,56 @@ object Const {
         const val TIP_SPN = 6
         const val TIP_PS = 7
         const val TIP_PSB = 8
+
+
+
+        const val LEARN_DISEB_MASK = 0x80
+        const val LEARN_LGHTS_MASK = 0x40
+        const val LEARN_7DAYS_MASK = 0x10
+
+        const val LEARN_R_ON_MASK   =  0x40
+        const val LEARN_R_OFF_MASK  =  0x20
+//---------------------------------PRIJEM EVENT---------------------------------------------
+        const val PRIJ_EV_PON     =  0x01
+        const val PRIJ_EV_TLG	  =    0x02				//novi tlg OK
+        const val PRIJ_EV_STIMP   =  0x04				//start imp OK
+        const val PRIJ_EV_EMTLG   =  0x08
+        const val PRIJ_EV_SINH    =  0x10
+        const val PRIJ_EV_MYTLG   =  0x20				//teleg upisan u prijemnik
+        const val PRIJ_EV_RTCST   =  0x40       //RTC ST ili  OF
+        const val PRIJ_EV_RTCOF   =  0x80
+//---------------------------RELEJ EVENTS--------------------
+        const val REL_EV_TL_ON      =   0x20
+        const val REL_EV_TL_OFF     =   0x10
+        const val REL_EV_TL_LDIS	=     0x80				//learn dis
+        const val REL_EV_TL_LINTR	=     0x40				//learn break
+        const val REL_EV_TL_PROEN   =   0x01				//prog enable
+        const val REL_EV_TL_PRODI   =   0x02				//prog disable
+//-----------------------------------------RELEJ STATUS-------------------------
+        const val REL_LEARN_EN 	=0x80
+        const val REL_LEARN_INTR=	0x40
+        const val REL_PROG_UNLOCK= 0x01
+        const val REL_TA_STATE =	0x20
+        const val REL_TIMPR_UNLOCK =0x02
+        const val REL_EM_STATE = 0x8
+
+//-----------------------------------------AKT FN-------------------------
+        const val AKT_FN_NOF=		0x0
+        const val AKT_FN_DLY=		0x01
+        const val AKT_FN_WIPER=	0x02
+        const val AKT_FN_VRETCI=	0x04	//retrigg cik funkcije
+        const val AKT_FN_VRES=		0x08
+        const val AKT_FN_VCI=		0x09
+        const val AKT_FN_VCI2=		0x0A
+        const val AKT_FN_PONW=		0x0C		//wait on Pon;
+        const val AKT_SET_ON=		0x80
+        const val AKT_SET_OFF=		0x40
+        const val AKT_POS_ON=		0x20
+        const val AKT_POS_OFF=		0x10
+        const val AKT_EMERG_TLG= 0x100
+
+
+
 
         val bVtmask = byteArrayOf(
             0x80.toByte(),

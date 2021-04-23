@@ -93,7 +93,29 @@
     <string name="IDSI_PARM_FROM_FILE"> (from file)</string>
     <string name="IDSI_PARM_FROM_NEW"> (new)</string>
 
+    <string name="IDS_LRN_DIS">      Disabled</string>
+    <string name="IDS_LRN_OK">      Learning</string>
+    <string name="IDS_LRN_INTR">      Interupted</string>
+    <string name="HOZ">      HOZ</string>
 
+    <string name="IDSI_RELTP">"Relay %d switching programs:"</string>
+
+    <string name="IDSI_TIMEPAIRLRN">	 "Time pairs in learning:"</string>
+    <string name="IDSI_LRN_NOTSTARTED">  "Not Started!"</string>
+    <string name="IDSI_LRN_ACTDAYS">	"\r\n    Active days:"</string>
+    <string name="IDSI_LRN_LASTCMD">		"R%1!d! Last command: %2"</string>
+    <string name="IDSI_LRN_WRITESTATE">		"\r\n    Write state: %1"</string>
+    <string name="IDSI_LRN_LEARNSTATE">		"R%1!d! Learn state: %2"</string>
+    <string name="IDSI_LRN_STARTDAY">		"Start day:"</string>
+    <string name="IDSI_LRN_CURRDAY">		"\r\n    Current day: %1!d!"</string>
+    <string name="IDSI_LRN_LEARNEDDAYS">	"Number of days learned:"</string>
+    <string name="IDSI_LRN_TPLEARNED">		"Today, the device has learned:"</string>
+    <string name="IDSI_LRN_ST1">		"Idle"</string>
+    <string name="IDSI_LRN_ST2">		"Start"</string>
+    <string name="IDSI_LRN_ST3">		"Break" //interupt</string>
+    <string name="IDSI_LRN_ST4">		"End"</string>
+    <string name="IDSI_LRN_ST5">		"Write OK" //writen ok</string>
+    <string name="IDSI_LRN_ST6">		"Unknown"</string>
 
 
     <string name="name">Name</string>

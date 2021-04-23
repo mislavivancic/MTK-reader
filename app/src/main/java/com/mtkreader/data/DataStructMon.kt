@@ -1,45 +1,92 @@
 package com.mtkreader.data
 
-import com.mtkreader.commons.Const
-import com.mtkreader.data.reading.*
+class DataStructMon {
 
-class DataStructures {
-    var globalIndex = 0
-    var m_paramSrc= Const.PARAMSRC.NEW
-    var mTip = 0
-    var mHardwareVersion = 0
-    var mSoftwareVersion = 0
-    var mParFiltera = StrParFil()
-    val mParFilteraCF = StrParFilVer9()
-    var mBrojRast = 0
-    var mUtfPosto = 0.0
-    val UTFREFP = 0.9
-    var mBrUpKalendara: Byte = 0
-    val mCfg = CfgParHwsw()
-    var mFileComment = ""
-    val mOprij = Oprij()
-    val mOp50rij = Oprij50()
-    val mRealloc = Array(4) { Rreallc() }
-    val mTelegSync = Array(13) { Telegram() }
-    val m_TlgFnD = Array(8) { Telegram() }
-    val mPProgR1 = Array(16) { Opprog() }
-    val mPProgR2 = Array(16) { Opprog() }
-    val mPProgR3 = Array(16) { Opprog() }
-    val mPProgR4 = Array(16) { Opprog() }
-    var mPBuff = ByteArray(256)
-    var mPraznici = PrazniciStr()
-    var mWipersRx = Array(4) { Wiper() }
-    var mPonPoffRx = Array(4) { PonPoffStr() }
-    var mTelegAbsenceRx = Array(4) { TlgAbstr() }
-    var mLearningRx = Array(4) { StrLoadMng() }
-    var mRelInterlock = Array(8) { IntrlockStr() }
-    var mKalendar = Array(72) { StKalend() }
-    var mInitRelSetProg = InitRelSetting()
-    var mUkls = Ukls()
-    var mCFileParData = RecFilParStr()  //upisano u file;
-    var m_cLastParData = REC_PAR_STR() //proèitano iz ureðaja
-    var m_cNewParData = REC_PAR_STR()  //upisano u ureðaj;
-    var m_dwDeviceSerNr=0
-    var m_LoopPar = Array(4) { LOOPTIMSTR() }
+    companion object {
+        public const val LOG_TLG_MAX = 16
+        public const val LOG_EVENT_MAX = 100
+    }
 
+
+
+   //STR_TLG_LOG_H  m_TlgLogH
+   //STR_TLG_LOG_O   m_TlgLog[LOG_TLG_MAX]
+   //STR_EVENT_LOG_H  m_EvLogH
+   //STR_EVENT_LOG    m_EvLog[LOG_EVENT_MAX]
+var m_EvLog=Array(LOG_EVENT_MAX){STR_EVENT_LOG()}
+
+var m_EvLogH=STR_EVENT_LOG_H()
+    var dispR1_BrPrek=""
+    var dispR2_BrPrek=""
+    var dispR3_BrPrek=""
+    var dispR4_BrPrek=""
+
+    var dispR_TransmitFail=Array(4){""}
+    var dispR_LoopEn=Array(4){""}
+    var dispR_ProgEn=Array(4){""}
+    var dispR_Learn=Array(4){""}
+    var dispR_Wiper=Array(4){""}
+
+
+    var disp_paramfile=""
+    var disp_time=""
+    var disp_date=""
+    var disp_RTC=""
+    var disp_RTCsync=""
+    var disp_timeInOp=""
+    var disp_outage=""
+    var disp_UTF=""
+    var disp_lastTlg=""
+    var disp_serNum=""
+
+    var disp_eventlog=""
+    var disp_learncycle=""
+
+
+}
+
+
+//typedef struct {
+//
+//    STR_LOG_TIME Time;
+//    byte Obj;
+//    UN_STR_EVENT  Event;
+//} STR_EVENT_LOG;
+class STR_EVENT_LOG_H {
+    var indx: Byte = 0
+    var start: Byte = 0
+    var MaxEvent: Byte = 0
+    var Event: Byte = 0
+
+}
+
+class STR_EVENT_LOG{
+  var   Time=STR_LOG_TIME()
+    var Obj=0
+    var Event=UN_STR_EVENT()
+}
+
+class STR_LOG_TIME{
+    var sec=0
+    var min=0
+    var hour=0
+    var day=0
+    var dat=0
+    var month=0
+    var year=0
+
+}
+class STR_OEVENT{
+    var bH=0
+    var bL=0
+}
+
+class STR_TLG_LOG{
+    var Imp=ByteArray(8)
+
+}
+class UN_STR_EVENT {
+    var Imp=ByteArray(8)
+    var bH=0
+    var bL=0
 }

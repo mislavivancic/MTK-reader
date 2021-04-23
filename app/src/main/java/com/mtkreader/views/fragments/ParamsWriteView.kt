@@ -2,9 +2,11 @@ package com.mtkreader.views.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebViewClient
 import com.mtkreader.R
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.ParamsWriteContract
@@ -49,8 +51,8 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
             }
         }
 
-       // val lastFileData = SharedPrefsUtils.getLastFileRead(requireContext())
-        val lastFileData ="//Programiranje tst2.mtk\n" +
+        // val lastFileData = SharedPrefsUtils.getLastFileRead(requireContext())
+        val lastFileData = "//Programiranje tst2.mtk\n" +
                 "\n" +
                 "UPMTK-2-t-8-V-98\n" +
                 "\n" +
@@ -180,6 +182,25 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
 
     override fun onError(throwable: Throwable) {
 
+    }
+
+    override fun onHtml(html: String) {
+        webView.apply {
+            settings.javaScriptEnabled = true
+            webViewClient = WebViewClient()
+            /*
+            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = true
+            settings.setSupportZoom(true)
+            settings.builtInZoomControls = true
+            settings.displayZoomControls = false
+            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = true
+            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL*/
+            //settings.
+        }
+        val encodedHtml: String = Base64.encodeToString(html.toByteArray(Charsets.UTF_8), Base64.NO_PADDING)
+        webView.loadData(encodedHtml, "text/html", "base64")
     }
 
     private fun String.trimAndSplit(): List<String> {

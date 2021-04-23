@@ -53,6 +53,7 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BasePre
     }
     private fun onFinished(data: String) {
         Log.i(Const.Logging.PACK,"LOAD FROM FILE DISPLAY")
+        view.onHtml(data)
     }
 
 }

@@ -45,3 +45,9 @@ fun TelegCMD.getBytes(): ByteArray {
 fun Byte.getAsArray(): ByteArray {
     return byteArrayOf(this)
 }
+fun Int.hasFlag(other: Int):Boolean{
+    if((this and other)!=0)
+        return true
+    else
+        return false
+}

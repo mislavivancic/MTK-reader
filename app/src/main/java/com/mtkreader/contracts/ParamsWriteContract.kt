@@ -1,5 +1,6 @@
 package com.mtkreader.contracts
 
+import android.text.Html
 import com.mtkreader.commons.base.AutoDisposePresenter
 import com.mtkreader.commons.base.ErrorHandlingFragment
 import com.mtkreader.data.DataStructures
@@ -7,6 +8,7 @@ import io.reactivex.Single
 
 interface ParamsWriteContract {
     interface View : ErrorHandlingFragment {
+        fun onHtml(html: String)
         // fun onSocketConnected(socket: BluetoothSocket)
         // fun onReceiveBytes(byte: Byte)
 
