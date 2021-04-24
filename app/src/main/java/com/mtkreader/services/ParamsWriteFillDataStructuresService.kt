@@ -594,8 +594,6 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
         bitadrxx = getAdrNr(bitadrxx)
         vadrr.VAdrRD =
             if ((adrxx.compare(0x80) == 0) || bitadrxx == 0.toByte()) 0 else (adrxx * 8 + bitadrxx).toByte()
-        println()
-
     }
 
     private fun getAdrNr(xxadr: Byte): Byte {
@@ -670,7 +668,6 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
     private fun fillAddressMap(lines: List<String>) {
         val a = ','.toByte()
         for (line in lines) {
-            println(line)
             val addressData = line.split("(")
             val address = addressData.getOrElse(0) { "" }
             val data = addressData.getOrElse(1) { "" }
@@ -693,7 +690,6 @@ class ParamsWriteFillDataStructuresService : ParamsWriteContract.FillDataStructu
                 }
                 .toByteArray()
             addressMap[address] = data
-            println()
         }
     }
 

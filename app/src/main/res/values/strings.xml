@@ -334,4 +334,5 @@
 
     <string name="address_does_not_exist">Address does not exist!</string>
     <string name="wrong_software_version">Wrong software version</string>
+    <string name="set_in_programming_mode">Set device in program mode!</string>
 </resources>

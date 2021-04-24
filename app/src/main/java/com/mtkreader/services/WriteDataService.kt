@@ -1,182 +1,180 @@
 package com.mtkreader.services
 
-import android.util.Log
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.data.DataStructures
+import com.mtkreader.data.SendData
 import com.mtkreader.data.reading.*
+import com.mtkreader.data.writing.DataRXMessage
+import com.mtkreader.data.writing.DataTXMessage
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.getBytes
+import com.mtkreader.trimAndSplit
+import com.mtkreader.utils.DataUtils.byteArrayToHexString
+import com.mtkreader.utils.DataUtils.hexToAscii
+import com.mtkreader.utils.DataUtils.removeNonAlphanumeric
 import io.reactivex.Single
 import java.util.*
 import kotlin.experimental.inv
+import kotlin.experimental.xor
 
 class WriteDataService : ParamsWriteContract.WriteDataService {
 
     private lateinit var data: DataStructures
+    private val dataToWrite = mutableListOf<SendData>()
+    private val imageWrite = mutableMapOf<String, String>()
+    private val imageRead = mutableMapOf<String, String>()
 
-    override fun generateStrings(data: DataStructures): Single<String> {
+    override fun generateStrings(data: DataStructures): Single<List<SendData>> {
         this.data = data
         return Single.fromCallable { setData() }
     }
 
-    private fun setData(): String {
-        var datstr: String
-        var adrstr: String
-        var cmdstr: String
+    private fun setData(): List<SendData> {
+        dataToWrite.clear()
+        imageWrite.clear()
 
-        //imgWR.clear()
-        //CString datstr, adrstr, cmdstr
-        //CMainFrame* pFrameWnd = ((CMainFrame*)AfxGetMainWnd())
-
-
-        adrstr = "C080"
-        cmdstr = "W3"
-        datstr = setFrRaParVer9(false)
+        var adrstr = "C080"
+        var cmdstr = "W3"
+        var datstr = setFrRaParVer9(false)
         setFrRaParVer9(false)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("C080", datstr)
 
         //TELEGRAMI
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9080", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(1, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9180", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(2, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9280", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(3, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9380", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(4, 3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9480", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(5, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9580", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(6, 3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9680", datstr)
 
-
-//---------------------------
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetKlDatVerPS981()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("8080", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetKl2VerDatVerPS981()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("8180", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetWiperDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("5080", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetPonPoffRDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("5180", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetTlgAbsensceDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("5280", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetLearningDatVer95()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("5380", datstr)
 
-//---------------------------------
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(8, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9880", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(9, 3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9980", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0A, 3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9A80", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0B, 2)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9B80", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = setTlgData(0x0C, 3)
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("9C80", datstr)
 
-//---------------------------------
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetRelInterLock()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
         AddToImg("0380", datstr)
 
         adrstr = ""
         cmdstr = "W3"
         datstr = SetNewRecParData()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        //AddToImg("0280", datstr)
+        Snd_D_Chk(cmdstr, adrstr, datstr, 1)
+        AddToImg("0280", datstr)
 
 
         data.mOprij.VAdrPrij = 0
         adrstr = ""
         cmdstr = "W3"
         datstr = SetIDParVer9()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 1)) return "false"
-        AddToImg("0280", datstr)
+        Snd_D_Chk(cmdstr, adrstr, datstr, 0)
 
+        WrProgPgPS981()
 
-        var res = WrProgPgPS981()
-
-        return ""
+        return dataToWrite.toList()
     }
 
     private fun setFrRaParVer9(bbdefault: Boolean): String {
@@ -430,7 +428,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
     }
 
     private fun toBCD(x: Int): Int {
-        return ((x / 10) shl 4) and (x % 10)
+        return ((x / 10) shl 4) or (x % 10)
     }
 
     private fun SetNewRecParData(): String {
@@ -439,7 +437,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         val min = Calendar.getInstance().get(Calendar.MINUTE)
         val sat = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val dat = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-        val mje = Calendar.getInstance().get(Calendar.MONTH)
+        val mje = Calendar.getInstance().get(Calendar.MONTH) + 1
         val god = Calendar.getInstance().get(Calendar.YEAR)
 
         data.m_cNewParData.DataTime[0] = toBCD(sek).toByte()
@@ -450,33 +448,38 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         data.m_cNewParData.DataTime[5] = toBCD(god / 100).toByte()
 
         var IDRePara: String = "IDREPAR"
+        IDRePara = "a"
         data.m_cNewParData.IDRePara = REC_PAR_STR.StringToByteArrTrimed(IDRePara, REC_PAR_STR.PARID_SIZE)
         var ReParaSite: String = "ReParaSite"
+        ReParaSite = "Korisnik"
         data.m_cNewParData.ReParaSite = REC_PAR_STR.StringToByteArrTrimed(ReParaSite, REC_PAR_STR.PARID_SIZE)
         var IDCreate: String = "IDCreate"
+        IDCreate = "a"
         data.m_cNewParData.IDCreate = REC_PAR_STR.StringToByteArrTrimed(IDCreate, REC_PAR_STR.PARID_SIZE)
         var CreateSite: String = "CreateSite"
+        CreateSite = "Korisnik"
         data.m_cNewParData.CreateSite = REC_PAR_STR.StringToByteArrTrimed(CreateSite, REC_PAR_STR.PARID_SIZE)
         var IDFile: String = "IDFile135613316136136"
+        IDFile = "ps"
         data.m_cNewParData.IDFile = REC_PAR_STR.StringToByteArrTrimed(IDFile, REC_PAR_STR.PARIDFILE_SIZE)
 
         for (i in 0 until REC_PAR_STR.DataTime_SIZE) res += String.format("%02X", data.m_cNewParData.DataTime[i])
-        for (i in 0 until REC_PAR_STR.PARID_SIZE) res += String.format("%02X", data.m_cNewParData.IDRePara[i])
-        for (i in 0 until REC_PAR_STR.PARID_SIZE) res += String.format("%02X", data.m_cNewParData.ReParaSite[i])
-        for (i in 0 until REC_PAR_STR.PARID_SIZE) res += String.format("%02X", data.m_cNewParData.IDCreate[i])
         for (i in 0 until REC_PAR_STR.PARID_SIZE) res += String.format("%02X", data.m_cNewParData.CreateSite[i])
+        for (i in 0 until REC_PAR_STR.PARID_SIZE) res += String.format("%02X", data.m_cNewParData.IDCreate[i])
+        for (i in 0 until REC_PAR_STR.PARID_SIZE) res += String.format("%02X", data.m_cNewParData.ReParaSite[i])
+        for (i in 0 until REC_PAR_STR.PARID_SIZE) res += String.format("%02X", data.m_cNewParData.IDRePara[i])
         for (i in 0 until REC_PAR_STR.PARIDFILE_SIZE) res += String.format("%02X", data.m_cNewParData.IDFile[i])
 
         return res
     }
 
     private fun SetIDParVer9(): String {
-        var res: String = ""
+        var res = ""
 
-        var buf = CharArray(10)
+        val buf = CharArray(10)
         var i = 0
-        var sz = 10
-        var V: Int = data.mOprij.VAdrPrij.toInt()
+        val sz = 10
+        var V: Int = data.mOprij.VAdrPrij
         res = String.format("%08X", data.mOprij.VAdrPrij)
 
         if (V > 0) {
@@ -491,16 +494,12 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
                 res += String.format("%02X", buf[i] + '0'.toInt())
                 i++
             }
-
         }
         res += "0000000000000000000000000000000000000000"
-
-
-
         return res
     }
 
-    private fun WrProgPgPS981(): Boolean {
+    private fun WrProgPgPS981() {
         var datstr: String
         var adrstr: String
         var cmdstr: String
@@ -510,13 +509,12 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         cmdstr = "W2"
         adrstr = String.format("10%02X", rel)
         datstr = String.format("FFFF")
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 0)) return false
-        AddToImg(adrstr, datstr)
+        Snd_D_Chk(cmdstr, adrstr, datstr, 0)
 
         cmdstr = "W3"
         adrstr = String.format("8280")
         datstr = SetAkProgID100()
-        if (!Snd_D_Chk(cmdstr, adrstr, datstr, 0)) return false
+        Snd_D_Chk(cmdstr, adrstr, datstr, 0)
         AddToImg("8280", datstr)
 
 
@@ -530,17 +528,16 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         brRel = 3 + 1 // TODO(remove hardcoding)
         len = 35
         rel = 1
-        var nProNum: Int = 0
+        var nProNum = 0
 
         do {
             nProNum = 0
             do {
-                adrstr = ""
                 cmdstr = "W3"
                 datstr = SetProgDat(rel, nProNum, len, NrTpar.toInt())
                 if (datstr != "") {
                     adrstr = String.format("%01X%01X80", rel, nProNum)
-                    if (!Snd_D_Chk(cmdstr, adrstr, datstr, 0)) return false
+                    Snd_D_Chk(cmdstr, adrstr, datstr, 0)
                     AddToImg(adrstr, datstr)
 
                 }
@@ -550,10 +547,6 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
             rel++
         } while (rel < brRel)
 
-
-
-
-        return true
     }
 
     private fun SetAkProgID100(): String {
@@ -603,17 +596,145 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         return res
     }
 
-    fun Snd_D_Chk(cmdstr: String, adrstr: String, datstr: String, nrblock: Int): Boolean {
-        //Log.i(Const.Logging.PACK, "\nSND CMD $cmdstr ADR $adrstr::$datstr")
-        //Log.i(Const.Logging.PACK, "($adrstr)$datstr\n")
-        return true
-
+    private fun Snd_D_Chk(cmdstr: String, adrstr: String, datstr: String, nrblock: Int) {
+        dataToWrite.add(SendData(cmdstr, adrstr, datstr, nrblock))
     }
 
-    fun AddToImg(adrstr: String, datstr: String): Boolean {
-        Log.i(Const.Logging.PACK, "$adrstr($datstr)\n")
-        return true
+    private fun AddToImg(adrstr: String, datstr: String) {
+        imageWrite[adrstr] = datstr
+        // Log.i(Const.Logging.PACK, "$adrstr($datstr)\n")
+    }
 
+    override fun createMessageObject(data: SendData): DataTXMessage {
+        val mSendMesageData = DataTXMessage()
+        var index = 0
+        if (data.command.isNotEmpty()) {
+            mSendMesageData.buffer[index++] = Const.Data.SOH
+
+            for (char in data.command) {
+                mSendMesageData.buffer[index++] = char.toByte()
+                mSendMesageData.bcc = mSendMesageData.bcc xor char.toByte()
+            }
+            mSendMesageData.bcc = mSendMesageData.bcc xor Const.Data.STX
+        }
+        mSendMesageData.buffer[index++] = Const.Data.STX
+
+        for (char in data.address) {
+            mSendMesageData.buffer[index++] = char.toByte()
+            mSendMesageData.bcc = mSendMesageData.bcc xor char.toByte()
+        }
+
+        mSendMesageData.buffer[index++] = '('.toByte()
+        mSendMesageData.bcc = mSendMesageData.bcc xor '('.toByte()
+
+        for (char in data.data) {
+            mSendMesageData.buffer[index++] = char.toByte()
+            mSendMesageData.bcc = mSendMesageData.bcc xor char.toByte()
+        }
+        mSendMesageData.buffer[index++] = ')'.toByte()
+        mSendMesageData.bcc = mSendMesageData.bcc xor ')'.toByte()
+
+        if (data.nrBlock != 0) {
+            mSendMesageData.buffer[index++] = Const.Data.EOT
+            mSendMesageData.bcc = mSendMesageData.bcc xor Const.Data.EOT
+        } else {
+            mSendMesageData.buffer[index++] = Const.Data.ETX
+            mSendMesageData.bcc = mSendMesageData.bcc xor Const.Data.ETX
+        }
+
+        mSendMesageData.buffer[index++] = mSendMesageData.bcc
+        mSendMesageData.count = index
+        return mSendMesageData
+    }
+
+    override fun createMessageObject(string: String): DataTXMessage {
+        val mSendMesageData = DataTXMessage()
+        var index = 0
+        if (string.isNotEmpty()) {
+            mSendMesageData.buffer[index++] = Const.Data.SOH
+            for (char in string) {
+                mSendMesageData.buffer[index++] = char.toByte()
+                mSendMesageData.bcc = mSendMesageData.bcc xor char.toByte()
+            }
+        }
+
+        mSendMesageData.buffer[index++] = Const.Data.ETX
+        mSendMesageData.bcc = mSendMesageData.bcc xor Const.Data.ETX
+        mSendMesageData.buffer[index++] = mSendMesageData.bcc
+        mSendMesageData.count = index
+        return mSendMesageData
+    }
+
+    override fun createMTKCommandMessageObject(string: String): DataTXMessage {
+        val mSendMesageData = DataTXMessage()
+        if (data.mSoftwareVersion >= 90)
+            return createMessageObject(string)
+        return mSendMesageData
+    }
+
+    override fun isReadImageValid(dataRXMessage: DataRXMessage): Boolean {
+        imageRead.clear()
+        val allImages = mutableMapOf<String, String>()
+        val data = dataRXMessage.buffer.take(dataRXMessage.count)
+        val dataString = hexToAscii(byteArrayToHexString(data.toByteArray()))
+        val lines = dataString.trimAndSplit()
+        for (line in lines) {
+            val splitLine = line.trim().split("(", ")")
+            if (splitLine.size >= 2) {
+                val address = removeNonAlphanumeric(splitLine[0])
+                val addressData = splitLine[1]
+                if (address in Const.Data.adressesC) {
+                    imageRead[address] = addressData
+                }
+                allImages[address] = addressData
+            }
+        }
+        var NrTpar = 11// TODO(remove hardcoding) data.mCfg.cNpar
+        val brProg = 9 // TODO(remove hardcoding) data.mCfg.cNprog
+        val brRel = 3 + 1 // TODO(remove hardcoding)data.mCfg.cNrel + 1
+
+        var rel = 1
+
+        do {
+            var nProNum = 0
+            do {
+                val address = String.format("%01X%01X80", rel, nProNum)
+                val addressData = allImages[address]
+                addressData?.let { imageRead[address] = addressData }
+                nProNum++
+            } while (nProNum < brProg)
+            rel++
+        } while (rel < brRel)
+
+        for (address in Const.Data.adressesC) {
+            if (imageRead[address] == null || imageWrite[address] == null)
+                return false
+        }
+
+        if (imageRead.size != imageWrite.size)
+            return false
+
+        val wrong = mutableListOf<String>()
+        for (address in imageRead.keys) {
+            val readValue = imageRead[address]
+            val writeValue = imageWrite[address]
+
+            when (address) {
+                "C080" -> {
+                    if (readValue != writeValue!!.substring(0, 36))
+                        wrong.add(address)
+                }
+                "8280" -> {
+                    if (readValue!!.substring(0, 20) != writeValue)
+                        wrong.add(address)
+                }
+                else -> {
+                    if (readValue != writeValue)
+                        wrong.add(address)
+                }
+            }
+        }
+        return wrong.isEmpty()
     }
 
 }

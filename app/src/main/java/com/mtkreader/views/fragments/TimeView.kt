@@ -11,12 +11,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
-import androidx.core.content.ContextCompat
 import com.github.ivbaranov.rxbluetooth.exceptions.ConnectionClosedException
 import com.ikovac.timepickerwithseconds.MyTimePickerDialog
 import com.ikovac.timepickerwithseconds.TimePicker
 import com.mtkreader.R
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.Const.BluetoothConstants.FIRST_LINE_TOKEN_FIRST
+import com.mtkreader.commons.Const.BluetoothConstants.FIRST_LINE_TOKEN_SECOND
+import com.mtkreader.commons.Const.BluetoothConstants.SECOND_LINE_TOKEN
+import com.mtkreader.commons.Const.BluetoothConstants.SECOND_LINE_TOKEN_OTHER
 import com.mtkreader.commons.Const.Data.ETX
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.contracts.TimeContract
@@ -29,9 +32,6 @@ import com.mtkreader.utils.DataUtils.getHardwareVersion
 import com.mtkreader.utils.TimeUtils
 import com.mtkreader.views.adapters.DeviceOperation
 import com.mtkreader.views.dialogs.ConnectingDialog
-import com.spiddekauga.android.ui.showcase.MaterialShowcaseSequence
-import com.spiddekauga.android.ui.showcase.MaterialShowcaseView
-import com.spiddekauga.android.ui.showcase.ShowcaseConfig
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_time.*
 import net.alexandroid.utils.mylogkt.logI
@@ -42,12 +42,6 @@ import java.util.*
 class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     MyTimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener {
 
-    companion object {
-        private const val FIRST_LINE_TOKEN_FIRST = 13.toByte().toChar()
-        private const val FIRST_LINE_TOKEN_SECOND = 10.toByte().toChar()
-        private const val SECOND_LINE_TOKEN = 6.toByte().toChar()
-        private const val SECOND_LINE_TOKEN_OTHER = 127.toByte().toChar()
-    }
 
     private lateinit var connectedDevice: BluetoothDevice
     private lateinit var connectingDialog: Dialog

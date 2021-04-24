@@ -9,7 +9,7 @@ import com.mtkreader.data.DeviceDate
 import com.mtkreader.data.DeviceTime
 import com.mtkreader.data.reading.TimeDate
 import com.mtkreader.data.writing.DataRXMessage
-import com.mtkreader.data.writing.DataTXTMessage
+import com.mtkreader.data.writing.DataTXMessage
 import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.DataUtils
 import io.reactivex.Single
@@ -318,7 +318,7 @@ class TimeServiceImpl : TimeContract.Service {
 
     private fun sendStringToDevice(time: String) {
         var j = 0
-        val messageSendData = DataTXTMessage()
+        val messageSendData = DataTXMessage()
         if (time.isNotEmpty()) {
             messageSendData.buffer[j++] = Const.Data.SOH
             for (char in time) {

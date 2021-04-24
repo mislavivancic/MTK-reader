@@ -45,3 +45,7 @@ fun TelegCMD.getBytes(): ByteArray {
 fun Byte.getAsArray(): ByteArray {
     return byteArrayOf(this)
 }
+
+fun String.trimAndSplit(): List<String> {
+    return trim().lines().filter { it.isNotBlank() }
+}

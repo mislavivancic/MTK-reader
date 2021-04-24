@@ -6,6 +6,9 @@ import android.content.Context
 import com.github.ivbaranov.rxbluetooth.BluetoothConnection
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.Const.BluetoothConstants.CONNECTION_TIMEOUT
+import com.mtkreader.commons.Const.BluetoothConstants.INIT_COMMUNICATION_INTERVAL
+import com.mtkreader.commons.Const.BluetoothConstants.TIME_QUERY_INTERVAL
 import com.mtkreader.commons.base.BasePresenter
 import com.mtkreader.contracts.TimeContract
 import com.mtkreader.data.DeviceDate
@@ -24,11 +27,6 @@ import java.util.concurrent.TimeUnit
 class TimePresenter(private val view: TimeContract.View) : BasePresenter(view),
     TimeContract.Presenter, KoinComponent {
 
-    companion object {
-        private const val INIT_COMMUNICATION_INTERVAL: Long = 2000
-        private const val TIME_QUERY_INTERVAL: Long = 2000
-        private const val CONNECTION_TIMEOUT: Long = 10000
-    }
 
     private val bluetoothManager: RxBluetooth by inject()
     private val service: TimeContract.Service by inject()

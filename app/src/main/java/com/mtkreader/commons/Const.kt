@@ -40,6 +40,15 @@ object Const {
 
     object BluetoothConstants {
         const val UUID = "00001101-0000-1000-8000-00805f9b34fb"
+
+        const val INIT_COMMUNICATION_INTERVAL: Long = 2000
+        const val TIME_QUERY_INTERVAL: Long = 2000
+        const val CONNECTION_TIMEOUT: Long = 10000
+
+        const val FIRST_LINE_TOKEN_FIRST = 13.toByte().toChar()
+        const val FIRST_LINE_TOKEN_SECOND = 10.toByte().toChar()
+        const val SECOND_LINE_TOKEN = 6.toByte().toChar()
+        const val SECOND_LINE_TOKEN_OTHER = 127.toByte().toChar()
     }
 
     object Logging {
@@ -53,6 +62,8 @@ object Const {
 
         const val FIRST_INIT = "2F3F210D0A"
         const val SECOND_INIT = "063034360D0A"
+        const val WRITE_PARAMS_SECOND_INIT = "063034310D0A"
+        const val WRITE_PARAMS_THIRD_INIT = "0142300371"//0A"
         const val GET_TIME = "0147740330"
         const val RESET = "01810382"
         const val ACK = "015503560D0A"
@@ -104,7 +115,7 @@ object Const {
         const val TEL_REL_X = 0x0200
         const val CLP_REL_X = 0x0400
         const val PON_REL_X = 0x0800
-        const val EMT_REL_X	= 0x1000
+        const val EMT_REL_X = 0x1000
 
         const val PRO_REL_ON = 0x0101
         const val PRO_REL_OFF = 0x0102
@@ -128,6 +139,30 @@ object Const {
             0x04.toByte(),
             0x02.toByte(),
             0x01.toByte()
+        )
+        val adressesC = arrayOf(
+            "C080",
+            "9080",
+            "9180",
+            "9280",
+            "9380",
+            "9480",
+            "9580",
+            "9680",
+            "8080",
+            "8180",
+            "5080",
+            "5180",
+            "5280",
+            "5380",
+            "9880",
+            "9980",
+            "9A80",
+            "9B80",
+            "9C80",
+            "0380",
+            "0280",
+            "8280"
         )
 
         val CTipPrij = arrayOf(

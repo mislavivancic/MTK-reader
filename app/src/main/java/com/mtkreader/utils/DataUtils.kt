@@ -82,17 +82,188 @@ object DataUtils {
         )
     }
 
-    fun getParRasTlgVer9():Array<Array<Int>>{
+    fun getParRasTlgVer9(): Array<Array<Int>> {
         return arrayOf(
-            arrayOf(0x0000,0X002B,0X0050,0X0090,0X004A,0X005E,0X007B,0X000C,0X0012,0X001E,0X003E,0X0053,0X0073,0X0074,0X0090,0X0043,0x0032,0x0000),
-            arrayOf(0x0001,0X0050,0X00A0,0X0100,0X0084,0X009C,0X00C8,0X0019,0X0027,0X0040,0X005A,0X0066,0X0080,0X0080,0X007E,0X0055,0x0032,0x0000),
-            arrayOf(0X0002,0X0050,0X00B4,0X012C,0X013B,0X01B3,0X028A,0X003C,0X008C,0X00C8,0X0136,0X0186,0X01F4,0X01F4,0X012C,0X014A,0X0028,0x0000),
-            arrayOf(0x0003,0X002B,0X0050,0X0090,0X004A,0X005E,0X007B,0X000C,0X0012,0X001E,0X003E,0X0052,0X0073,0X0073,0X0090,0X0043,0x0032,0x0000),
-            arrayOf(0x0004,0x00CF,0x019E,0x0258,0x019C,0x028C,0x033F,0x002C,0x009C,0x00C8,0x00E3,0x00EF,0x010A,0x010A,0x0258,0x00E6,0x002C,0x0000),
-            arrayOf(0x0005,0x0096,0x012C,0x0186,0x00F4,0x011C,0x016B,0x001A,0x0028,0x0042,0x005D,0x0069,0x0084,0x0084,0x0186,0x0060,0x002C,0x0000),
-            arrayOf(0X0006,0X00BE,0X017C,0X0258,0X019C,0X028C,0X033F,0X002C,0X009C,0X00C8,0X00E3,0X00EF,0X010A,0X010A,0X0258,0X00E6,0X0032,0X0000),
-            arrayOf(0x0007,0x007D,0x00FA,0x0186,0x00F4,0x011C,0x016B,0x001A,0x0028,0x0042,0x005D,0x0069,0x0084,0x0084,0x0186,0x0060,0x0032,0x0000),
-            arrayOf(0x0008,0X002B,0X0050,0X0090,0X004A,0X005E,0X007B,0X000C,0X0012,0X001E,0X003E,0X0052,0X0073,0X0073,0X0090,0X0043,0x0032,0x0000)
+            arrayOf(
+                0x0000,
+                0X002B,
+                0X0050,
+                0X0090,
+                0X004A,
+                0X005E,
+                0X007B,
+                0X000C,
+                0X0012,
+                0X001E,
+                0X003E,
+                0X0053,
+                0X0073,
+                0X0074,
+                0X0090,
+                0X0043,
+                0x0032,
+                0x0000
+            ),
+            arrayOf(
+                0x0001,
+                0X0050,
+                0X00A0,
+                0X0100,
+                0X0084,
+                0X009C,
+                0X00C8,
+                0X0019,
+                0X0027,
+                0X0040,
+                0X005A,
+                0X0066,
+                0X0080,
+                0X0080,
+                0X007E,
+                0X0055,
+                0x0032,
+                0x0000
+            ),
+            arrayOf(
+                0X0002,
+                0X0050,
+                0X00B4,
+                0X012C,
+                0X013B,
+                0X01B3,
+                0X028A,
+                0X003C,
+                0X008C,
+                0X00C8,
+                0X0136,
+                0X0186,
+                0X01F4,
+                0X01F4,
+                0X012C,
+                0X014A,
+                0X0028,
+                0x0000
+            ),
+            arrayOf(
+                0x0003,
+                0X002B,
+                0X0050,
+                0X0090,
+                0X004A,
+                0X005E,
+                0X007B,
+                0X000C,
+                0X0012,
+                0X001E,
+                0X003E,
+                0X0052,
+                0X0073,
+                0X0073,
+                0X0090,
+                0X0043,
+                0x0032,
+                0x0000
+            ),
+            arrayOf(
+                0x0004,
+                0x00CF,
+                0x019E,
+                0x0258,
+                0x019C,
+                0x028C,
+                0x033F,
+                0x002C,
+                0x009C,
+                0x00C8,
+                0x00E3,
+                0x00EF,
+                0x010A,
+                0x010A,
+                0x0258,
+                0x00E6,
+                0x002C,
+                0x0000
+            ),
+            arrayOf(
+                0x0005,
+                0x0096,
+                0x012C,
+                0x0186,
+                0x00F4,
+                0x011C,
+                0x016B,
+                0x001A,
+                0x0028,
+                0x0042,
+                0x005D,
+                0x0069,
+                0x0084,
+                0x0084,
+                0x0186,
+                0x0060,
+                0x002C,
+                0x0000
+            ),
+            arrayOf(
+                0X0006,
+                0X00BE,
+                0X017C,
+                0X0258,
+                0X019C,
+                0X028C,
+                0X033F,
+                0X002C,
+                0X009C,
+                0X00C8,
+                0X00E3,
+                0X00EF,
+                0X010A,
+                0X010A,
+                0X0258,
+                0X00E6,
+                0X0032,
+                0X0000
+            ),
+            arrayOf(
+                0x0007,
+                0x007D,
+                0x00FA,
+                0x0186,
+                0x00F4,
+                0x011C,
+                0x016B,
+                0x001A,
+                0x0028,
+                0x0042,
+                0x005D,
+                0x0069,
+                0x0084,
+                0x0084,
+                0x0186,
+                0x0060,
+                0x0032,
+                0x0000
+            ),
+            arrayOf(
+                0x0008,
+                0X002B,
+                0X0050,
+                0X0090,
+                0X004A,
+                0X005E,
+                0X007B,
+                0X000C,
+                0X0012,
+                0X001E,
+                0X003E,
+                0X0052,
+                0X0073,
+                0X0073,
+                0X0090,
+                0X0043,
+                0x0032,
+                0x0000
+            )
         )
     }
 
@@ -224,7 +395,6 @@ object DataUtils {
     }
 
 
-
     fun HtoB(ch: Char): Char {
         if (ch in '0'..'9') {
             return (ch - '0').toChar()
@@ -253,5 +423,36 @@ object DataUtils {
     fun removeNonAlphanumeric(input: String): String {
         val re = Regex("[^A-Za-z0-9 ]")
         return re.replace(input, "")
+    }
+
+    fun byteArrayToHexString(bytes: ByteArray): String {
+        var data = ""
+        for (byte in bytes) {
+            data += String.format("%02X", byte)
+        }
+        return data
+    }
+
+    fun hexStringToByteArray(s: String): ByteArray {
+        val len = s.length
+        val data = ByteArray(len / 2)
+        var i = 0
+        while (i < len) {
+            data[i / 2] = ((Character.digit(s[i], 16) shl 4)
+                    + Character.digit(s[i + 1], 16)).toByte()
+            i += 2
+        }
+        return data
+    }
+
+    fun hexToAscii(hexStr: String): String {
+        val output = StringBuilder("")
+        var i = 0
+        while (i < hexStr.length) {
+            val str = hexStr.substring(i, i + 2)
+            output.append(str.toInt(16).toChar())
+            i += 2
+        }
+        return output.toString()
     }
 }
