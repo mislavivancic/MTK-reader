@@ -1,20 +1,13 @@
 package com.mtkreader.presenters
 
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
-import android.content.Context
-import com.github.ivbaranov.rxbluetooth.BluetoothConnection
-import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.R
 import com.mtkreader.commons.Const
-import com.mtkreader.commons.Const.BluetoothConstants.CONNECTION_TIMEOUT
-import com.mtkreader.commons.base.BasePresenter
+import com.mtkreader.commons.base.BaseBluetoothPresenter
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.data.DataStructures
 import com.mtkreader.data.SendData
 import com.mtkreader.data.writing.DataRXMessage
 import com.mtkreader.data.writing.DataTXMessage
-import com.mtkreader.managers.DataManager
 import com.mtkreader.utils.CommunicationUtil
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -24,27 +17,16 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import java.io.IOException
-import java.util.*
-import java.util.concurrent.TimeUnit
 
-class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BasePresenter(view),
+class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBluetoothPresenter(view),
     ParamsWriteContract.Presenter, KoinComponent {
 
-    private val context: Context by inject()
     private val fillDataStructuresService: ParamsWriteContract.FillDataStructuresService by inject()
     private val writeDataService: ParamsWriteContract.WriteDataService by inject()
-    private val bluetoothManager: RxBluetooth by inject()
-    private lateinit var connection: BluetoothConnection
-    private lateinit var socket: BluetoothSocket
 
-    private lateinit var timeoutDisposable: Disposable
-    private lateinit var initCommunicationDisposable: Disposable
     private lateinit var waitMessageDisposable: Disposable
 
     private val dataToWrite = mutableListOf<DataTXMessage>()
-    private val dataManager = DataManager()
-
 
     private val statusObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -79,55 +61,22 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BasePre
         dataToWrite.clear()
         dataToWrite.addAll(sendData.map { writeDataService.createMessageObject(it) })
         statusObservable.onNext("File parsed successfully!")
-        view.onReadyToConnect()
+        view.onDataReady()
     }
 
-    override fun connectToDevice(device: BluetoothDevice) {
-        addDisposable(
-            bluetoothManager.connectAsClient(device, UUID.fromString(Const.BluetoothConstants.UUID))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSocketConnected, view::onError)
-        )
-        timeoutDisposable = Observable.timer(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnComplete {
-                closeConnection()
-                throw IOException("TimeOut!")
-            }.doOnError { view.onError(it) }
-            .subscribe()
-        addDisposable(timeoutDisposable)
-    }
-
-    private fun onSocketConnected(socket: BluetoothSocket) {
-        statusObservable.onNext("Connected")
-        this.socket = socket
-        view.onSocketConnected()
-        startCommunication(socket)
-        initDeviceCommunication()
-    }
-
-    private fun startCommunication(socket: BluetoothSocket) {
+    override fun startCommunication() {
         statusObservable.onNext("Programming started!")
-
-        connection = BluetoothConnection(socket)
 
         waitMessageDisposable = Observable.fromCallable { communicate() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(this::onEndProgramming, this::onErrorOccurred)
-
         addDisposable(waitMessageDisposable)
-        addDisposable(
-            connection.observeByteStream()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::onReceiveByte, view::onError)
-        )
+        readStream()
+        initDeviceCommunication()
     }
 
-    private fun onReceiveByte(byte: Byte) {
+    override fun onByteReceive(byte: Byte) {
         stopTimeout()
         dataManager.addData(byte)
     }
@@ -180,37 +129,5 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BasePre
     private fun verifyReadout(readoutMessage: DataRXMessage): Boolean {
         return writeDataService.isReadImageValid(readoutMessage)
     }
-
-    private fun initDeviceCommunication() {
-        statusObservable.onNext("Started communication!")
-        initCommunicationDisposable =
-            Observable.interval(Const.BluetoothConstants.INIT_COMMUNICATION_INTERVAL, TimeUnit.MILLISECONDS)
-                .doOnNext {
-                    CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.FIRST_INIT)
-                    view.displayWaitMessage()
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError { this.onErrorOccurred(it) }
-                .subscribe()
-        addDisposable(initCommunicationDisposable)
-    }
-
-    override fun stopTimeout() {
-        timeoutDisposable.dispose()
-        initCommunicationDisposable.dispose()
-    }
-
-    override fun tryReset() {
-        if (this::socket.isInitialized && socket.isConnected)
-            CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.RESET)
-    }
-
-    override fun closeConnection() {
-        if (this::connection.isInitialized)
-            connection.closeConnection()
-        clear()
-    }
-
 
 }

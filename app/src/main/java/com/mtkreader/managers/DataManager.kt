@@ -2,6 +2,9 @@ package com.mtkreader.managers
 
 import com.mtkreader.commons.Const
 import com.mtkreader.data.writing.DataRXMessage
+import com.mtkreader.utils.DataUtils
+import com.mtkreader.utils.DataUtils.hexToAscii
+import net.alexandroid.utils.mylogkt.logI
 import kotlin.experimental.xor
 
 class DataManager {
@@ -22,13 +25,14 @@ class DataManager {
         readoutType = type
         retryCount = 0
         readMessageData = DataRXMessage()
-        val timeOut = System.currentTimeMillis() + 4500
+        val timeOut = System.currentTimeMillis() + 10000
         do {
             if (System.currentTimeMillis() > timeOut) {
                 throw Exception("Timed out!")
             }
 
         } while (!endOfMessage())
+        logI(hexToAscii(DataUtils.byteArrayToHexString(readMessageData.getBufferData().toByteArray())), customTag = Const.Logging.RECEIVED)
         return readMessageData
     }
 
@@ -112,7 +116,7 @@ class DataManager {
                     }
                 } else {
                     retryCount++
-                    Thread.sleep(1500)
+                    Thread.sleep(700)
                 }
                 if (retryCount > 5)
                     return false

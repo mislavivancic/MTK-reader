@@ -71,7 +71,6 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
         }
         val lastFileData = SharedPrefsUtils.getLastFileRead(requireContext())
         if (lastFileData != null) {
-            //presenter.extractFileData(lastFileData.trimAndSplit())
             btn_last_file.visibility = View.VISIBLE
             btn_last_file.setOnClickListener {
                 presenter.extractFileData(lastFileData.trimAndSplit())
@@ -79,7 +78,7 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
         }
     }
 
-    override fun onReadyToConnect() {
+    override fun onDataReady() {
         presenter.connectToDevice(connectedDevice)
         connectingDialog = ConnectingDialog(requireContext())
         connectingDialog.show()
@@ -88,6 +87,7 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
     override fun onSocketConnected() {
         connectingDialog.dismiss()
         loading_layout.visibility = View.VISIBLE
+        presenter.startCommunication()
     }
 
     override fun onStatusUpdate(statusMessage: String) {
@@ -125,6 +125,4 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
     override fun onError(throwable: Throwable) {
 
     }
-
-
 }

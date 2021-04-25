@@ -1,6 +1,5 @@
 package com.mtkreader.services
 
-import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.mtkreader.R
 import com.mtkreader.commons.Const
@@ -8,11 +7,8 @@ import com.mtkreader.contracts.TimeContract
 import com.mtkreader.data.DeviceDate
 import com.mtkreader.data.DeviceTime
 import com.mtkreader.data.reading.TimeDate
-import com.mtkreader.data.writing.DataRXMessage
 import com.mtkreader.data.writing.DataTXMessage
-import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.DataUtils
-import io.reactivex.Single
 import java.util.*
 import kotlin.experimental.and
 import kotlin.experimental.or
@@ -20,32 +16,10 @@ import kotlin.experimental.xor
 
 class TimeServiceImpl : TimeContract.Service {
 
-    private lateinit var socket: BluetoothSocket
-    private var readMessageData = DataRXMessage()
-    private val data = mutableListOf<Char>()
-
-
-    override fun setSocket(socket: BluetoothSocket) {
-        this.socket = socket
+    override fun extractTimeData(context: Context, data: List<Char>, hardwareVersion: Int): Pair<String, String> {
+        val dbuf = parseTimeData(data)
+        return generateTimeString(context, dbuf, hardwareVersion)
     }
-
-    override fun extractTimeData(
-        context: Context,
-        data: List<Char>,
-        hardwareVersion: Int
-    ): Single<Pair<String, String>> {
-        return Single.fromCallable<Pair<String, String>> {
-            val dbuf = parseTimeData(data)
-            return@fromCallable generateTimeString(context, dbuf, hardwareVersion)
-        }
-    }
-
-    override fun setTimeDate(time: DeviceTime, deviceDate: DeviceDate): Single<Boolean> {
-        return Single.fromCallable<Boolean> {
-            return@fromCallable startTimeWrite(deviceDate, time)
-        }
-    }
-
 
     private fun parseTimeData(data: List<Char>): ByteArray {
         var i = 1
@@ -148,8 +122,7 @@ class TimeServiceImpl : TimeContract.Service {
         return !((byte.toInt() shr 4) < 10 && (byte.toInt() and 0x0F) < 10)
     }
 
-
-    private fun startTimeWrite(deviceDate: DeviceDate, time: DeviceTime): Boolean {
+    override fun generateTimeWriteMessage(time: DeviceTime, deviceDate: DeviceDate): DataTXMessage {
         val timeDate = TimeDate()
         val year = (deviceDate.year % 100).toByte()
         with(timeDate) {
@@ -173,150 +146,30 @@ class TimeServiceImpl : TimeContract.Service {
             val cal = GregorianCalendar(deviceDate.year, deviceDate.month, deviceDate.day - 1)
 
             dan = cal.get(GregorianCalendar.DAY_OF_WEEK).toByte()
-            return writeTime(timeDate)
+
+
+            val timeString = String.format(
+                Const.Data.TIME_FORMAT,
+                timeDate.sek,
+                timeDate.min,
+                timeDate.sat,
+                timeDate.dan
+            )
+            val timeDateString = String.format(
+                Const.Data.TIME_DATE_FORMAT,
+                timeDate.sek,
+                timeDate.min,
+                timeDate.sat,
+                timeDate.dan,
+                timeDate.dat,
+                timeDate.mje,
+                timeDate.god
+            )
+            return createTimeWriteMessage(timeDateString)
         }
     }
 
-    private fun writeTime(timeDate: TimeDate): Boolean {
-        val timeString = String.format(
-            Const.Data.TIME_FORMAT,
-            timeDate.sek,
-            timeDate.min,
-            timeDate.sat,
-            timeDate.dan
-        )
-        val timeDateString = String.format(
-            Const.Data.TIME_DATE_FORMAT,
-            timeDate.sek,
-            timeDate.min,
-            timeDate.sat,
-            timeDate.dan,
-            timeDate.dat,
-            timeDate.mje,
-            timeDate.god
-        )
-
-        return !waitAnswer(timeDateString)
-
-    }
-
-    private fun waitAnswer(time: String): Boolean {
-        var isSuccessful = false
-        loop@ for (i in 1..3) {
-            sendStringToDevice(time)
-
-            readMessageData = DataRXMessage()
-            if (waitMessage()) {
-                when (readMessageData.status) {
-                    Const.Data.ACK -> {
-                        isSuccessful = true
-                        break@loop
-                    }
-                    Const.Data.NAK -> continue@loop
-                    Const.Data.COMPLETE -> break@loop
-
-                }
-            }
-
-        }
-        readMessageData = DataRXMessage()
-        return isSuccessful
-    }
-
-    override fun setReadData(data: List<Char>) {
-        this.data.clear()
-        this.data.addAll(data)
-    }
-
-    private fun waitMessage(): Boolean {
-        val timeOut = System.currentTimeMillis() + 1500
-        do {
-            if (System.currentTimeMillis() > timeOut) {
-                println("Timed out!")
-                return false
-            }
-
-        } while (!endOfMessage())
-        return true
-    }
-
-    private fun endOfMessage(): Boolean {
-        while (true) {
-            if (data.isNotEmpty()) {
-                for (dataByte in data) {
-                    if (readMessageData.status == Const.Data.ETX || readMessageData.status == Const.Data.EOT) {
-                        readMessageData.bcc = readMessageData.bcc xor dataByte.toByte()
-                        if (readMessageData.bcc == 0.toByte()) {
-                            readMessageData.status = Const.Data.COMPLETE
-                        } else {
-                            readMessageData.proterr = 0xCC.toByte()
-                        }
-                        return true
-                    } else {
-                        if (readMessageData.status == Const.Data.SOH || readMessageData.status == Const.Data.STX)
-                            readMessageData.bcc = readMessageData.bcc xor dataByte.toByte()
-
-                        when (dataByte.toByte()) {
-                            Const.Data.SOH -> {
-                                if (readMessageData.count == 0)
-                                    readMessageData.status = Const.Data.SOH
-                                else
-                                    readMessageData.proterr = Const.Data.SOH
-                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
-                            }
-                            Const.Data.STX -> {
-                                if (readMessageData.status == Const.Data.SOH || readMessageData.count == 0)
-                                    readMessageData.status = Const.Data.STX
-                                else
-                                    readMessageData.proterr = Const.Data.STX
-                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
-                            }
-                            0x0D.toByte() -> {
-                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
-                                if (readMessageData.type == 0.toByte()) readMessageData.crlf = 0x0D
-                            }
-                            0x0A.toByte() -> {
-                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
-                                if (readMessageData.type == 0.toByte()) {
-                                    if (readMessageData.crlf == 0x0D.toByte())
-                                        readMessageData.crlf = 0x0A
-                                    readMessageData.status = Const.Data.COMPLETE
-                                    return true
-                                }
-                            }
-                            Const.Data.ETX -> {
-                                readMessageData.status = Const.Data.ETX
-                            }
-                            Const.Data.EOT -> {
-                                readMessageData.status = Const.Data.EOT
-                            }
-                            Const.Data.ACK -> {
-                                readMessageData.status = Const.Data.ACK
-                                return true
-                            }
-                            Const.Data.NAK -> {
-                                readMessageData.status = Const.Data.NAK
-                                return true
-                            }
-                            else -> {
-                                readMessageData.buffer[readMessageData.count++] = dataByte.toByte()
-                                if (readMessageData.count > 2048 * 4) {
-                                    readMessageData.proterr = 0x55
-                                    return false
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-
-
-            Thread.sleep(700)
-        }
-    }
-
-    private fun sendStringToDevice(time: String) {
+    override fun createTimeWriteMessage(time: String):DataTXMessage {
         var j = 0
         val messageSendData = DataTXMessage()
         if (time.isNotEmpty()) {
@@ -330,10 +183,8 @@ class TimeServiceImpl : TimeContract.Service {
             messageSendData.buffer[j++] = messageSendData.bcc
             messageSendData.count = j
 
-            CommunicationUtil.writeToSocket(
-                socket,
-                messageSendData.buffer.take(messageSendData.count).toByteArray()
-            )
         }
+        return messageSendData
     }
+
 }

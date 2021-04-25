@@ -41,4 +41,6 @@ data class DataRXMessage(
         return result
     }
 
+    fun getBufferData() = buffer.take(count)
+
 }
