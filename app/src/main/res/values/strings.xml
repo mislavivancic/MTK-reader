@@ -203,6 +203,93 @@
         <item>Ho.</item>
     </string-array>
 
+
+   <string name="IDSTOC_GENERAL">"General"</string>
+   <string name="IDSTOC_RELSETTING">"Relay settings"</string>
+   <string name="IDSTOC_ASTRSAT">"Astronomical clock"</string>
+   <string name="IDSTOC_ULSATSCHED">"Time switch schedules"</string>
+   <string name="IDSTOC_RELSWASSIGN">"Relay switching assignment"</string>
+   <string name="IDSTOC_CLASSTLG">"Classic telegrams"</string>
+   <string name="IDSTOC_ADDTLG">"Additional telegrams"</string>
+   <string name="IDSTOC_SYNCTLG">"Synchronization telegrams"</string>
+   <string name="IDSTOC_SYNCTLGWD">"Synchronization telegrams - day of the week"</string>
+   <string name="IDSTOC_DINTLG">"Telegram type DIN-43861-301"</string>
+   <string name="IDSTOC_CYCSW">"Cyclic switching"</string>
+   <string name="IDSTOC_DLYSW">"Switching delay"</string>
+   <string name="IDSTOC_WSREL">"Work Schedules"</string>
+   <string name="IDSTOC_TPARREL">"Time pairs"</string>
+   <string name="IDSTOC_PWONOFF">"Arrival and loss of supply"</string>
+   <string name="IDSTOC_SPECDAYS">"Special days"</string>
+   <string name="IDSTOC_SEASONS">"Seasons"</string>
+   <string name="IDSTOC_WIPER">"Wiper and Closed Loop"</string>
+   <string name="IDSTOC_LEARNF">"Learn functions"</string>
+   <string name="IDSTOC_TLGABSE">"Telegram absence"</string>
+   <string name="IDSTOC_EVENTLOG">"Event log"</string>
+   <string name="IDSTOC_RELINTERLOCK">"Logic functions"</string>
+
+    <string name="IDSC_USERID">"User ID"</string>
+    <string name="IDSC_USERNAME">"User Name"</string>
+    <string name="IDSC_PASSWORD">"PassWord"</string>
+    <string name="IDSC_WACCESS">"Access"</string>
+    <string name="IDSC_RELAY">"Relay"</string>
+    <string name="IDSC_POSITION">"Position"</string>
+    <string name="IDSC_TIME">"Time"</string>
+    <string name="IDSC_DAY">"Day"</string>
+    <string name="IDSC_DESCR">"Description (Name)"</string>
+    <string name="IDSC_FILENAME">"File name *.mtk"</string>
+    <string name="IDSC_DAYMONTH">"day/month"</string>
+    <string name="IDSC_BEGIN">"begin"</string>
+    <string name="IDSC_END">"end"</string>
+
+
+
+
+
+    <string name="IDS_EVL_RTC_ST">"RTC:Loss of RTC"</string>
+    <string name="IDS_EVL_RTC_OF">"RTC:Oscilator fail"</string>
+    <string name="IDS_EVL_RTC_BL">"RTC:Battery low"</string>
+    <string name="IDS_EVL_RTC_OOK">"RTC:Oscilator OK"</string>
+    <string name="IDS_EVL_ON">"""a"""</string>
+    <string name="IDS_EVL_OFF">"""b"""</string>
+    <string name="IDS_EVL_PROBLOCK">"Programs DISABLED"</string>
+    <string name="IDS_EVL_PROUNBLOCK">"Programs ENABLED"</string>
+    <string name="IDS_EVL_TA_S">"Telegram absence SET"</string>
+    <string name="IDS_EVL_TA_R">"Telegram absence RESET"</string>
+    <string name="IDS_EVL_WIP_S">"Wiper SET"</string>
+    <string name="IDS_EVL_WIP_R">"Wiper RESET"</string>
+    <string name="IDS_EVL_PREL_ON">"Prog ""a"""</string>
+    <string name="IDS_EVL_PREL_OFF">"Prog ""b"""</string>
+    <string name="IDS_EVL_PRO_REL_X">"SP"</string>
+    <string name="IDS_EVL_TEL_REL_X">"TLG"</string>
+    <string name="IDS_EVL_CLP_REL_X">"SM"</string>
+    <string name="IDS_EVL_WIP_REL_X">"W"</string>
+    <string name="IDS_EVL_PWR_REL_X">"PWRON"</string>
+    <string name="IDS_EVL_POFF">"Power:OFF"</string>
+    <string name="IDS_EVL_PON">"Power:ON"</string>
+    <string name="IDS_EVL_SHT">"Synchronization telegram  - time"</string>
+    <string name="IDS_EVL_SHD">"Synchronization telegram - day"</string>
+    <string name="IDS_EVL_LSINH">"Time:local changed"</string>
+    <string name="IDS_EVL_WPAROK">"Changed param"</string>
+    <string name="IDS_EVL_WPARERR">"Changed param error"</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <string name="work_schedules">Work Schedules</string>
     <string name="active">Active</string>
 

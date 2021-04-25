@@ -122,6 +122,17 @@ object Const {
         const val TIP_PS = 7
         const val TIP_PSB = 8
 
+        const val SNO_RTC= 0x20
+
+        const val SNO_REL1= 0x01
+        const val SNO_REL2= 0x02
+        const val SNO_REL3= 0x03
+        const val SNO_REL4= 0x04
+
+        const val SNO_PRIJEM= 0x10
+        const val SNO_TLG=   0x80
+
+
 
 
         const val LEARN_DISEB_MASK = 0x80

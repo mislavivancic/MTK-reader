@@ -43,6 +43,7 @@ class DataStructMon {
 
     var disp_eventlog = ""
     var disp_learncycle = ""
+    var disp_eventlogCSV = ""
 
 
 }

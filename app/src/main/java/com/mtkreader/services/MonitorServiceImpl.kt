@@ -5,8 +5,39 @@ import android.content.Context
 import android.util.Log
 import com.mtkreader.R
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.Const.Data.CLP_REL_X
+import com.mtkreader.commons.Const.Data.EMT_REL_X
+import com.mtkreader.commons.Const.Data.PON_REL_X
+import com.mtkreader.commons.Const.Data.PRO_REL_X
+import com.mtkreader.commons.Const.Data.REL_OFF
+import com.mtkreader.commons.Const.Data.REL_ON
+import com.mtkreader.commons.Const.Data.REL_PROBLOCK
+import com.mtkreader.commons.Const.Data.REL_PROUNBLOCK
+import com.mtkreader.commons.Const.Data.REL_TA_R
+import com.mtkreader.commons.Const.Data.REL_TA_S
+import com.mtkreader.commons.Const.Data.REL_WIP_R
+import com.mtkreader.commons.Const.Data.REL_WIP_S
+import com.mtkreader.commons.Const.Data.SNE_LSINH
+import com.mtkreader.commons.Const.Data.SNE_POFF
+import com.mtkreader.commons.Const.Data.SNE_PON
+import com.mtkreader.commons.Const.Data.SNE_RTC_BL
+import com.mtkreader.commons.Const.Data.SNE_RTC_OF
+import com.mtkreader.commons.Const.Data.SNE_RTC_OOK
+import com.mtkreader.commons.Const.Data.SNE_RTC_ST
+import com.mtkreader.commons.Const.Data.SNE_SHD
+import com.mtkreader.commons.Const.Data.SNE_SHT
+import com.mtkreader.commons.Const.Data.SNE_WPARERR
+import com.mtkreader.commons.Const.Data.SNE_WPAROK
+import com.mtkreader.commons.Const.Data.SNO_PRIJEM
+import com.mtkreader.commons.Const.Data.SNO_REL1
+import com.mtkreader.commons.Const.Data.SNO_REL2
+import com.mtkreader.commons.Const.Data.SNO_REL3
+import com.mtkreader.commons.Const.Data.SNO_REL4
+import com.mtkreader.commons.Const.Data.SNO_RTC
+import com.mtkreader.commons.Const.Data.TEL_REL_X
 import com.mtkreader.contracts.TimeContract
 import com.mtkreader.data.*
+import com.mtkreader.data.DataStructMon.Companion.LOG_EVENT_MAX
 import com.mtkreader.data.REL24HCSTR2.Companion.SIZE_24HC_TPAR2
 import com.mtkreader.data.reading.*
 import com.mtkreader.data.writing.DataRXMessage
@@ -350,48 +381,50 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
 
     var m_dbufLen=0
 
-    private fun GetLineDat(){
+    private fun GetLineDat() {
         //----
-        var dbuf=ByteArray(128)
-        var monadr=0
-        when((monadr and 0xE0.toInt())){
-             0x80 -> {UpRamEventLog(monadr and 0x1F.toInt(),dbuf); return}
+        var dbuf = ByteArray(128)
+        var monadr = 0
+        when ((monadr and 0xE0.toInt())) {
+            0x80 -> {
+                UpRamEventLog(monadr and 0x1F.toInt(), dbuf); return
+            }
         }
-        when((monadr and 0xF0.toInt())) {
-            0xC0-> ""//UpRamTlgLog
-            0x40->GetProg7DRx(dbuf,monadr and 0xF0.toInt(),0)
-            0x50->GetProg7DRx(dbuf,monadr and 0xF0.toInt(),1)
-            0x60->GetProg7DRx(dbuf,monadr and 0xF0.toInt(),2)
+        when ((monadr and 0xF0.toInt())) {
+            0xC0 -> ""//UpRamTlgLog
+            0x40 -> GetProg7DRx(dbuf, monadr and 0xF0.toInt(), 0)
+            0x50 -> GetProg7DRx(dbuf, monadr and 0xF0.toInt(), 1)
+            0x60 -> GetProg7DRx(dbuf, monadr and 0xF0.toInt(), 2)
 
         }
-        when(monadr){
-            0x00->UpTimPri(dbuf)
-            0X04->UpWTimPri(dbuf)
-            0X03->UpAktRel(dbuf)
-           0X09->GetPrijFlg(dbuf)
+        when (monadr) {
+            0x00 -> UpTimPri(dbuf)
+            0X04 -> UpWTimPri(dbuf)
+            0X03 -> UpAktRel(dbuf)
+            0X09 -> GetPrijFlg(dbuf)
 
-            0X08->UpProgFile(dbuf)
+            0X08 -> UpProgFile(dbuf)
 
-           // 0x21->UpmBroPre(dbuf)
-            0x20->UpEEBroPre(dbuf)
-            0x10->UpZadTeleg(dbuf)
-           0x11->UpUtf(dbuf)
-           0x12->UpKVUf(dbuf)
+            // 0x21->UpmBroPre(dbuf)
+            0x20 -> UpEEBroPre(dbuf)
+            0x10 -> UpZadTeleg(dbuf)
+            0x11 -> UpUtf(dbuf)
+            0x12 -> UpKVUf(dbuf)
 //
-           0x22->UpBrTstF(dbuf)
-           0X05->GetDevSerNr(dbuf)
-            0X06->GetEventH(dbuf)
-           // 0X07->GetTlgH(dbuf)
+            0x22 -> UpBrTstF(dbuf)
+            0X05 -> GetDevSerNr(dbuf)
+            0X06 -> GetEventH(dbuf)
+            // 0X07->GetTlgH(dbuf)
 //
-           0x25->GetRelEvents(dbuf)
-           0x26->GetRelStatus(dbuf)
-            0x27->GetPrijEvents(dbuf)
-            0x28->GetPrijStatus(dbuf)
-            0x29->GetAktFnRx(dbuf)
+            0x25 -> GetRelEvents(dbuf)
+            0x26 -> GetRelStatus(dbuf)
+            0x27 -> GetPrijEvents(dbuf)
+            0x28 -> GetPrijStatus(dbuf)
+            0x29 -> GetAktFnRx(dbuf)
 
-            0x2A, 0x2B, 0x2C, 0x2D->Get24HLearn(dbuf,monadr-0x2A)
-            0x30, 0x31, 0x32, 0x33->GetProg24h(dbuf, monadr and 0x7)
-            0x14->GetRTCFlags(dbuf)
+            0x2A, 0x2B, 0x2C, 0x2D -> Get24HLearn(dbuf, monadr - 0x2A)
+            0x30, 0x31, 0x32, 0x33 -> GetProg24h(dbuf, monadr and 0x7)
+            0x14 -> GetRTCFlags(dbuf)
         }
 
 
@@ -402,12 +435,12 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         var b2=dbuf[globalIndex++]
         var str=String.format("b1 %02x b2 %02x", b1,b2)
     }
-
+    var LearnedDaysRel=Array(4){Array(7){false} }
     private fun Get24HLearn(dbuf: ByteArray, rel: Int) {
         var mTab24HCX: REL24HCSTR2=REL24HCSTR2()
 
         val uk7D=if(dataS.mCfg.cID>=100) true else false
-        var LearnedDaysRel=Array(4){Array(7){false} }
+        LearnedDaysRel=Array(4){Array(7){false} }
         if(uk7D){
             mTab24HCX.Sta7DC.currDay=dbuf[globalIndex++].toInt()
             mTab24HCX.Sta7DC.StartDay=dbuf[globalIndex++].toInt()
@@ -459,24 +492,20 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         var res=""
         if (mTab24HCX.NrTpar <= SIZE_24HC_TPAR2) maxP = mTab24HCX.NrTpar
 
-            var upar = 0
-            var TP= WTONOFF()
-            while (upar < maxP) {
-                TP=mTab24HCX.Tpar[upar]
-                res+=String.format(
-                    "    \r\n    T-a: %02d:%02d T-b: %02d:%02d",
-                    mTab24HCX.Tpar[upar].ton / 60, mTab24HCX.Tpar[upar].ton % 60,
-                    mTab24HCX.Tpar[upar].toff / 60, mTab24HCX.Tpar[upar].toff % 60
-                )
-                upar++
-            }
-
+        var upar = 0
+        var TP = WTONOFF()
+        while (upar < maxP) {
+            TP = mTab24HCX.Tpar[upar]
+            res += String.format("    \r\n    T-a: %02d:%02d T-b: %02d:%02d", TP.ton / 60, TP.ton % 60, TP.toff / 60, TP.toff % 60)
+            upar++
+        }
+        TP = mTab24HCX.Tpar[upar]
         if (mTab24HCX.RelWrPos == 1 && mTab24HCX.LastCmd == 1)
-            res+=String.format("    \r\n    T-a: %02d:%02d T-b: --:--", mTab24HCX.Tpar[upar].ton / 60, mTab24HCX.Tpar[upar].ton % 60)
+            res += String.format("    \r\n    T-a: %02d:%02d T-b: --:--", TP.ton / 60, TP.ton % 60)
         if (mTab24HCX.RelWrPos == 2 && mTab24HCX.LastCmd == 2)
-            res+=String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", mTab24HCX.Tpar[upar].toff / 60, mTab24HCX.Tpar[upar].toff % 60)
+            res += String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", TP.toff / 60, TP.toff % 60)
         if (mTab24HCX.Tsta1Off >= 0)
-            res+=String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", mTab24HCX.Tsta1Off / 60, mTab24HCX.Tsta1Off % 60)
+            res += String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", mTab24HCX.Tsta1Off / 60, mTab24HCX.Tsta1Off % 60)
 
 
         if (res.isBlank()) res = "    \r\n    T-a: --:-- T-b: --:--"
@@ -486,7 +515,22 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
     }
 
     var m_24cikN=""
+    private fun GetProg7DRx(dbuf: ByteArray, prog: Int, rel: Int) {
 
+        var head= ""
+
+        var ShowPro=true
+        if (prog < 8) {    //SP
+            head=String.format("    \r\n    " +  getString(R.string.IDSI_RELTP), rel+1);
+
+        } else { //LP
+            val p = prog - 8
+            head=String.format("\r\n"+ getString(R.string.IDSI_RRR) +" %d "+  getString(R.string.IDSI_TIMEPAIRLRN) +"(%d)",rel+1, prog -7);
+            if (!LearnedDaysRel[rel][prog]) ShowPro = false
+        }
+        m_24cikN += head
+        if (ShowPro) GetProg(dbuf) else m_24cikN += "    \r\n    T-a: --:-- T-b: --:--"
+    }
 
     private fun GetProg24h(dbuf: ByteArray, rel: Int) {
         m_24cikN += String.format("\n\r" + getString(R.string.IDSI_RELTP), rel +1)
@@ -754,9 +798,9 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         val imps = mutableListOf<String>()
         for(i in 0..7){
             for(j in 0..7){
-                if(dbuf[i].toInt() and Const.Data.bVtmask[j].toInt() !=0){
-                    val imps = mutableListOf<String>()
-                }
+                if(dbuf[i].toInt() and Const.Data.bVtmask[j].toInt() !=0)
+                    imps.add(GetImpName(8*i+j+1))
+
             }
 
         }
@@ -889,8 +933,133 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
 
     }
 
-    private fun GetProg7DRx(dbuf: ByteArray, prog: Int, rel: Int) {
-        TODO("Not yet implemented")
+    fun SaveLogEvent() {
+        var csvStr = getString(R.string.IDSC_TIME) + ";" +
+                getString(R.string.IDSTOC_EVENTLOG) + ";" +
+                getString(R.string.IDSI_SERIALNUM) + datmon.disp_serNum + "\r\n"
+        var res = ""
+        var rindx = 0;
+        var endidx = 0;
+        //CListBox *loglist=(CListBox*)GetDlgItem(IDC_LOGEVENT);
+        //loglist->ResetContent();
+
+        if (datmon.m_EvLogH.start > 0 || datmon.m_EvLogH.indx > 0) {
+            if (datmon.m_EvLogH.start < datmon.m_EvLogH.indx) //nije napravio krug
+            {
+                rindx = datmon.m_EvLogH.start.toInt()
+                endidx = datmon.m_EvLogH.indx.toInt()
+            } else {
+                rindx = datmon.m_EvLogH.indx.toInt()
+                endidx = datmon.m_EvLogH.indx.toInt()
+            }
+
+
+            do {
+                var day = datmon.m_EvLog[rindx].Time.day
+                var sdan = context.resources.getStringArray(R.array.a_days)
+                var strday = if (day > 0) sdan[day - 1] else "???"
+                var obj = datmon.m_EvLog[rindx].Obj
+                var event = ""
+
+                when (obj) {
+                    0x80 -> event = "Telegram:" + GetTlgImp(datmon.m_EvLog[rindx].Event.Imp) //SNO_TLG
+                    0xA0 -> event = "Telegram:" + GetTlgString(datmon.m_EvLog[rindx].Event.Imp) //HOZ
+                    0xC0 -> event = "Telegram:" + GetTlgString(datmon.m_EvLog[rindx].Event.Imp) //SYNC
+                    else -> {
+                        var name = (datmon.m_EvLog[rindx].Event.bH shl 8) or (datmon.m_EvLog[rindx].Event.bL)
+                        event = GetEventString(obj, name)
+                    }
+                }
+
+                var datum = String.format(
+                    "%02X-%02X-%02X",
+                    datmon.m_EvLog[rindx].Time.dat,
+                    datmon.m_EvLog[rindx].Time.month,
+                    datmon.m_EvLog[rindx].Time.year
+                );
+                var vrijeme = String.format(
+                    "%02X:%02X:%02X",
+                    datmon.m_EvLog[rindx].Time.hour,
+                    datmon.m_EvLog[rindx].Time.min,
+                    datmon.m_EvLog[rindx].Time.sec
+                );
+
+                vrijeme += strday;
+                vrijeme = datum + " " + vrijeme;
+
+                res += String.format("%s %s\r\n", vrijeme, event)
+                csvStr += String.format("%s;%s\r\n", vrijeme, event);
+                //loglist->AddString(str);
+                //pFrameWnd->ShowData(str);
+
+                rindx++;
+                if (rindx >= LOG_EVENT_MAX) {
+                    rindx = 0;
+                }
+            } while (rindx != endidx);
+        }
+        datmon.disp_eventlog = res
+        datmon.disp_eventlog = csvStr
+    }
+
+    private fun GetTlgString(tlg: ByteArray): String {
+        //CString str = _T("");
+        //std::vector<CString> names = DBQ::GetTlgNamesMatchingRectlg(tlgx);
+        //for (auto value : names) str += " - "+ value;
+        //if(str.GetLength() <= 0)
+         var   str = GetTlgImp(tlg);
+        return str;
+
+    }
+
+    private fun GetEventString(obj: Int, name: Int): String {
+        var r = ""
+        when (obj) {
+            SNO_RTC -> {
+                if (name == SNE_RTC_ST) r = getString(R.string.IDS_EVL_RTC_ST)
+                else if (name == SNE_RTC_OF) r = getString(R.string.IDS_EVL_RTC_OF)
+                else if (name == SNE_RTC_BL) r = getString(R.string.IDS_EVL_RTC_BL)
+                else if (name == SNE_RTC_OOK) r = getString(R.string.IDS_EVL_RTC_OOK)
+                else r = String.format("RTC:%04X", name)
+
+            }
+            SNO_REL1, SNO_REL2, SNO_REL3, SNO_REL4 -> {
+                var swr = ""
+                if (name.hasFlag(PRO_REL_X)) swr = getString(R.string.IDS_EVL_PRO_REL_X)
+                if (name.hasFlag(TEL_REL_X)) swr = getString(R.string.IDS_EVL_TEL_REL_X)
+                if (name.hasFlag(CLP_REL_X)) swr = getString(R.string.IDS_EVL_CLP_REL_X)
+                if (name.hasFlag(REL_WIP_R)) swr = getString(R.string.IDS_EVL_WIP_REL_X)
+                if (name.hasFlag(REL_WIP_S)) swr = getString(R.string.IDS_EVL_TEL_REL_X) + " " + getString(R.string.IDS_EVL_WIP_REL_X)
+                if (name.hasFlag(PON_REL_X)) swr = getString(R.string.IDS_EVL_PWR_REL_X)
+                if (name.hasFlag(EMT_REL_X)) swr = getString(R.string.IDS_EVL_TEL_REL_X) + " H"
+
+                var tr: String
+                if (name.hasFlag(REL_ON)) tr = getString(R.string.IDS_EVL_ON) + " " + swr
+                else if (name.hasFlag(REL_OFF)) tr = getString(R.string.IDS_EVL_OFF) + " " + swr
+                else if (name == REL_PROBLOCK) tr = getString(R.string.IDS_EVL_PROBLOCK)
+                else if (name == REL_PROUNBLOCK) tr = getString(R.string.IDS_EVL_PROUNBLOCK)
+                else if (name == REL_TA_S) tr = getString(R.string.IDS_EVL_TA_S)
+                else if (name == REL_TA_R) tr = getString(R.string.IDS_EVL_TA_R)
+                else tr = String.format("%04X", name)
+                r = String.format("R%d:", obj)+tr
+
+            }
+            SNO_PRIJEM -> {
+                when (name) {
+                    SNE_POFF -> r = getString(R.string.IDS_EVL_POFF)
+                    SNE_PON -> r = getString(R.string.IDS_EVL_PON)
+                    SNE_SHT -> r = getString(R.string.IDS_EVL_SHT)
+                    SNE_SHD -> r = getString(R.string.IDS_EVL_SHD)
+                    SNE_LSINH -> r = getString(R.string.IDS_EVL_LSINH)
+                    SNE_WPAROK -> r = getString(R.string.IDS_EVL_WPAROK)
+                    SNE_WPARERR -> r = getString(R.string.IDS_EVL_WPARERR)
+                    else -> r = String.format("RECEIVER:%02X", name)
+                }
+            }
+            else -> r = String.format("UNKNOWN:%02X,%04X", obj, name)
+
+        }
+        return r;
     }
 
     fun UpRamEventLog(nr:Int,dbuf: ByteArray) {
@@ -900,11 +1069,32 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         for(i in 0..3)
         {
 
-        datmon.m_EvLog
+            datmon.m_EvLog[nr+i].Time.sec=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[nr+i].Time.min=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[nr+i].Time.hour=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[nr+i].Time.day=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[nr+i].Time.dat=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[nr+i].Time.month=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[nr+i].Time.year=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[nr+i].Obj=dbuf[globalIndex++].toInt()
+
+            var tmp=dbuf[globalIndex++]
+            datmon.m_EvLog[nr+i].Event.bH=tmp.toInt()
+            datmon.m_EvLog[nr+i].Event.Imp[0]=tmp
+
+            tmp=dbuf[globalIndex++]
+            datmon.m_EvLog[nr+i].Event.bL=tmp.toInt()
+            datmon.m_EvLog[nr+i].Event.Imp[1]=tmp
+
+            datmon.m_EvLog[nr+i].Event.Imp[2]=dbuf[globalIndex++]
+            datmon.m_EvLog[nr+i].Event.Imp[3]=dbuf[globalIndex++]
+            datmon.m_EvLog[nr+i].Event.Imp[4]=dbuf[globalIndex++]
+            datmon.m_EvLog[nr+i].Event.Imp[5]=dbuf[globalIndex++]
+            datmon.m_EvLog[nr+i].Event.Imp[6]=dbuf[globalIndex++]
+            datmon.m_EvLog[nr+i].Event.Imp[7]=dbuf[globalIndex++]
 
         }
     }
-
 
 
 
