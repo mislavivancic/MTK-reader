@@ -6,6 +6,7 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import android.webkit.WebViewClient
 import com.mtkreader.R
 import com.mtkreader.commons.Const
@@ -67,9 +68,7 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
 
     private fun initViews() {
         webView.apply {
-            settings.javaScriptEnabled = true
             webViewClient = WebViewClient()
-            /*
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
             settings.setSupportZoom(true)
@@ -77,13 +76,12 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
             settings.displayZoomControls = false
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
-            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL*/
-            //settings.
+            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL
         }
     }
 
     override fun displayData(dataString: String) {
-        val encodedHtml: String =           Base64.encodeToString(dataString.toByteArray(Charsets.UTF_8), Base64.NO_PADDING)
+        val encodedHtml: String = Base64.encodeToString(dataString.toByteArray(Charsets.UTF_8), Base64.NO_PADDING)
         webView.loadData(encodedHtml, "text/html", "base64")
 
     }

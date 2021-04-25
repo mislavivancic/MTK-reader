@@ -25,7 +25,7 @@ class DataManager {
         readoutType = type
         retryCount = 0
         readMessageData = DataRXMessage()
-        val timeOut = System.currentTimeMillis() + 10000
+        val timeOut = if (type == 0.toByte()) System.currentTimeMillis() + 10000 else System.currentTimeMillis() + 60000
         do {
             if (System.currentTimeMillis() > timeOut) {
                 throw Exception("Timed out!")
@@ -39,6 +39,7 @@ class DataManager {
 
     private fun endOfMessage(): Boolean {
         try {
+
             while (true) {
                 if (data.isNotEmpty()) {
                     readData.clear()
@@ -121,8 +122,10 @@ class DataManager {
                 if (retryCount > 5)
                     return false
             }
-        } catch (e: Exception) {
+        } catch (e: NullPointerException) {
             return false
         }
+
+
     }
 }

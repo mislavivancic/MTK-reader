@@ -1,53 +1,54 @@
 package com.mtkreader.presenters
 
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
-import com.github.ivbaranov.rxbluetooth.BluetoothConnection
-import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.commons.Const
-import com.mtkreader.commons.base.BasePresenter
+import com.mtkreader.commons.base.BaseBluetoothPresenter
 import com.mtkreader.contracts.ReadingContract
+import com.mtkreader.utils.CommunicationUtil
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.koin.core.KoinComponent
-import org.koin.core.inject
-import java.util.*
 
-class ReadingPresenter(private val view: ReadingContract.View) : BasePresenter(view),
+class ReadingPresenter(private val view: ReadingContract.View) : BaseBluetoothPresenter(view),
     ReadingContract.Presenter, KoinComponent {
 
-    private val bluetoothManager: RxBluetooth by inject()
-    private lateinit var connection: BluetoothConnection
-    private lateinit var socket: BluetoothSocket
+    private lateinit var waitMessageDisposable: Disposable
 
-    override fun connectToDevice(device: BluetoothDevice) {
-        addDisposable(
-            bluetoothManager.connectAsClient(device, UUID.fromString(Const.BluetoothConstants.UUID))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSocketConnected, view::onError)
-        )
+    override fun onByteReceive(byte: Byte) {
+        stopTimeout()
+        dataManager.addData(byte)
+        view.onByte(byte)
     }
 
-    private fun onSocketConnected(socket: BluetoothSocket) {
-        this.socket = socket
-        view.onSocketConnected(socket)
+    override fun startCommunication() {
+        waitMessageDisposable = Observable.fromCallable { communicate() }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(view::onReadoutDone, this::onErrorOccurred)
+        addDisposable(waitMessageDisposable)
+        readStream()
+        initDeviceCommunication()
     }
 
-    override fun readStream(socket: BluetoothSocket) {
-        connection = BluetoothConnection(socket)
 
-        addDisposable(
-            connection.observeByteStream()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(view::onReceiveBytes, view::onError)
-        )
-    }
+    private fun communicate(): String {
+        var fullContent = ""
 
-    override fun closeConnection() {
-        connection.closeConnection()
-        clear()
+        val headerMessage = dataManager.waitForMessage()
+        fullContent += headerMessage.getBufferData().map { it.toChar() }.joinToString("")
+
+        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
+        val message = dataManager.waitForMessage()
+        fullContent += message.getBufferData().map { it.toChar() }.joinToString("")
+
+
+        CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
+        val readoutDate = dataManager.waitForMessage(type = 1)
+        fullContent += readoutDate.getBufferData().map { it.toChar() }.joinToString("")
+
+
+        return fullContent
     }
 
 }
