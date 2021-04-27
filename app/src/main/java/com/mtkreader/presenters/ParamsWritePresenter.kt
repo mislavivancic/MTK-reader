@@ -1,16 +1,18 @@
 package com.mtkreader.presenters
 
-import com.mtkreader.R
 import com.mtkreader.commons.Const
+import com.mtkreader.commons.Const.Data.ACK
 import com.mtkreader.commons.base.BaseBluetoothPresenter
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.data.DataStructures
 import com.mtkreader.data.SendData
 import com.mtkreader.data.writing.DataRXMessage
 import com.mtkreader.data.writing.DataTXMessage
+import com.mtkreader.exceptions.NotProgrammingModeException
+import com.mtkreader.exceptions.ProgrammingError
 import com.mtkreader.utils.CommunicationUtil
+import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -35,7 +37,7 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
             statusObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(view::onStatusUpdate, this::onErrorOccurred)
+                .subscribe(view::onStatusUpdate, view::onError)
         )
     }
 
@@ -44,7 +46,7 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
             fillDataStructuresService.extractFileData(fileLines)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onDataStructuresFilled, this::onErrorOccurred)
+                .subscribe(this::onDataStructuresFilled, view::onError)
         )
     }
 
@@ -53,7 +55,7 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
             writeDataService.generateStrings(fileData)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSendDataReady, this::onErrorOccurred)
+                .subscribe(this::onSendDataReady, view::onError)
         )
     }
 
@@ -70,7 +72,7 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
         waitMessageDisposable = Observable.fromCallable { communicate() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::onEndProgramming, this::onErrorOccurred)
+            .subscribe(this::onEndProgramming, view::onError)
         addDisposable(waitMessageDisposable)
         readStream()
         initDeviceCommunication()
@@ -78,55 +80,56 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
 
     override fun onByteReceive(byte: Byte) {
         stopTimeout()
-        dataManager.addData(byte)
+        communicationManager.addData(byte)
     }
 
     private fun communicate(): DataRXMessage {
         val messages = mutableListOf<DataRXMessage>()
-        val headerMessage = dataManager.waitForMessage()
+        val headerMessage = communicationManager.waitForMessage()
         messages.add(headerMessage)
 
         CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.WRITE_PARAMS_SECOND_INIT)
-        var message = dataManager.waitForMessage()
+        var message = communicationManager.waitForMessage()
         if (message.buffer[1] != 'P'.toByte() || message.buffer[2] != '0'.toByte()) {
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.WRITE_PARAMS_THIRD_INIT)
-            throw Exception(context.getString(R.string.set_in_programming_mode))
+            throw NotProgrammingModeException()
         }
         messages.add(message)
         for (data in dataToWrite) {
             val sendData = data.buffer.take(data.count)
             CommunicationUtil.writeToSocket(socket, sendData.toByteArray())
-            message = dataManager.waitForMessage()
+            message = communicationManager.waitForMessage()
+            if (message.status != ACK) throw ProgrammingError()
             messages.add(message)
         }
 
         val mtkMod = writeDataService.createMessageObject(SendData("E1", "0180", "", 0))
         CommunicationUtil.writeToSocket(socket, mtkMod.buffer.take(mtkMod.count).toByteArray())
-        message = dataManager.waitForMessage()
+        message = communicationManager.waitForMessage()
         messages.add(message)
 
         // todo how in the fuck do i get this string
         //val waitMtkAnswer = writeDataService.createMessageObject("G6(A0A0A020)")
         val waitMtkAnswer = writeDataService.createMessageObject("G6(20202020)")
         CommunicationUtil.writeToSocket(socket, waitMtkAnswer.buffer.take(waitMtkAnswer.count).toByteArray())
-        message = dataManager.waitForMessage()
+        message = communicationManager.waitForMessage()
         messages.add(message)
 
         val readProgramsCommand = writeDataService.createMTKCommandMessageObject("U")
         CommunicationUtil.writeToSocket(socket, readProgramsCommand.buffer.take(readProgramsCommand.count).toByteArray())
-        return dataManager.waitForMessage(type = 1)
+        return communicationManager.waitForMessage(type = 1)
     }
 
     private fun onEndProgramming(readoutMessage: DataRXMessage) {
         statusObservable.onNext("Verifying...")
-        addDisposable(Single.fromCallable { verifyReadout(readoutMessage) }
+        addDisposable(Completable.fromCallable { verifyReadout(readoutMessage) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(view::onProgramingFinished, this::onErrorOccurred)
+            .subscribe(view::onProgramingFinished, view::onError)
         )
     }
 
-    private fun verifyReadout(readoutMessage: DataRXMessage): Boolean {
+    private fun verifyReadout(readoutMessage: DataRXMessage) {
         return writeDataService.isReadImageValid(readoutMessage)
     }
 

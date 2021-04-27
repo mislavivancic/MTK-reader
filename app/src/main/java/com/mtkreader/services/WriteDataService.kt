@@ -7,9 +7,10 @@ import com.mtkreader.data.SendData
 import com.mtkreader.data.reading.*
 import com.mtkreader.data.writing.DataRXMessage
 import com.mtkreader.data.writing.DataTXMessage
-import com.mtkreader.utils.DataUtils
+import com.mtkreader.exceptions.VerificationException
 import com.mtkreader.getBytes
 import com.mtkreader.trimAndSplit
+import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.DataUtils.byteArrayToHexString
 import com.mtkreader.utils.DataUtils.hexToAscii
 import com.mtkreader.utils.DataUtils.removeNonAlphanumeric
@@ -672,7 +673,7 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         return mSendMesageData
     }
 
-    override fun isReadImageValid(dataRXMessage: DataRXMessage): Boolean {
+    override fun isReadImageValid(dataRXMessage: DataRXMessage) {
         imageRead.clear()
         val allImages = mutableMapOf<String, String>()
         val data = dataRXMessage.buffer.take(dataRXMessage.count)
@@ -708,11 +709,12 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
 
         for (address in Const.Data.adressesC) {
             if (imageRead[address] == null || imageWrite[address] == null)
-                return false
+                throw VerificationException()
         }
 
         if (imageRead.size != imageWrite.size)
-            return false
+            throw VerificationException()
+
 
         val wrong = mutableListOf<String>()
         for (address in imageRead.keys) {
@@ -734,7 +736,8 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
                 }
             }
         }
-        return wrong.isEmpty()
+        if (wrong.isNotEmpty())
+            throw VerificationException()
     }
 
 }

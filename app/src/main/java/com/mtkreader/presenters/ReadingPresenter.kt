@@ -17,7 +17,7 @@ class ReadingPresenter(private val view: ReadingContract.View) : BaseBluetoothPr
 
     override fun onByteReceive(byte: Byte) {
         stopTimeout()
-        dataManager.addData(byte)
+        communicationManager.addData(byte)
         view.onByte(byte)
     }
 
@@ -25,7 +25,7 @@ class ReadingPresenter(private val view: ReadingContract.View) : BaseBluetoothPr
         waitMessageDisposable = Observable.fromCallable { communicate() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(view::onReadoutDone, this::onErrorOccurred)
+            .subscribe(view::onReadoutDone, view::onError)
         addDisposable(waitMessageDisposable)
         readStream()
         initDeviceCommunication()
@@ -35,16 +35,16 @@ class ReadingPresenter(private val view: ReadingContract.View) : BaseBluetoothPr
     private fun communicate(): String {
         var fullContent = ""
 
-        val headerMessage = dataManager.waitForMessage()
+        val headerMessage = communicationManager.waitForMessage()
         fullContent += headerMessage.getBufferData().map { it.toChar() }.joinToString("")
 
         CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
-        val message = dataManager.waitForMessage()
+        val message = communicationManager.waitForMessage()
         fullContent += message.getBufferData().map { it.toChar() }.joinToString("")
 
 
         CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.ACK)
-        val readoutDate = dataManager.waitForMessage(type = 1)
+        val readoutDate = communicationManager.waitForMessage(type = 1)
         fullContent += readoutDate.getBufferData().map { it.toChar() }.joinToString("")
 
 

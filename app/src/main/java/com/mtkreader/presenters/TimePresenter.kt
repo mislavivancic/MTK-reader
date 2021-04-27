@@ -32,18 +32,18 @@ class TimePresenter(private val view: TimeContract.View, private val deviceOpera
 
     override fun startCommunication() {
         waitMessageDisposable = Observable.fromCallable {
-            val headerMessage = dataManager.waitForMessage()
+            val headerMessage = communicationManager.waitForMessage()
             val hardwareVersion = DataUtils.getHardwareVersion(headerMessage.getBufferData().joinToString("").toByteArray())
 
 
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
-            var message = dataManager.waitForMessage()
+            var message = communicationManager.waitForMessage()
             return@fromCallable hardwareVersion
 
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::onCommunicationStarted, this::onErrorOccurred)
+            .subscribe(this::onCommunicationStarted, view::onError)
         addDisposable(waitMessageDisposable)
         readStream()
         initDeviceCommunication()
@@ -51,7 +51,7 @@ class TimePresenter(private val view: TimeContract.View, private val deviceOpera
 
     override fun onByteReceive(byte: Byte) {
         stopTimeout()
-        dataManager.addData(byte)
+        communicationManager.addData(byte)
     }
 
     private fun onCommunicationStarted(hardwareVersion: Int) {
@@ -67,7 +67,7 @@ class TimePresenter(private val view: TimeContract.View, private val deviceOpera
             timeDatePair = communicateTimeRead(hardwareVersion)
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnError { this.onErrorOccurred(it) }
+            .doOnError { view.onError(it) }
             .doOnNext { view.displayTimeData(timeDatePair) }
             .subscribe()
         addDisposable(getTimeDisposable)
@@ -76,7 +76,7 @@ class TimePresenter(private val view: TimeContract.View, private val deviceOpera
 
     private fun communicateTimeRead(hardwareVersion: Int): Pair<String, String> {
         CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.GET_TIME)
-        val timeMessage = dataManager.waitForMessage()
+        val timeMessage = communicationManager.waitForMessage()
         return service.extractTimeData(context, timeMessage.getBufferData().map { it.toChar() }, hardwareVersion)
     }
 
@@ -86,13 +86,13 @@ class TimePresenter(private val view: TimeContract.View, private val deviceOpera
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext(view::onTimeWriteResult)
             .doOnComplete { getTime(hardwareVersion) }
-            .subscribe(view::onTimeWriteResult, this::onErrorOccurred))
+            .subscribe(view::onTimeWriteResult, view::onError))
     }
 
     private fun communicateTimeWrite(): Boolean {
         val setTimeCommand = service.generateTimeWriteMessage(deviceTime, deviceDate)
         CommunicationUtil.writeToSocket(socket, setTimeCommand.buffer.take(setTimeCommand.count).toByteArray())
-        val timeSetResponse = dataManager.waitForMessage()
+        val timeSetResponse = communicationManager.waitForMessage()
         return timeSetResponse.status == Const.Data.ACK
     }
 

@@ -11,7 +11,7 @@ interface ParamsWriteContract {
     interface View : BluetoothContract.View {
         fun onDataReady()
         fun onStatusUpdate(statusMessage: String)
-        fun onProgramingFinished(isSuccessful: Boolean)
+        fun onProgramingFinished()
     }
 
     interface Presenter : BluetoothContract.Presenter {
@@ -27,6 +27,6 @@ interface ParamsWriteContract {
         fun createMessageObject(data: SendData): DataTXMessage
         fun createMessageObject(string: String): DataTXMessage
         fun createMTKCommandMessageObject(string: String): DataTXMessage
-        fun isReadImageValid(dataRXMessage: DataRXMessage): Boolean
+        fun isReadImageValid(dataRXMessage: DataRXMessage)
     }
 }

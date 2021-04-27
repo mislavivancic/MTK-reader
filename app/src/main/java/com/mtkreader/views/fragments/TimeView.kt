@@ -10,12 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
-import com.github.ivbaranov.rxbluetooth.exceptions.ConnectionClosedException
 import com.ikovac.timepickerwithseconds.MyTimePickerDialog
 import com.ikovac.timepickerwithseconds.TimePicker
 import com.mtkreader.R
 import com.mtkreader.commons.Const
-import com.mtkreader.commons.base.BaseMVPFragment
+import com.mtkreader.commons.base.BaseBluetoothFragment
 import com.mtkreader.contracts.TimeContract
 import com.mtkreader.data.DeviceDate
 import com.mtkreader.data.DeviceTime
@@ -26,11 +25,10 @@ import com.mtkreader.views.adapters.DeviceOperation
 import com.mtkreader.views.dialogs.ConnectingDialog
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_time.*
-import java.io.IOException
 import java.util.*
 
 
-class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
+class TimeView : BaseBluetoothFragment<TimeContract.Presenter>(), TimeContract.View,
     MyTimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener {
 
 
@@ -78,7 +76,18 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     private fun initializeViews() {
-        requireActivity().title = getString(R.string.program_time)
+
+        if (deviceOperation == DeviceOperation.TIME_READ) {
+            requireActivity().title = getString(R.string.read_time)
+            btn_retry.text = getString(R.string.retry_time_read)
+        } else if (deviceOperation == DeviceOperation.TIME_SET) {
+            requireActivity().title = getString(R.string.program_time)
+            btn_retry.text = getString(R.string.retry_time_set)
+            pick_date_time_container.visibility = View.VISIBLE
+            btn_program_time.visibility = View.VISIBLE
+            program_time_container.visibility = View.VISIBLE
+        }
+
         requireActivity().toolbar.setNavigationIcon(R.drawable.ic_back_white)
 
         tv_data_read.movementMethod = ScrollingMovementMethod()
@@ -102,14 +111,7 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
             startReading()
             toast(getString(R.string.retrying))
         }
-        if (deviceOperation == DeviceOperation.TIME_READ) {
-            btn_retry.text = getString(R.string.retry_time_read)
-        } else if (deviceOperation == DeviceOperation.TIME_SET) {
-            btn_retry.text = getString(R.string.retry_time_set)
-            pick_date_time_container.visibility = View.VISIBLE
-            btn_program_time.visibility = View.VISIBLE
-            program_time_container.visibility = View.VISIBLE
-        }
+
         val calendar: Calendar = Calendar.getInstance()
         val hours: Int = calendar.get(Calendar.HOUR_OF_DAY)
         val minutes: Int = calendar.get(Calendar.MINUTE)
@@ -153,14 +155,19 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
         if (isSuccessful) {
             toast(getString(R.string.time_changed))
         } else {
-            btn_retry.visibility = View.VISIBLE
-            tv_error.text = getString(R.string.setting_time_is_impossible)
-            toast(getString(R.string.setting_time_is_impossible))
+            snack(getString(R.string.setting_time_is_impossible), actionText = getString(R.string.ok), action = {
+                startReading()
+                toast(getString(R.string.retrying))
+            })
+            //btn_retry.visibility = View.VISIBLE
+            //tv_error.text = getString(R.string.setting_time_is_impossible)
+            //toast(getString(R.string.setting_time_is_impossible))
         }
     }
 
     override fun displayTimeData(timeDate: Pair<String, String>) {
         device_time_container.visibility = View.VISIBLE
+        loading_layout.visibility = View.GONE
         tv_current_time.text = String.format("%s", timeDate.first)
         tv_current_date.text = String.format("%s", timeDate.second)
     }
@@ -192,37 +199,13 @@ class TimeView : BaseMVPFragment<TimeContract.Presenter>(), TimeContract.View,
     }
 
     override fun onError(throwable: Throwable) {
-        presenter.stopTimeFetch()
-        presenter.tryReset()
         connectingDialog.dismiss()
         loading_layout.visibility = View.GONE
-        when (throwable) {
-            is ConnectionClosedException -> {
-                btn_retry.visibility = View.VISIBLE
-                ShowcaseManager.startErrorShowcase(
-                    requireActivity(),
-                    btn_retry
-                )
-            }
-            is IOException -> {
-                toast(getString(R.string.set_probe_in_connecting))
-                tv_error.text = getString(R.string.set_probe_in_connecting)
-                btn_retry.visibility = View.VISIBLE
-                ShowcaseManager.startErrorShowcase(
-                    requireActivity(),
-                    btn_retry
-                )
-            }
-            else -> displayErrorPopup(throwable)
-        }
+        handleError(throwable) { startReading() }
         presenter.stopTimeout()
-    }
-
-    override fun onStop() {
+        presenter.stopTimeFetch()
         presenter.tryReset()
-        super.onStop()
     }
-
 
     override fun onDestroy() {
         presenter.closeConnection()

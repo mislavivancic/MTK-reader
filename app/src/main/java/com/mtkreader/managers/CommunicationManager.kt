@@ -2,12 +2,14 @@ package com.mtkreader.managers
 
 import com.mtkreader.commons.Const
 import com.mtkreader.data.writing.DataRXMessage
+import com.mtkreader.exceptions.BccException
+import com.mtkreader.exceptions.CommunicationException
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.DataUtils.hexToAscii
 import net.alexandroid.utils.mylogkt.logI
 import kotlin.experimental.xor
 
-class DataManager {
+class CommunicationManager {
 
 
     private val data = mutableListOf<Byte>()
@@ -28,7 +30,7 @@ class DataManager {
         val timeOut = if (type == 0.toByte()) System.currentTimeMillis() + 10000 else System.currentTimeMillis() + 60000
         do {
             if (System.currentTimeMillis() > timeOut) {
-                throw Exception("Timed out!")
+                throw CommunicationException()
             }
 
         } while (!endOfMessage())
@@ -55,7 +57,7 @@ class DataManager {
                             } else {
                                 readMessageData.proterr = 0xCC.toByte()
                                 // todo error
-                                throw Exception("BCC error")
+                                throw BccException()
                             }
                             return true
                         } else {

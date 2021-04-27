@@ -10,15 +10,16 @@ import android.view.View
 import android.view.ViewGroup
 import com.mtkreader.R
 import com.mtkreader.commons.Const
-import com.mtkreader.commons.base.BaseMVPFragment
+import com.mtkreader.commons.base.BaseBluetoothFragment
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.presenters.ParamsWritePresenter
 import com.mtkreader.trimAndSplit
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.dialogs.ConnectingDialog
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_pick.*
 
-class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), ParamsWriteContract.View {
+class ParamsWriteView : BaseBluetoothFragment<ParamsWriteContract.Presenter>(), ParamsWriteContract.View {
 
     companion object {
         private const val FILE_PICK_CODE = 1
@@ -60,6 +61,8 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
     }
 
     private fun initViews() {
+        requireActivity().title = getString(R.string.write_parameters)
+        requireActivity().toolbar.setNavigationIcon(R.drawable.ic_back_white)
         btn_pick_file.setOnClickListener {
             Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "application/octet-stream*"
@@ -71,10 +74,15 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
         }
         val lastFileData = SharedPrefsUtils.getLastFileRead(requireContext())
         if (lastFileData != null) {
-            btn_last_file.visibility = View.VISIBLE
+            btn_last_file.isEnabled = true
             btn_last_file.setOnClickListener {
                 presenter.extractFileData(lastFileData.trimAndSplit())
             }
+        }
+
+        btn_retry.setOnClickListener {
+            val lastData = SharedPrefsUtils.getLastFileRead(requireContext())
+            lastData?.let { presenter.extractFileData(it.trimAndSplit()) }
         }
     }
 
@@ -94,14 +102,10 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
         toast(statusMessage)
     }
 
-    override fun onProgramingFinished(isSuccessful: Boolean) {
-        toast("Is successfully programed? -> $isSuccessful")
+    override fun onProgramingFinished() {
+        loading_layout.visibility = View.GONE
+        snack(getString(R.string.device_programmed), getString(R.string.ok), isError = false)
     }
-
-    override fun displayWaitMessage() {
-
-    }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -123,6 +127,13 @@ class ParamsWriteView : BaseMVPFragment<ParamsWriteContract.Presenter>(), Params
     }
 
     override fun onError(throwable: Throwable) {
-
+        connectingDialog.dismiss()
+        loading_layout.visibility = View.GONE
+        handleError(throwable) {
+            val lastFileData = SharedPrefsUtils.getLastFileRead(requireContext())
+            lastFileData?.let { presenter.extractFileData(it.trimAndSplit()) }
+        }
+        presenter.stopTimeout()
+        presenter.tryReset()
     }
 }

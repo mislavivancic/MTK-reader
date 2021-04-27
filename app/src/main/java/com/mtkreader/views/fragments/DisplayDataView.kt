@@ -15,6 +15,7 @@ import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.presenters.DisplayDataPresenter
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.SharedPrefsUtils
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_display_data.*
 
 class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), DisplayDataContract.View {
@@ -57,8 +58,6 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         initPresenter()
         initViews()
 
-        println(bodyData.joinToString(""))
-
         presenter.processData(headerData, bodyData)
     }
 
@@ -67,6 +66,9 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
     }
 
     private fun initViews() {
+        requireActivity().title = getString(R.string.read_parameters)
+        requireActivity().toolbar.setNavigationIcon(R.drawable.ic_back_white)
+
         webView.apply {
             webViewClient = WebViewClient()
             settings.loadWithOverviewMode = true

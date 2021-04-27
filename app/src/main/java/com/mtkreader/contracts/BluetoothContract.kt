@@ -10,7 +10,7 @@ interface BluetoothContract {
     interface View : ErrorHandlingFragment {
         fun onSocketConnected()
 
-        fun displayWaitMessage()
+        fun displayWaitMessage(){}
         fun onError(throwable: Throwable)
     }
 

@@ -5,9 +5,11 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.github.ivbaranov.rxbluetooth.BluetoothConnection
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
+import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.BluetoothContract
-import com.mtkreader.managers.DataManager
+import com.mtkreader.exceptions.CommunicationException
+import com.mtkreader.managers.CommunicationManager
 import com.mtkreader.utils.CommunicationUtil
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -15,7 +17,6 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -28,7 +29,7 @@ abstract class BaseBluetoothPresenter(private val view: BluetoothContract.View) 
     private lateinit var connection: BluetoothConnection
     protected lateinit var socket: BluetoothSocket
 
-    protected val dataManager = DataManager()
+    protected val communicationManager = CommunicationManager()
 
     private lateinit var timeoutDisposable: Disposable
     private lateinit var initCommunicationDisposable: Disposable
@@ -46,7 +47,7 @@ abstract class BaseBluetoothPresenter(private val view: BluetoothContract.View) 
             .observeOn(AndroidSchedulers.mainThread())
             .doOnComplete {
                 closeConnection()
-                throw IOException("TimeOut!")
+                throw CommunicationException(context.getString(R.string.time_out))
             }.doOnError { view.onError(it) }
             .subscribe()
         addDisposable(timeoutDisposable)
