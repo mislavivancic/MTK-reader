@@ -332,5 +332,7 @@
 
     <string name="device_programmed">Device programmed!</string>
     <string name="start_readout">Start readout</string>
+    <string name="pick_mtk_file">Select .mtk file!</string>
+    <string name="file_must_be">File must be .mtk!</string>
 
 </resources>

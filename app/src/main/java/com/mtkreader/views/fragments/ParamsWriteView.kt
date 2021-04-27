@@ -4,7 +4,10 @@ import android.app.Dialog
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -65,11 +68,10 @@ class ParamsWriteView : BaseBluetoothFragment<ParamsWriteContract.Presenter>(), 
         requireActivity().toolbar.setNavigationIcon(R.drawable.ic_back_white)
         btn_pick_file.setOnClickListener {
             Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "application/octet-stream*"
-
-                addCategory(Intent.CATEGORY_DEFAULT)
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/octet-stream"
             }.also {
-                startActivityForResult(it, FILE_PICK_CODE)
+                startActivityForResult(Intent.createChooser(it, getString(R.string.pick_mtk_file)), FILE_PICK_CODE)
             }
         }
         val lastFileData = SharedPrefsUtils.getLastFileRead(requireContext())
@@ -112,6 +114,12 @@ class ParamsWriteView : BaseBluetoothFragment<ParamsWriteContract.Presenter>(), 
         if (requestCode == FILE_PICK_CODE) {
             val fileUri = data?.data
             if (fileUri != null) {
+                val fileName = getFileName(fileUri)
+                val extension = fileName?.split(".")?.getOrNull(1)
+                if (extension != null && extension.toLowerCase() != "mtk") {
+                    toast(getString(R.string.file_must_be))
+                    return
+                }
                 val input = requireContext().contentResolver.openInputStream(fileUri)
                 val fileContent = input?.bufferedReader().use { it?.readText() }
                 if (fileContent != null) {
@@ -124,6 +132,27 @@ class ParamsWriteView : BaseBluetoothFragment<ParamsWriteContract.Presenter>(), 
                 }
             } else toast(getString(R.string.no_file_picked))
         }
+    }
+
+
+   private fun getFileName(uri: Uri): String? {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor: Cursor? = requireActivity().contentResolver.query(uri, null, null, null, null)
+            cursor.use { cursor ->
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result!!.lastIndexOf('/')
+            if (cut != -1) {
+                result = result!!.substring(cut + 1)
+            }
+        }
+        return result
     }
 
     override fun onError(throwable: Throwable) {
