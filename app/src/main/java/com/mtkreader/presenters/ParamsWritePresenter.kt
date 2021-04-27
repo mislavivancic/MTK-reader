@@ -31,6 +31,7 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
     private val dataToWrite = mutableListOf<DataTXMessage>()
 
     private val statusObservable: PublishSubject<String> = PublishSubject.create()
+    private var dataStructures = DataStructures()
 
     init {
         addDisposable(
@@ -51,18 +52,7 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
     }
 
     private fun onDataStructuresFilled(fileData: DataStructures) {
-        addDisposable(
-            writeDataService.generateStrings(fileData)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSendDataReady, view::onError)
-        )
-    }
-
-    private fun onSendDataReady(sendData: List<SendData>) {
-        dataToWrite.clear()
-        dataToWrite.addAll(sendData.map { writeDataService.createMessageObject(it) })
-        statusObservable.onNext("File parsed successfully!")
+        dataStructures = fileData
         view.onDataReady()
     }
 
@@ -84,9 +74,14 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
     }
 
     private fun communicate(): DataRXMessage {
-        val messages = mutableListOf<DataRXMessage>()
+        writeDataService.setDataStructures(dataStructures)
+
         val headerMessage = communicationManager.waitForMessage()
-        messages.add(headerMessage)
+        writeDataService.getVersions(headerMessage.getBufferData().toByteArray())
+
+        val sendData = writeDataService.generateStrings(dataStructures)
+        dataToWrite.clear()
+        dataToWrite.addAll(sendData.map { writeDataService.createMessageObject(it) })
 
         CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.WRITE_PARAMS_SECOND_INIT)
         var message = communicationManager.waitForMessage()
@@ -94,26 +89,22 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
             CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.WRITE_PARAMS_THIRD_INIT)
             throw NotProgrammingModeException()
         }
-        messages.add(message)
         for (data in dataToWrite) {
-            val sendData = data.buffer.take(data.count)
-            CommunicationUtil.writeToSocket(socket, sendData.toByteArray())
+            val partSendData = data.buffer.take(data.count)
+            CommunicationUtil.writeToSocket(socket, partSendData.toByteArray())
             message = communicationManager.waitForMessage()
             if (message.status != ACK) throw ProgrammingError()
-            messages.add(message)
         }
 
         val mtkMod = writeDataService.createMessageObject(SendData("E1", "0180", "", 0))
         CommunicationUtil.writeToSocket(socket, mtkMod.buffer.take(mtkMod.count).toByteArray())
         message = communicationManager.waitForMessage()
-        messages.add(message)
 
         // todo how in the fuck do i get this string
         //val waitMtkAnswer = writeDataService.createMessageObject("G6(A0A0A020)")
         val waitMtkAnswer = writeDataService.createMessageObject("G6(20202020)")
         CommunicationUtil.writeToSocket(socket, waitMtkAnswer.buffer.take(waitMtkAnswer.count).toByteArray())
         message = communicationManager.waitForMessage()
-        messages.add(message)
 
         val readProgramsCommand = writeDataService.createMTKCommandMessageObject("U")
         CommunicationUtil.writeToSocket(socket, readProgramsCommand.buffer.take(readProgramsCommand.count).toByteArray())

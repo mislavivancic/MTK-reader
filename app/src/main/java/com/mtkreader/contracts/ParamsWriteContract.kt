@@ -23,7 +23,9 @@ interface ParamsWriteContract {
     }
 
     interface WriteDataService {
-        fun generateStrings(data: DataStructures): Single<List<SendData>>
+        fun getVersions(header: ByteArray)
+        fun generateStrings(data: DataStructures): List<SendData>
+        fun setDataStructures(data: DataStructures)
         fun createMessageObject(data: SendData): DataTXMessage
         fun createMessageObject(string: String): DataTXMessage
         fun createMTKCommandMessageObject(string: String): DataTXMessage

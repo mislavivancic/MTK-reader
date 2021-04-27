@@ -1,6 +1,7 @@
 package com.mtkreader.utils
 
 import com.mtkreader.commons.Const
+import com.mtkreader.data.DataStructures
 import com.mtkreader.data.reading.LadderNets
 import com.mtkreader.data.reading.StrParFil
 import com.mtkreader.data.reading.StrParFilVer9
@@ -454,5 +455,57 @@ object DataUtils {
             i += 2
         }
         return output.toString()
+    }
+
+    fun getVersions(data: DataStructures, header: ByteArray) {
+        val headString = header.toString(Charsets.UTF_8)
+        val startIndexOfParams = headString.indexOf(";")
+
+        val buff = strCopyHexToBuf(headString, startIndexOfParams + 1)
+        data.mCfg.cBrparam = buff[0]
+        val a: Int = buff[1].toInt() and 0xFF
+        val b: Int = buff[2].toInt() and 0xFF
+        data.mCfg.cID = 256 * a + b
+
+        data.mCfg.cPcbRev = buff[3]
+        data.mCfg.cNrel = buff[4]
+        data.mCfg.cRtc = buff[5]
+        data.mCfg.cNprog = buff[6]
+        data.mCfg.cNpar = buff[7]
+        println()
+    }
+
+    fun strCopyHexToBuf(headString: String, index: Int): List<Byte> {
+        val buf = mutableListOf<Byte>()
+
+        val len = (headString.length - index) / 2
+        var i = 0
+
+        var nIndex = index
+        var lb: Byte
+        var hb: Byte
+        while (i++ < len) {
+            hb = headString[nIndex++].toByte()
+            lb = headString[nIndex++].toByte()
+            if (hb == ')'.toByte() || lb == ')'.toByte())
+                break
+            if (hb == '\r'.toByte() || lb == '\r'.toByte())
+                break
+            hb = HextoD(hb, lb)
+            buf.add(hb)
+        }
+        return buf
+    }
+
+    fun HextoD(hb: Byte, lb: Byte): Byte {
+        var mb: Byte
+        mb = 0
+        if (hb >= '0'.toByte() && hb <= '9'.toByte() || hb >= 'A'.toByte() && hb <= 'F'.toByte() ||
+            lb >= '0'.toByte() && lb <= '9'.toByte() || lb >= 'A'.toByte() && lb <= 'F'.toByte()
+        ) {
+            mb = if (hb >= 'A'.toByte()) ((hb - '7'.toByte()) * 16).toByte() else ((hb - '0'.toByte()) * 16).toByte()
+            mb = if (lb >= 'A'.toByte()) (mb + (lb - '7'.toByte())).toByte() else (mb + (lb - '0'.toByte())).toByte()
+        }
+        return mb
     }
 }

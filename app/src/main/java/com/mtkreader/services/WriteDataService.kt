@@ -12,9 +12,9 @@ import com.mtkreader.getBytes
 import com.mtkreader.trimAndSplit
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.DataUtils.byteArrayToHexString
+import com.mtkreader.utils.DataUtils.getVersions
 import com.mtkreader.utils.DataUtils.hexToAscii
 import com.mtkreader.utils.DataUtils.removeNonAlphanumeric
-import io.reactivex.Single
 import java.util.*
 import kotlin.experimental.inv
 import kotlin.experimental.xor
@@ -26,9 +26,16 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
     private val imageWrite = mutableMapOf<String, String>()
     private val imageRead = mutableMapOf<String, String>()
 
-    override fun generateStrings(data: DataStructures): Single<List<SendData>> {
+    override fun setDataStructures(data: DataStructures) {
         this.data = data
-        return Single.fromCallable { setData() }
+    }
+
+    override fun generateStrings(data: DataStructures): List<SendData> {
+        return setData()
+    }
+
+    override fun getVersions(header: ByteArray) {
+        getVersions(data, header)
     }
 
     private fun setData(): List<SendData> {
@@ -521,12 +528,9 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
 
         //upis  programa koji nisu prazni
         var len: Int = 35
-        var NrTpar = data.mCfg.cNpar
-        NrTpar = 11 // TODO(remove hardcoding)
-        var brProg = data.mCfg.cNprog
-        brProg = 9 // TODO(remove hardcoding)
-        var brRel = data.mCfg.cNrel + 1
-        brRel = 3 + 1 // TODO(remove hardcoding)
+        val NrTpar = data.mCfg.cNpar
+        val brProg = data.mCfg.cNprog
+        val brRel = data.mCfg.cNrel + 1
         len = 35
         rel = 1
         var nProNum = 0
@@ -690,9 +694,9 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
                 allImages[address] = addressData
             }
         }
-        var NrTpar = 11// TODO(remove hardcoding) data.mCfg.cNpar
-        val brProg = 9 // TODO(remove hardcoding) data.mCfg.cNprog
-        val brRel = 3 + 1 // TODO(remove hardcoding)data.mCfg.cNrel + 1
+        var NrTpar = this.data.mCfg.cNpar
+        val brProg = this.data.mCfg.cNprog
+        val brRel = this.data.mCfg.cNrel + 1
 
         var rel = 1
 
