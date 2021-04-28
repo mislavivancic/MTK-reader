@@ -3,6 +3,7 @@ package com.mtkreader.presenters
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.Const.Data.ACK
 import com.mtkreader.commons.base.BaseBluetoothPresenter
+import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.data.DataStructures
 import com.mtkreader.data.SendData

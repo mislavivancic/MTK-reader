@@ -2,14 +2,13 @@ package com.mtkreader.services
 
 import android.content.Context
 import android.util.Log
-import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.data.DataStructures
 import com.mtkreader.data.reading.*
-import com.mtkreader.utils.Css
 import com.mtkreader.utils.DataUtils
-
+import com.mtkreader.utils.DataUtils.HtoB
+import com.mtkreader.utils.DataUtils.strCopyHexToBuf
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import kotlin.experimental.or

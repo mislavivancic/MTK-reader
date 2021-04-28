@@ -15,12 +15,10 @@ interface DisplayDataContract {
     }
 
     interface DisplayService {
-       // fun generateHtml(): String
         fun generateHtml(dataStructures: DataStructures): String
     }
 
     interface ProcessService {
-       // fun processData(header: ByteArray, data: ByteArray): String
         fun processData(header: ByteArray, data: ByteArray): DataStructures
     }
 }
