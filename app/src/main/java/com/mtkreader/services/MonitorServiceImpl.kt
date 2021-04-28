@@ -2,6 +2,15 @@ package com.mtkreader.services
 
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.content.ContextWrapper
+import android.database.Cursor
+import android.database.DatabaseErrorHandler
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteDatabase.CursorFactory
+import android.database.sqlite.SQLiteException
+import android.database.sqlite.SQLiteOpenHelper
+import android.os.Environment
+import android.provider.BaseColumns
 import android.util.Log
 import com.mtkreader.R
 import com.mtkreader.commons.Const
@@ -48,10 +57,14 @@ import com.mtkreader.utils.DataUtils
 import io.reactivex.Single
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import java.io.File
 import java.util.*
 import kotlin.experimental.and
 import kotlin.experimental.or
 import kotlin.experimental.xor
+
+
+
 
 
 class MonitorServiceImpl : TimeContract.Service,KoinComponent {
@@ -66,6 +79,12 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         this.socket = socket
     }
 
+    fun a(){
+        testParse(statusS)
+        testParse(eventsS)
+        testParse(learnS)
+        SaveLogEvent()
+    }
     override fun extractTimeData(
         context: Context,
         data: List<Char>,
@@ -187,6 +206,10 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
 
 
     private fun startTimeWrite(deviceDate: DeviceDate, time: DeviceTime): Boolean {
+        testParse(statusS)
+        testParse(eventsS)
+        testParse(learnS)
+        return true
         val timeDate = TimeDate()
         val year = (deviceDate.year % 100).toByte()
         with(timeDate) {
@@ -380,11 +403,136 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
     //---------------------------------------
 
     var m_dbufLen=0
+    var LearnedDaysRel=Array(4){Array(7){false} }
+    var m_24cikN=""
+    var m_KVUt=0
+    private var m_SWVerPri = 98     //TODO remove hardcode
+    private var m_HWVerPri = Const.Data.TIP_PS
 
-    private fun GetLineDat() {
+
+    var m_BrPrekR1=0
+    var m_BrPrekR2=0
+    var m_BrPrekR3=0
+    var m_BrPrekR4=0
+
+    var m_AktRel=0
+    var m_PriMod=false
+
+    fun String.decodeHex(): ByteArray = chunked(2)
+        .map { it.toInt(16).toByte() }
+        .toByteArray()
+
+
+    val statusS="""
+00(18041307250421)
+08(747374330000000000000000000000000000)
+03(E300)
+20(0000000000000000)
+10(000000000000000000000000000000000000)
+12(0A400000)
+11(00001100)
+22(0001000CCF93)
+25(00000000)
+26(60616040)
+27(00)
+28(00)
+29(0000000000000000)
+14(0000)
+"""
+    val eventsS="""
+05(0001CC00)
+06(05006400)
+80(34541207250421100001000000000000425412072504211000020000000000004155120725042101004000000000000041561207250421020040000000000000)
+81(41571207250421030040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+82(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+83(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+84(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+85(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+86(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+87(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+88(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+89(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+8A(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+8B(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+8C(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+8D(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+8E(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+8F(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+90(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+91(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+92(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+93(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+94(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+95(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+96(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+97(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+98(00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+"""
+    val learnS="""
+2A(00FF000000000000FFFF0000000000000000000000000000000000000000)
+30(F0007F21C2942D03C03FC4EC5281E0800800800800800800800800800800800800800800)
+2B(00FF001000000000FFFF0000000000000000000000000000000000000000)
+58(F0007F21C2942D03C03FC4EC5281E0800800800800800800800800800800800800800800)
+50(F0007F21C2942D03C03FC4EC5281E0800800800800800800800800800800800800800800)
+59(000000800800800800800800800800800800800800800800800800800800800800800800)
+51(000000800800800800800800800800800800800800800800800800800800800800800800)
+5A(000000800800800800800800800800800800800800800800800800800800800800800800)
+52(000000800800800800800800800800800800800800800800800800800800800800800800)
+5B(000000800800800800800800800800800800800800800800800800800800800800800800)
+53(000000800800800800800800800800800800800800800800800800800800800800800800)
+5C(000000800800800800800800800800800800800800800800800800800800800800800800)
+54(000000800800800800800800800800800800800800800800800800800800800800800800)
+5D(000000800800800800800800800800800800800800800800800800800800800800800800)
+55(000000800800800800800800800800800800800800800800800800800800800800800800)
+5E(000000800800800800800800800800800800800800800800800800800800800800800800)
+56(000000800800800800800800800800800800800800800800800800800800800800800800)
+2C(00FF001000000000FFFF0000000000000000000000000000000000000000)
+68(C0007F03C16830C3C0800800800800800800800800800800800800800800800800800800)
+60(C0007F03C16830C3C0800800800800800800800800800800800800800800800800800800)
+69(000000800800800800800800800800800800800800800800800800800800800800800800)
+61(000000800800800800800800800800800800800800800800800800800800800800800800)
+6A(000000800800800800800800800800800800800800800800800800800800800800800800)
+62(000000800800800800800800800800800800800800800800800800800800800800800800)
+6B(000000800800800800800800800800800800800800800800800800800800800800800800)
+63(000000800800800800800800800800800800800800800800800800800800800800800800)
+6C(000000800800800800800800800800800800800800800800800800800800800800800800)
+64(000000800800800800800800800800800800800800800800800800800800800800800800)
+6D(000000800800800800800800800800800800800800800800800800800800800800800800)
+65(000000800800800800800800800800800800800800800800800800800800800800800800)
+6E(000000800800800800800800800800800800800800800800800800800800800800800800)
+66(000000800800800800800800800800800800800800800800800800800800800800800800)
+"""
+
+
+
+
+
+
+
+    private fun testParse(str:String){
+        LearnedDaysRel=Array(4){Array(7){false} }
+        m_AktRel = 0xE0
+        m_PriMod = false	//Mod HDO
+        m_24cikN=""
+        dataS.mCfg.cID=130 //TODO maknuti harcode init na startu
+
+        for(i in str.split("\n")){
+            var x=i.split("(",")")
+            if(x.count()>2)
+            {
+                Log.i(Const.Logging.MONITOR,"\n"+x[0]+" "+x[1])
+                var db=x[1].decodeHex()
+                var mn=x[0].decodeHex()
+
+                GetLineDat(db,mn[0].toInt())
+            }
+        }
+    }
+    private fun GetLineDat(dbuf:ByteArray,monadr:Int) {
         //----
-        var dbuf = ByteArray(128)
-        var monadr = 0
+        //var dbuf = ByteArray(128)
+        //var monadr = 0
+        globalIndex=0
         when ((monadr and 0xE0.toInt())) {
             0x80 -> {
                 UpRamEventLog(monadr and 0x1F.toInt(), dbuf); return
@@ -392,9 +540,9 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         }
         when ((monadr and 0xF0.toInt())) {
             0xC0 -> ""//UpRamTlgLog
-            0x40 -> GetProg7DRx(dbuf, monadr and 0xF0.toInt(), 0)
-            0x50 -> GetProg7DRx(dbuf, monadr and 0xF0.toInt(), 1)
-            0x60 -> GetProg7DRx(dbuf, monadr and 0xF0.toInt(), 2)
+            0x40 -> GetProg7DRx(dbuf, monadr and 0x0F.toInt(), 0)
+            0x50 -> GetProg7DRx(dbuf, monadr and 0x0F.toInt(), 1)
+            0x60 -> GetProg7DRx(dbuf, monadr and 0x0F.toInt(), 2)
 
         }
         when (monadr) {
@@ -435,12 +583,13 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         var b2=dbuf[globalIndex++]
         var str=String.format("b1 %02x b2 %02x", b1,b2)
     }
-    var LearnedDaysRel=Array(4){Array(7){false} }
-    private fun Get24HLearn(dbuf: ByteArray, rel: Int) {
-        var mTab24HCX: REL24HCSTR2=REL24HCSTR2()
 
+
+    private fun Get24HLearn(dbuf: ByteArray, rel: Int) {
+
+        var mTab24HCX: REL24HCSTR2=REL24HCSTR2()
         val uk7D=if(dataS.mCfg.cID>=100) true else false
-        LearnedDaysRel=Array(4){Array(7){false} }
+        for(i in 0 until 7) LearnedDaysRel[rel][i]=false
         if(uk7D){
             mTab24HCX.Sta7DC.currDay=dbuf[globalIndex++].toInt()
             mTab24HCX.Sta7DC.StartDay=dbuf[globalIndex++].toInt()
@@ -451,7 +600,7 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
                 var startD = mTab24HCX.Sta7DC.StartDay;
                 for(sh in 0 until mTab24HCX.Sta7DC.BrUpProg){
                     LearnedDaysRel[rel][startD++] = true;
-                    if (startD >= 7) startD = 0; //TODO ??BrUpProg
+                    if (startD >= 7) startD = 0;
                 }
             }
         }
@@ -500,11 +649,11 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
             upar++
         }
         TP = mTab24HCX.Tpar[upar]
-        if (mTab24HCX.RelWrPos == 1 && mTab24HCX.LastCmd == 1)
+        if ((mTab24HCX.RelWrPos == 1) and (mTab24HCX.LastCmd == 1))
             res += String.format("    \r\n    T-a: %02d:%02d T-b: --:--", TP.ton / 60, TP.ton % 60)
-        if (mTab24HCX.RelWrPos == 2 && mTab24HCX.LastCmd == 2)
+        if ((mTab24HCX.RelWrPos == 2) and (mTab24HCX.LastCmd == 2))
             res += String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", TP.toff / 60, TP.toff % 60)
-        if (mTab24HCX.Tsta1Off >= 0)
+        if (mTab24HCX.Tsta1Off.toShort() >= 0)
             res += String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", mTab24HCX.Tsta1Off / 60, mTab24HCX.Tsta1Off % 60)
 
 
@@ -514,7 +663,6 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
             
     }
 
-    var m_24cikN=""
     private fun GetProg7DRx(dbuf: ByteArray, prog: Int, rel: Int) {
 
         var head= ""
@@ -524,12 +672,12 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
             head=String.format("    \r\n    " +  getString(R.string.IDSI_RELTP), rel+1);
 
         } else { //LP
-            val p = prog - 8
             head=String.format("\r\n"+ getString(R.string.IDSI_RRR) +" %d "+  getString(R.string.IDSI_TIMEPAIRLRN) +"(%d)",rel+1, prog -7);
-            if (!LearnedDaysRel[rel][prog]) ShowPro = false
+            if (!LearnedDaysRel[rel][prog-8]) ShowPro = false
         }
         m_24cikN += head
-        if (ShowPro) GetProg(dbuf) else m_24cikN += "    \r\n    T-a: --:-- T-b: --:--"
+        if (ShowPro) GetProg(dbuf)
+        else m_24cikN += "    \r\n    T-a: --:-- T-b: --:--"
     }
 
     private fun GetProg24h(dbuf: ByteArray, rel: Int) {
@@ -573,14 +721,15 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         {
             val TP=pPProg.TPro[i]
             var par=""
-            if((!TP.bTonb) && (!TP.bToffb))
+            if((!TP.bTonb) and (!TP.bToffb))
                 par=String.format("    \r\n    T-a: %02d:%02d T-b: %02d:%02d", TP.Ton /60,TP.Ton%60, TP.Toff/60,TP.Toff%60)
-            if((!TP.bTonb) && (TP.bToffb))
+            if((!TP.bTonb) and (TP.bToffb))
                 par=String.format("    \r\n    T-a: %02d:%02d T-b: --:--",  TP.Ton /60, TP.Ton % 60)
-            if((TP.bTonb) && (!TP.bToffb))
+            if((TP.bTonb) and (!TP.bToffb))
                 par=String.format("    \r\n    T-a: --:-- T-b: %02d:%02d",  TP.Toff/60, TP.Toff%60)
-            if((!TP.bTonb) || (!TP.bToffb))
+            if((!TP.bTonb) or (!TP.bToffb))
                 res += par;
+            Log.i(Const.Logging.MONITOR,par)
         }
         if(res.isBlank())
             res="    \r\n    T-a: --:-- T-b: --:--"
@@ -609,7 +758,7 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
 
         datmon.disp_RTC=rtc.joinToString()
         datmon.disp_RTCsync=sync
-
+        Log.i(Const.Logging.MONITOR,str)
     }
 
     private fun GetEventH(dbuf: ByteArray) {
@@ -650,14 +799,16 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
                 res += String.format(" R%d (%04X%s)", i + 1, flags, str)
 
                 if (m_PriMod == false)
-                    datmon.dispR_Wiper[i] = if (flags.hasFlag(Const.Data.AKT_FN_WIPER)) getString(R.string.yes) else getString(R.string.no) //TODO wiper ili loop
+                    datmon.dispR_Wiper[i] = if (flags.hasFlag(Const.Data.AKT_FN_WIPER)) getString(R.string.yes) else getString(R.string.no)
 
             }
         }
+        Log.i(Const.Logging.MONITOR,res)
     }
 
     private fun GetPrijStatus(dbuf: ByteArray) {
         var res=String.format("\r\nGetPrijStatus:%02x",dbuf[globalIndex++])
+        Log.i(Const.Logging.MONITOR,res)
     }
 
     private fun GetPrijEvents(dbuf: ByteArray) {
@@ -672,13 +823,13 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         if(status.hasFlag(Const.Data.PRIJ_EV_RTCST))	str+="|RTCST"
         if(status.hasFlag(Const.Data.PRIJ_EV_RTCOF))	str+="|RTCOF"
         str2=String.format("\r\nGetPrijEvents: %02X (%s)",status,str);
-
+        Log.i(Const.Logging.MONITOR,str2)
     }
 
     private fun GetRelStatus(dbuf: ByteArray) {
         var res = "\r\nGetRelStatus: "
 
-        for (i in 0..4) {
+        for (i in 0..3) {
             var relx = 0x80 shr i
             var status = dbuf[globalIndex++].toInt()
 
@@ -708,20 +859,17 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
                     if (status.hasFlag(Const.Data.REL_EM_STATE)) datmon.dispR_ProgEn[i]=getString(R.string.HOZ)
 
                     datmon.dispR_TransmitFail[i] = if (status.hasFlag(Const.Data.REL_TA_STATE)) getString(R.string.yes) else getString(R.string.no)
-                    datmon.dispR_LoopEn[i] = if (status.hasFlag(Const.Data.REL_TIMPR_UNLOCK)) getString(R.string.yes) else getString(R.string.no) //TODO wiper ili loop
+                    datmon.dispR_LoopEn[i] = if (status.hasFlag(Const.Data.REL_TIMPR_UNLOCK)) getString(R.string.yes) else getString(R.string.no)
                 }
             }        //end akt rel;
 
         }
-
+        Log.i(Const.Logging.MONITOR,res)
 
     }
 
     private fun GetRelEvents(dbuf: ByteArray) {
-        //CString str=_T("");str.Format(_T("\r\nGetRelEvents:%02x"),*pdbuf++);
-
         var res ="\r\nGetRelEvents:"
-        dbuf[globalIndex++]// TODO ??
         for (rel in 0..3)
         {
             val revents = dbuf[globalIndex++].toInt()
@@ -733,7 +881,9 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
             if (revents.hasFlag(Const.Data.REL_EV_TL_PROEN) )tstr += "|PROEN"
             if (revents.hasFlag(Const.Data.REL_EV_TL_PRODI)) tstr += "|PRODI"
             res += String.format(" R%d (%02X%s)",rel+1,revents,tstr)
+
         }
+        Log.i(Const.Logging.MONITOR,res)
 
     }
 
@@ -743,7 +893,7 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         else
             datmon.disp_outage=String.format(" %d",dbuf[globalIndex++])
 
-        if(m_dbufLen>=6)
+        if(dbuf.count()>=6)
         {
             val tin = setOprel4I(dbuf)
             val days=  tin / (3600 * 24)
@@ -756,8 +906,6 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         }
     }
 
-    private var m_SWVerPri = 0
-    private var m_HWVerPri = 0
     private fun UpUtf(dbuf: ByteArray) {
         var utf=0.0
         if(m_SWVerPri>=90) {
@@ -767,13 +915,13 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         }else
             utf=setOprelI(dbuf).toDouble()*0.0028
 
-       datmon.disp_UTF=if(m_PriMod == false) String.format("%0.2f",utf) else ""
+       datmon.disp_UTF=if(m_PriMod == false) String.format("%.2f",utf) else ""
     }
 
-    var m_KVUt=0
     private fun UpKVUf(dbuf: ByteArray) {
         m_KVUt=setOprelI(dbuf)
     }
+
 
     private fun GetImpName(nr:Int):String {
         var imp=""
@@ -790,7 +938,6 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         }
         return imp
     }
-
 
     private fun GetTlgImp(dbuf: ByteArray):String {
         var res=""
@@ -823,12 +970,6 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
     }
 
 
-    var m_BrPrekR1=0
-    var m_BrPrekR2=0
-    var m_BrPrekR3=0
-    var m_BrPrekR4=0
-
-
     private fun UpEEBroPre(dbuf: ByteArray) {
         m_BrPrekR1=setOprelI(dbuf)
         m_BrPrekR2=setOprelI(dbuf)
@@ -837,17 +978,16 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         if((m_AktRel and 0x80) !=0) datmon.dispR1_BrPrek=String.format("%d",m_BrPrekR1)
         if((m_AktRel and 0x40) !=0) datmon.dispR2_BrPrek=String.format("%d",m_BrPrekR2)
         if((m_AktRel and 0x20) !=0) datmon.dispR3_BrPrek=String.format("%d",m_BrPrekR3)
-        if((m_AktRel and 0x80) !=0) datmon.dispR4_BrPrek=String.format("%d",m_BrPrekR4)
+        if((m_AktRel and 0x10) !=0) datmon.dispR4_BrPrek=String.format("%d",m_BrPrekR4)
 
     }
 
-    var m_AktRel=0
-    var m_PriMod=false
-
     private fun UpAktRel(dbuf: ByteArray) {
+
+
         var b=dbuf[globalIndex++].toInt()
         m_AktRel=b and 0xE0
-        m_PriMod=if(b and 0x02 !=0) true else false
+        //m_PriMod=if(b.hasFlag(0x02)) true else false //TODO ?????  m_PriMod
         dbuf[globalIndex++]
 
     }
@@ -858,7 +998,7 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         {
             val c=dbuf[globalIndex++]
             if(c==0.toByte()) break
-            paramfile+=c
+            paramfile+=c.toChar() //TODO
 
         }
         datmon.disp_paramfile=paramfile
@@ -999,7 +1139,7 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
             } while (rindx != endidx);
         }
         datmon.disp_eventlog = res
-        datmon.disp_eventlog = csvStr
+        datmon.disp_eventlogCSV = csvStr
     }
 
     private fun GetTlgString(tlg: ByteArray): String {
@@ -1066,32 +1206,32 @@ class MonitorServiceImpl : TimeContract.Service,KoinComponent {
         val cnt=nr*4
         if(cnt>= DataStructMon.LOG_EVENT_MAX) return
 
-        for(i in 0..3)
+        for(i in (cnt)..(cnt+3))
         {
 
-            datmon.m_EvLog[nr+i].Time.sec=dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[nr+i].Time.min=dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[nr+i].Time.hour=dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[nr+i].Time.day=dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[nr+i].Time.dat=dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[nr+i].Time.month=dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[nr+i].Time.year=dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[nr+i].Obj=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[i].Time.sec=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[i].Time.min=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[i].Time.hour=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[i].Time.day=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[i].Time.dat=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[i].Time.month=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[i].Time.year=dbuf[globalIndex++].toInt()
+            datmon.m_EvLog[i].Obj=dbuf[globalIndex++].toInt()
 
             var tmp=dbuf[globalIndex++]
-            datmon.m_EvLog[nr+i].Event.bH=tmp.toInt()
-            datmon.m_EvLog[nr+i].Event.Imp[0]=tmp
+            datmon.m_EvLog[i].Event.bH=tmp.toInt()
+            datmon.m_EvLog[i].Event.Imp[0]=tmp
 
             tmp=dbuf[globalIndex++]
-            datmon.m_EvLog[nr+i].Event.bL=tmp.toInt()
-            datmon.m_EvLog[nr+i].Event.Imp[1]=tmp
+            datmon.m_EvLog[i].Event.bL=tmp.toInt()
+            datmon.m_EvLog[i].Event.Imp[1]=tmp
 
-            datmon.m_EvLog[nr+i].Event.Imp[2]=dbuf[globalIndex++]
-            datmon.m_EvLog[nr+i].Event.Imp[3]=dbuf[globalIndex++]
-            datmon.m_EvLog[nr+i].Event.Imp[4]=dbuf[globalIndex++]
-            datmon.m_EvLog[nr+i].Event.Imp[5]=dbuf[globalIndex++]
-            datmon.m_EvLog[nr+i].Event.Imp[6]=dbuf[globalIndex++]
-            datmon.m_EvLog[nr+i].Event.Imp[7]=dbuf[globalIndex++]
+            datmon.m_EvLog[i].Event.Imp[2]=dbuf[globalIndex++]
+            datmon.m_EvLog[i].Event.Imp[3]=dbuf[globalIndex++]
+            datmon.m_EvLog[i].Event.Imp[4]=dbuf[globalIndex++]
+            datmon.m_EvLog[i].Event.Imp[5]=dbuf[globalIndex++]
+            datmon.m_EvLog[i].Event.Imp[6]=dbuf[globalIndex++]
+            datmon.m_EvLog[i].Event.Imp[7]=dbuf[globalIndex++]
 
         }
     }

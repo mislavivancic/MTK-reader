@@ -18,6 +18,7 @@ import com.mtkreader.commons.base.ErrorDialog
 import com.mtkreader.compare
 import com.mtkreader.contracts.ConnectionContract
 import com.mtkreader.presenters.ConnectionPresenter
+import com.mtkreader.services.MonitorServiceImpl
 import com.mtkreader.utils.PermissionUtils
 import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
@@ -51,6 +52,12 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
         initializePresenter()
         initializeViews()
         initializeRoutes()
+        test()
+    }
+
+    private fun test(){
+        val a = MonitorServiceImpl()
+        a.a()
     }
 
     private fun initializePresenter() {

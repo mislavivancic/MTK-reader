@@ -159,7 +159,7 @@
     <string name="IDSCB_LEARING_PERIODR1_0">"24 h"</string>
     <string name="IDSCB_LEARING_PERIODR1_1">"7 days"</string>
     <string name="IDSI_LEARNEN">"Learn Enable "</string>
-    <string name="IDSI_LEARNPERIOD">"\n\r------------------------------------\r\nRelay %d time pairs - in learning(%s):"</string>
+    <string name="IDSI_LEARNPERIOD">\n------------------------------------\nRelay %d time pairs - in learning(%s):</string>
     <string name="IDSI_LEARNPERIOD2">"Learn period"</string>
 
 

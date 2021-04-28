@@ -16,7 +16,9 @@ object CommunicationUtil {
         socket.outputStream.write(data)
     }
 
-    private fun hexStringToByteArray(s: String): ByteArray {
+    private fun
+
+            hexStringToByteArray(s: String): ByteArray {
         val len = s.length
         val data = ByteArray(len / 2)
         var i = 0
