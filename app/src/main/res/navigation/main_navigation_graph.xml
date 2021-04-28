@@ -68,6 +68,14 @@
         android:id="@+id/paramWriteView"
         android:name="com.mtkreader.views.fragments.ParamsWriteView"
         android:label="ParamsWriteView"
-        tools:layout="@layout/fragment_file_pick" />
+        tools:layout="@layout/fragment_file_pick">
+        <action
+            android:id="@+id/navigateToDisplayDataView"
+            app:destination="@id/displayDataView"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
 
 </navigation>

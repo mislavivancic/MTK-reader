@@ -8,11 +8,10 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebViewClient
+import androidx.navigation.fragment.findNavController
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseBluetoothFragment
@@ -76,17 +75,18 @@ class ParamsWriteView : BaseBluetoothFragment<ParamsWriteContract.Presenter>(), 
                 startActivityForResult(Intent.createChooser(it, getString(R.string.pick_mtk_file)), FILE_PICK_CODE)
             }
         }
-        val lastFileData = SharedPrefsUtils.getLastFileRead(requireContext())
-        if (lastFileData != null) {
-            btn_last_file.isEnabled = true
-            btn_last_file.setOnClickListener {
-                presenter.extractFileData(lastFileData.trimAndSplit())
-            }
-        }
+        checkLastFile()
 
         btn_retry.setOnClickListener {
             val lastData = SharedPrefsUtils.getLastFileRead(requireContext())
             lastData?.let { presenter.extractFileData(it.trimAndSplit()) }
+        }
+    }
+
+    override fun onHtmlReady(html: String) {
+        with(Bundle()) {
+            putString(Const.Extras.HTML_EXTRA, html)
+            findNavController().navigate(R.id.navigateToDisplayDataView, this)
         }
     }
 
@@ -129,7 +129,8 @@ class ParamsWriteView : BaseBluetoothFragment<ParamsWriteContract.Presenter>(), 
                     fileLines.addAll(fileContent.trimAndSplit())
                     if (fileLines.isNotEmpty()) {
                         SharedPrefsUtils.saveLastFileRead(requireContext(), fileContent)
-                        presenter.extractFileData(fileLines)
+                        fileName?.let { SharedPrefsUtils.saveLastFileReadName(requireContext(), fileName) }
+                        checkLastFile()
                     }
                 }
             } else toast(getString(R.string.no_file_picked))
@@ -137,7 +138,7 @@ class ParamsWriteView : BaseBluetoothFragment<ParamsWriteContract.Presenter>(), 
     }
 
 
-   private fun getFileName(uri: Uri): String? {
+    private fun getFileName(uri: Uri): String? {
         var result: String? = null
         if (uri.scheme == "content") {
             val cursor: Cursor? = requireActivity().contentResolver.query(uri, null, null, null, null)
@@ -155,6 +156,28 @@ class ParamsWriteView : BaseBluetoothFragment<ParamsWriteContract.Presenter>(), 
             }
         }
         return result
+    }
+
+    private fun checkLastFile() {
+        val lastFileData = SharedPrefsUtils.getLastFileRead(requireContext())
+        val lastFileName = SharedPrefsUtils.getLastFileReadName(requireContext())
+        if (lastFileData != null && lastFileName != null) {
+            btn_preview.isEnabled = true
+            btn_preview.text = String.format(getString(R.string.preview_params_s), lastFileName)
+            btn_preview.setOnClickListener {
+                presenter.displayFileData(lastFileData.trimAndSplit())
+            }
+            btn_start.isEnabled = true
+            btn_start.text = String.format(getString(R.string.start_program_s), lastFileName)
+            btn_start.setOnClickListener {
+                presenter.extractFileData(lastFileData.trimAndSplit())
+            }
+        } else {
+            btn_preview.isEnabled = false
+            btn_preview.text = getString(R.string.preview_params)
+            btn_start.isEnabled = false
+            btn_start.text = getString(R.string.start_program)
+        }
     }
 
     override fun onError(throwable: Throwable) {

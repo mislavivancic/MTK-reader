@@ -10,12 +10,14 @@ interface ParamsWriteContract {
 
     interface View : BluetoothContract.View {
         fun onDataReady()
+        fun onHtmlReady(html:String)
         fun onStatusUpdate(statusMessage: String)
         fun onProgramingFinished()
     }
 
     interface Presenter : BluetoothContract.Presenter {
         fun extractFileData(fileLines: List<String>)
+        fun displayFileData(fileLines: List<String>)
     }
 
     interface FillDataStructuresService {

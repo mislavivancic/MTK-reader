@@ -160,7 +160,6 @@
     <string name="IDSI_LEARNPERIOD">\n------------------------------------\nRelay %d time pairs - in learning(%s):</string>
     <string name="IDSI_LEARNPERIOD2">"Learn period"</string>
 
-
     <string-array name="IDSI_LRN_ST">
         <item>"Idle"</item>
         <item>"Start"</item>
@@ -169,9 +168,6 @@
         <item>"Write OK"</item>
         <item>"Unknown"</item>
     </string-array>
-
-
-
 
     <string-array name="dan_sync_tg">
         <item>Mon</item>
@@ -202,28 +198,28 @@
     </string-array>
 
 
-   <string name="IDSTOC_GENERAL">"General"</string>
-   <string name="IDSTOC_RELSETTING">"Relay settings"</string>
-   <string name="IDSTOC_ASTRSAT">"Astronomical clock"</string>
-   <string name="IDSTOC_ULSATSCHED">"Time switch schedules"</string>
-   <string name="IDSTOC_RELSWASSIGN">"Relay switching assignment"</string>
-   <string name="IDSTOC_CLASSTLG">"Classic telegrams"</string>
-   <string name="IDSTOC_ADDTLG">"Additional telegrams"</string>
-   <string name="IDSTOC_SYNCTLG">"Synchronization telegrams"</string>
-   <string name="IDSTOC_SYNCTLGWD">"Synchronization telegrams - day of the week"</string>
-   <string name="IDSTOC_DINTLG">"Telegram type DIN-43861-301"</string>
-   <string name="IDSTOC_CYCSW">"Cyclic switching"</string>
-   <string name="IDSTOC_DLYSW">"Switching delay"</string>
-   <string name="IDSTOC_WSREL">"Work Schedules"</string>
-   <string name="IDSTOC_TPARREL">"Time pairs"</string>
-   <string name="IDSTOC_PWONOFF">"Arrival and loss of supply"</string>
-   <string name="IDSTOC_SPECDAYS">"Special days"</string>
-   <string name="IDSTOC_SEASONS">"Seasons"</string>
-   <string name="IDSTOC_WIPER">"Wiper and Closed Loop"</string>
-   <string name="IDSTOC_LEARNF">"Learn functions"</string>
-   <string name="IDSTOC_TLGABSE">"Telegram absence"</string>
-   <string name="IDSTOC_EVENTLOG">"Event log"</string>
-   <string name="IDSTOC_RELINTERLOCK">"Logic functions"</string>
+    <string name="IDSTOC_GENERAL">"General"</string>
+    <string name="IDSTOC_RELSETTING">"Relay settings"</string>
+    <string name="IDSTOC_ASTRSAT">"Astronomical clock"</string>
+    <string name="IDSTOC_ULSATSCHED">"Time switch schedules"</string>
+    <string name="IDSTOC_RELSWASSIGN">"Relay switching assignment"</string>
+    <string name="IDSTOC_CLASSTLG">"Classic telegrams"</string>
+    <string name="IDSTOC_ADDTLG">"Additional telegrams"</string>
+    <string name="IDSTOC_SYNCTLG">"Synchronization telegrams"</string>
+    <string name="IDSTOC_SYNCTLGWD">"Synchronization telegrams - day of the week"</string>
+    <string name="IDSTOC_DINTLG">"Telegram type DIN-43861-301"</string>
+    <string name="IDSTOC_CYCSW">"Cyclic switching"</string>
+    <string name="IDSTOC_DLYSW">"Switching delay"</string>
+    <string name="IDSTOC_WSREL">"Work Schedules"</string>
+    <string name="IDSTOC_TPARREL">"Time pairs"</string>
+    <string name="IDSTOC_PWONOFF">"Arrival and loss of supply"</string>
+    <string name="IDSTOC_SPECDAYS">"Special days"</string>
+    <string name="IDSTOC_SEASONS">"Seasons"</string>
+    <string name="IDSTOC_WIPER">"Wiper and Closed Loop"</string>
+    <string name="IDSTOC_LEARNF">"Learn functions"</string>
+    <string name="IDSTOC_TLGABSE">"Telegram absence"</string>
+    <string name="IDSTOC_EVENTLOG">"Event log"</string>
+    <string name="IDSTOC_RELINTERLOCK">"Logic functions"</string>
 
     <string name="IDSC_USERID">"User ID"</string>
     <string name="IDSC_USERNAME">"User Name"</string>
@@ -238,9 +234,6 @@
     <string name="IDSC_DAYMONTH">"day/month"</string>
     <string name="IDSC_BEGIN">"begin"</string>
     <string name="IDSC_END">"end"</string>
-
-
-
 
 
     <string name="IDS_EVL_RTC_ST">"RTC:Loss of RTC"</string>
@@ -269,23 +262,6 @@
     <string name="IDS_EVL_LSINH">"Time:local changed"</string>
     <string name="IDS_EVL_WPAROK">"Changed param"</string>
     <string name="IDS_EVL_WPARERR">"Changed param error"</string>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     <string name="work_schedules">Work Schedules</string>
@@ -461,5 +437,9 @@
     <string name="start_readout">Start readout</string>
     <string name="pick_mtk_file">Select .mtk file!</string>
     <string name="file_must_be">File must be .mtk!</string>
+    <string name="preview_params_s">Preview (%s)</string>
+    <string name="preview_params">Preview parameters</string>
+    <string name="start_program_s">Program (%s)</string>
+    <string name="start_program">Program</string>
 
 </resources>
