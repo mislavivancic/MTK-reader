@@ -6,6 +6,7 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import android.webkit.WebViewClient
 import com.mtkreader.R
 import com.mtkreader.commons.Const
@@ -14,6 +15,7 @@ import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.presenters.DisplayDataPresenter
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.SharedPrefsUtils
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_display_data.*
 
 class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), DisplayDataContract.View {
@@ -56,8 +58,6 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         initPresenter()
         initViews()
 
-        println(bodyData.joinToString(""))
-
         presenter.processData(headerData, bodyData)
     }
 
@@ -66,10 +66,11 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
     }
 
     private fun initViews() {
+        requireActivity().title = getString(R.string.read_parameters)
+        requireActivity().toolbar.setNavigationIcon(R.drawable.ic_back_white)
+
         webView.apply {
-            settings.javaScriptEnabled = true
             webViewClient = WebViewClient()
-            /*
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
             settings.setSupportZoom(true)
@@ -77,13 +78,12 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
             settings.displayZoomControls = false
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
-            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL*/
-            //settings.
+            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL
         }
     }
 
     override fun displayData(dataString: String) {
-        val encodedHtml: String =           Base64.encodeToString(dataString.toByteArray(Charsets.UTF_8), Base64.NO_PADDING)
+        val encodedHtml: String = Base64.encodeToString(dataString.toByteArray(Charsets.UTF_8), Base64.NO_PADDING)
         webView.loadData(encodedHtml, "text/html", "base64")
 
     }

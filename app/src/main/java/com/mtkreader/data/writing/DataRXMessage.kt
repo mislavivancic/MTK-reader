@@ -7,11 +7,11 @@ import kotlinx.android.parcel.Parcelize
 data class DataRXMessage(
     var count: Int = 0,
     var status: Byte = 0,
-    val type: Byte = 0,
+    var type: Byte = 0,
     var bcc: Byte = 0,
     var crlf: Byte = 0,
     var proterr: Byte = 0,
-    val buffer: ByteArray = ByteArray(2048 * 4)
+    var buffer: ByteArray = ByteArray(2048 * 4)
 ) : Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -40,5 +40,7 @@ data class DataRXMessage(
         result = 31 * result + buffer.contentHashCode()
         return result
     }
+
+    fun getBufferData() = buffer.take(count)
 
 }

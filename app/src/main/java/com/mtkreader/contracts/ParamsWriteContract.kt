@@ -1,29 +1,21 @@
 package com.mtkreader.contracts
 
-import android.text.Html
-import com.mtkreader.commons.base.AutoDisposePresenter
-import com.mtkreader.commons.base.ErrorHandlingFragment
 import com.mtkreader.data.DataStructures
+import com.mtkreader.data.SendData
+import com.mtkreader.data.writing.DataRXMessage
+import com.mtkreader.data.writing.DataTXMessage
 import io.reactivex.Single
 
 interface ParamsWriteContract {
-    interface View : ErrorHandlingFragment {
-        fun onHtml(html: String)
-        // fun onSocketConnected(socket: BluetoothSocket)
-        // fun onReceiveBytes(byte: Byte)
 
-        fun onError(throwable: Throwable)
+    interface View : BluetoothContract.View {
+        fun onDataReady()
+        fun onStatusUpdate(statusMessage: String)
+        fun onProgramingFinished()
     }
 
-    interface ViewDisplay : ErrorHandlingFragment {
-        fun displayData(dataString: String)
-    }
-
-    interface Presenter : AutoDisposePresenter {
+    interface Presenter : BluetoothContract.Presenter {
         fun extractFileData(fileLines: List<String>)
-        // fun connectToDevice(device: BluetoothDevice)
-        // fun readStream(socket: BluetoothSocket)
-        // fun closeConnection()
     }
 
     interface FillDataStructuresService {
@@ -31,6 +23,12 @@ interface ParamsWriteContract {
     }
 
     interface WriteDataService {
-        fun generateStrings(data: DataStructures): Single<String>
+        fun getVersions(header: ByteArray)
+        fun generateStrings(data: DataStructures): List<SendData>
+        fun setDataStructures(data: DataStructures)
+        fun createMessageObject(data: SendData): DataTXMessage
+        fun createMessageObject(string: String): DataTXMessage
+        fun createMTKCommandMessageObject(string: String): DataTXMessage
+        fun isReadImageValid(dataRXMessage: DataRXMessage)
     }
 }

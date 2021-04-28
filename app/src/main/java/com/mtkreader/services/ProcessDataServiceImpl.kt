@@ -17,7 +17,7 @@ import kotlin.experimental.or
 class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent {
 
     val context: Context by inject()
-    private val data: DataStructures=DataStructures()
+    private val data: DataStructures = DataStructures()
     // move this elsewhere
 
 
@@ -84,6 +84,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         m_Dateerr++
         return false
     }
+
     private fun GetLineDat() {
         var i = 0
         val m_gaddr = Mgaddr(0)
@@ -107,7 +108,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             m_Dateerr++
 
         i = 5
-        if(mline[0]==63.toByte())i++ //HACK TODO
+        if (mline[0] == 63.toByte()) i++ //HACK TODO
         val dbuf = ByteArray(128)
 
 
@@ -144,10 +145,10 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                     4 -> getDeviceSerNr(dbuf)
                 }
             }
-            1 -> getTparPar(dbuf,data.mPProgR1[mgaddr.objectt])
-            2 -> getTparPar(dbuf,data.mPProgR2[mgaddr.objectt])
-            3 -> getTparPar(dbuf,data.mPProgR3[mgaddr.objectt])
-            4 -> getTparPar(dbuf,data.mPProgR4[mgaddr.objectt])
+            1 -> getTparPar(dbuf, data.mPProgR1[mgaddr.objectt])
+            2 -> getTparPar(dbuf, data.mPProgR2[mgaddr.objectt])
+            3 -> getTparPar(dbuf, data.mPProgR3[mgaddr.objectt])
+            4 -> getTparPar(dbuf, data.mPProgR4[mgaddr.objectt])
 
             0xC -> getFriRPar(dbuf, data.mParFilteraCF, data.mParFiltera)
 
@@ -527,10 +528,6 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         }
 
 
-
-
-
-
     }
 
     private fun getKl2VerDatVer96(dbuf: ByteArray, mOp50Prij: Oprij50, mOpPrij: Oprij) {
@@ -558,8 +555,8 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
             globalIndex++
             globalIndex++
         } else if (data.mCfg.cID == 130 || data.mCfg.cID == 0x8C) {
-            mOpPrij.VOpRe.StaPrij =dbuf[globalIndex++]
-            mOpPrij.PromjZLjU =dbuf[globalIndex++]
+            mOpPrij.VOpRe.StaPrij = dbuf[globalIndex++]
+            mOpPrij.PromjZLjU = dbuf[globalIndex++]
         }
 
         for (i in 0..12)
@@ -757,11 +754,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         wiper.TBlockPrePro = setOprel3I(dbuf)
     }
 
-    private fun getTparPar(dbuf: ByteArray,oPProg:Opprog)
-            : Opprog {
-        //val oPProg = Opprog()
-
-
+    private fun getTparPar(dbuf: ByteArray, oPProg: Opprog): Opprog {
         val x = Unitimbyt()
         var nrTpar = 8
 
@@ -779,7 +772,7 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
 
 
         x.b[1] = dbuf[globalIndex++]
-        if (m_SWVerPri >= 40)x.b[0] = dbuf[globalIndex++]
+        if (m_SWVerPri >= 40) x.b[0] = dbuf[globalIndex++]
 
 
         x.updateI()
@@ -844,9 +837,6 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
     }
 
 
-
-
-
     private fun getVersions(header: ByteArray) {
         val headString = header.toString(Charsets.UTF_8)
 
@@ -864,8 +854,8 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
                     m_SWVerPri += (char - '0')
                 break
             }
-            data.mHardwareVersion=m_HWVerPri
-            data.mSoftwareVersion=m_SWVerPri
+            data.mHardwareVersion = m_HWVerPri
+            data.mSoftwareVersion = m_SWVerPri
         }
 
         val startIndexOfParams = headString.indexOf(";")
@@ -883,56 +873,6 @@ class ProcessDataServiceImpl : DisplayDataContract.ProcessService, KoinComponent
         data.mCfg.cNpar = buff[7]
     }
 
-    // HELPER METHODS
-
-    private fun strCopyHexToBuf(headString: String, index: Int)
-            : List<Byte> {
-        val buf = mutableListOf<Byte>()
-
-        val len = (headString.length - index) / 2
-        var i = 0
-
-        var nIndex = index
-
-        var lb: Byte
-        var hb: Byte
-
-        while (i++ < len) {
-            hb = headString[nIndex++].toByte()
-            lb = headString[nIndex++].toByte()
-
-            if (hb == ')'.toByte() || lb == ')'.toByte())
-                break
-
-            if (hb == '\r'.toByte() || lb == '\r'.toByte())
-                break
-
-            hb = HextoD(hb, lb)
-            buf.add(hb)
-        }
-        return buf
-    }
-
-    private fun HtoB(ch: Char) : Char? {
-        if (ch in '0'..'9') return (ch - '0').toChar()
-        if (ch in 'A'..'F') return (ch - 'A' + 0xA).toChar()
-        return null
-    }
-
-    private fun HextoD(hb: Byte, lb: Byte)
-            : Byte {
-        var mb: Byte
-        mb = 0
-        if (hb >= '0'.toByte() && hb <= '9'.toByte() || hb >= 'A'.toByte() && hb <= 'F'.toByte() ||
-            lb >= '0'.toByte() && lb <= '9'.toByte() || lb >= 'A'.toByte() && lb <= 'F'.toByte()
-        ) {
-            mb =
-                if (hb >= 'A'.toByte()) ((hb - '7'.toByte()) * 16).toByte() else ((hb - '0'.toByte()) * 16).toByte()
-            mb =
-                if (lb >= 'A'.toByte()) (mb + (lb - '7'.toByte())).toByte() else (mb + (lb - '0'.toByte())).toByte()
-        }
-        return mb
-    }
 
 }
 

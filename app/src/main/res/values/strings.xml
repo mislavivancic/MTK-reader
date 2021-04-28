@@ -111,8 +111,6 @@
     <string name="IDSI_LRN_LEARNEDDAYS">	"Number of days learned:"</string>
     <string name="IDSI_LRN_TPLEARNED">		"Today, the device has learned:"</string>
 
-
-
     <string name="name">Name</string>
     <string name="a">A</string>
 
@@ -428,7 +426,8 @@
     <string name="retrying">Retrying…</string>
     <string name="retry_time_read">Retry time read</string>
     <string name="retry_time_set">Retry time set</string>
-    <string name="set_probe_in_connecting">Set probe in connecting mode and retry!</string>
+    <string name="set_probe_in_connecting">Communication initialization error!\nSet probe in connecting mode and retry!</string>
+    <string name="restart_device_or_wait">Restart device or wait 120s</string>
     <string name="wait">\nWaiting…\t</string>
     <string name="program_time">Program time</string>
     <string name="pick_date">Pick date</string>
@@ -444,7 +443,9 @@
     <string name="program_time_date_hint">Click here to program picked time and date to device!</string>
     <string name="read_setting">Read setting</string>
     <string name="read_params">Read Params</string>
+    <string name="read_parameters">Read Parameters</string>
     <string name="write_params">Write Params</string>
+    <string name="write_parameters">Write Parameters</string>
     <string name="not_available_yet">Not available yet</string>
     <string name="pick_file">Pick file</string>
     <string name="no_file_picked">No file picked</string>
@@ -454,4 +455,11 @@
 
     <string name="address_does_not_exist">Address does not exist!</string>
     <string name="wrong_software_version">Wrong software version</string>
+    <string name="set_in_programming_mode">Set device in program mode!</string>
+
+    <string name="device_programmed">Device programmed!</string>
+    <string name="start_readout">Start readout</string>
+    <string name="pick_mtk_file">Select .mtk file!</string>
+    <string name="file_must_be">File must be .mtk!</string>
+
 </resources>

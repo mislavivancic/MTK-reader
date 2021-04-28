@@ -12,18 +12,8 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@id/btn_display_old"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btn_display_old"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/display_last_reading"
-        android:textAllCaps="false"
-        android:theme="@style/MtkButton"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent" />
 
 
     <com.airbnb.lottie.LottieAnimationView

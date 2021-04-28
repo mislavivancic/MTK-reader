@@ -15,12 +15,9 @@ import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseMVPFragment
 import com.mtkreader.commons.base.ErrorDialog
-import com.mtkreader.compare
 import com.mtkreader.contracts.ConnectionContract
 import com.mtkreader.presenters.ConnectionPresenter
-import com.mtkreader.services.MonitorServiceImpl
 import com.mtkreader.utils.PermissionUtils
-import com.mtkreader.utils.SharedPrefsUtils
 import com.mtkreader.views.adapters.ConnectedDevicesRecyclerView
 import com.mtkreader.views.adapters.DeviceOperation
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
@@ -51,13 +48,6 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
         super.onActivityCreated(savedInstanceState)
         initializePresenter()
         initializeViews()
-        initializeRoutes()
-        test()
-    }
-
-    private fun test(){
-        val a = MonitorServiceImpl()
-        a.a()
     }
 
     private fun initializePresenter() {
@@ -72,15 +62,6 @@ class ConnectView : BaseMVPFragment<ConnectionContract.Presenter>(), ConnectionC
         else
             PermissionUtils.requestCoarseLocationPermission(this)
 
-        if (SharedPrefsUtils.getReadData(requireContext()) != null)
-            btn_display_old.visibility = View.VISIBLE
-
-    }
-
-    private fun initializeRoutes() {
-        btn_display_old.setOnClickListener {
-            findNavController().navigate(R.id.navigateToDisplayDataView)
-        }
     }
 
     override fun onBluetoothInit() {

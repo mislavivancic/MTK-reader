@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="programming_error">Programming error</string>
+    <string name="time_out">Timed out</string>
+    <string name="bcc_error">BCC error</string>
+    <string name="error_reading_parameters">Error reading parameters</string>
+    <string name="verification_error">Verification error</string>
+    <string name="switch_off_supply">Switch off supply, wait 10 sec and switch on supply,\nor wait 120 sec for new communication start!</string>
+</resources>
