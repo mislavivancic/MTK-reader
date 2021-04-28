@@ -36,5 +36,19 @@ object SharedPrefsUtils {
         return prefs.getString(Const.SharedPrefKeys.LAST_FILE_READ_KEY, null)
     }
 
+    fun saveLastFileReadName(context: Context, data: String) {
+        context.getSharedPreferences(
+            BuildConfig.APPLICATION_ID,
+            Context.MODE_PRIVATE
+        ).edit().putString(Const.SharedPrefKeys.LAST_FILE_NAME, data).apply()
+    }
+
+    fun getLastFileReadName(context: Context): String? {
+        val prefs = context.getSharedPreferences(
+            BuildConfig.APPLICATION_ID,
+            Context.MODE_PRIVATE
+        )
+        return prefs.getString(Const.SharedPrefKeys.LAST_FILE_NAME, null)
+    }
 
 }

@@ -14,6 +14,7 @@ import com.mtkreader.exceptions.ProgrammingError
 import com.mtkreader.utils.CommunicationUtil
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -51,6 +52,22 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onDataStructuresFilled, view::onError)
         )
+    }
+
+    override fun displayFileData(fileLines: List<String>) {
+        addDisposable(
+            fillDataStructuresService.extractFileData(fileLines)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onDataStructuresFilledForDisplay, view::onError)
+        )
+    }
+
+    private fun onDataStructuresFilledForDisplay(fileData: DataStructures) {
+        addDisposable(Single.fromCallable { displayService.generateHtml(fileData) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(view::onHtmlReady, view::onError))
     }
 
     private fun onDataStructuresFilled(fileData: DataStructures) {

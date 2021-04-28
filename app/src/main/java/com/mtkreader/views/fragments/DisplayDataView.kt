@@ -22,10 +22,16 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
 
     private lateinit var headerData: ByteArray
     private lateinit var bodyData: ByteArray
+    private lateinit var htmlString: String
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
+        val htmlExtra = requireArguments().getString(Const.Extras.HTML_EXTRA)
+        if (htmlExtra != null) {
+            htmlString = htmlExtra
+            return
+        }
         val dataArg = arguments?.getString(Const.Extras.DATA_EXTRA)
         if (dataArg != null) {
             val (head, body) = DataUtils.extractHeaderAndBody(dataArg)
@@ -57,8 +63,11 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
         super.onActivityCreated(savedInstanceState)
         initPresenter()
         initViews()
-
-        presenter.processData(headerData, bodyData)
+        if (this::htmlString.isInitialized) {
+            displayData(htmlString)
+        } else {
+            presenter.processData(headerData, bodyData)
+        }
     }
 
     private fun initPresenter() {

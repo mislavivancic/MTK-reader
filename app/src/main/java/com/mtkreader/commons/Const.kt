@@ -16,11 +16,13 @@ object Const {
         const val DEVICE_EXTRA = "DEVICE_EXTRA"
         const val DEVICE_OPERATION = "DEVICE_OPERATION"
         const val DATA_EXTRA = "DATA_EXTRA"
+        const val HTML_EXTRA = "HTML_EXTRA"
     }
 
     object SharedPrefKeys {
         const val READ_DATA_KEY = "READ_DATA_KEY"
         const val LAST_FILE_READ_KEY = "LAST_FILE_READ_KEY"
+        const val LAST_FILE_NAME = "LAST_FILE_NAME"
     }
 
     object PermissionCode {
