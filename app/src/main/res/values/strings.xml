@@ -442,4 +442,6 @@
     <string name="start_program_s">Program (%s)</string>
     <string name="start_program">Program</string>
 
+    <string name="monitor">Monitor</string>
+
 </resources>
