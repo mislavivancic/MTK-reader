@@ -27,7 +27,7 @@ class DisplayDataView : BaseMVPFragment<DisplayDataContract.Presenter>(), Displa
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        val htmlExtra = requireArguments().getString(Const.Extras.HTML_EXTRA)
+        val htmlExtra = arguments?.getString(Const.Extras.HTML_EXTRA)
         if (htmlExtra != null) {
             htmlString = htmlExtra
             return
