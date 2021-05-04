@@ -52,3 +52,8 @@ fun String.trimAndSplit(): List<String> {
 fun Int.hasFlag(other: Int):Boolean{
     return (this and other)!=0
 }
+
+fun String.decodeHex(): ByteArray = chunked(2)
+    .map { it.toInt(16).toByte() }
+    .toByteArray()
+

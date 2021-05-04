@@ -53,7 +53,10 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
         requireActivity().toolbar.setNavigationIcon(R.drawable.ic_back_white)
 
         btn_retry.setOnClickListener { startConnecting() }
-        btn_readout.setOnClickListener { startConnecting() }
+        btn_readout.setOnClickListener {
+            tv_monitor_data.text = ""
+            startConnecting()
+        }
     }
 
     private fun startConnecting() {
@@ -70,6 +73,11 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
 
     override fun displayWaitMessage() {
         //tv_data_read.append(getString(R.string.wait))
+    }
+
+    override fun onByte(byte: Byte) {
+        loading_layout.visibility = View.GONE
+        tv_monitor_data.append(byte.toChar().toString())
     }
 
     override fun onError(throwable: Throwable) {

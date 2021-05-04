@@ -32,6 +32,14 @@
         app:layout_constraintTop_toBottomOf="@id/btn_readout"
         tools:visibility="visible" />
 
+    <TextView
+        android:id="@+id/tv_monitor_data"
+        android:layout_width="match_parent"
+        android:textColor="@color/white"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_retry"/>
+
     <include
         android:id="@+id/loading_layout"
         layout="@layout/loading_layout"

@@ -29,7 +29,6 @@ interface ParamsWriteContract {
         fun generateStrings(data: DataStructures): List<SendData>
         fun setDataStructures(data: DataStructures)
         fun createMessageObject(data: SendData): DataTXMessage
-        fun createMessageObject(string: String): DataTXMessage
         fun createMTKCommandMessageObject(string: String): DataTXMessage
         fun isReadImageValid(dataRXMessage: DataRXMessage)
     }

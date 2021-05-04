@@ -70,6 +70,7 @@ object Const {
         const val GET_TIME = "0147740330"
         const val RESET = "01810382"
         const val ACK = "01550356"
+        const val MONITOR_STATUS = "01560355"
     }
     object PARAMSRC {
        const val FILE = 0

@@ -38,6 +38,13 @@
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/navigateToMonitorView"
+            app:destination="@id/monitorView"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
     </fragment>
     <fragment
         android:id="@+id/readingView"
@@ -78,4 +85,10 @@
             app:popExitAnim="@anim/fragment_fade_exit" />
     </fragment>
 
+
+    <fragment
+        android:id="@+id/monitorView"
+        android:name="com.mtkreader.views.fragments.MonitorView"
+        android:label="DisplayTimeView"
+        tools:layout="@layout/fragment_monitor" />
 </navigation>

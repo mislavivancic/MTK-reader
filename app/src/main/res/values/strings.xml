@@ -443,5 +443,6 @@
     <string name="start_program">Program</string>
 
     <string name="monitor">Monitor</string>
+    <string name="monitor_status">Monitor status</string>
 
 </resources>
