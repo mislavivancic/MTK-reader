@@ -93,13 +93,6 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
     private var m_SWVerPri = 98     //TODO remove hardcode
     private var m_HWVerPri = Const.Data.TIP_PS
 
-
-    var m_BrPrekR1 = 0
-    var m_BrPrekR2 = 0
-    var m_BrPrekR3 = 0
-    var m_BrPrekR4 = 0
-
-    var m_AktRel = 0
     var m_PriMod = false
 
 
@@ -186,7 +179,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
     override fun parseMonitor(str: String): DataStructMon {
         LearnedDaysRel = Array(4) { Array(7) { false } }
-        m_AktRel = 0xE0
+        dataMonitor.m_AktRel = 0xE0
         m_PriMod = false    //Mod HDO
         m_24cikN = ""
         dataS.mCfg.cID = 130 //TODO maknuti harcode init na startu
@@ -201,6 +194,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
                 GetLineDat(db, mn[0].toInt())
             }
         }
+        dataMonitor.disp_learncycle=m_24cikN
         return dataMonitor
     }
 
@@ -455,7 +449,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
             if ((m_HWVerPri == Const.Data.TIP_PSB) and (i == 3)) break;
             if ((m_HWVerPri == Const.Data.TIP_PS) and (i == 3)) break;
-            if (m_AktRel.hasFlag(relx)) {
+            if (dataMonitor.m_AktRel.hasFlag(relx)) {
                 var str = ""
                 if (flags.hasFlag(Const.Data.AKT_FN_DLY)) str += "|FN_DLY";
                 if (flags.hasFlag(Const.Data.AKT_FN_WIPER)) str += "|FN_WIPER";
@@ -507,7 +501,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
             if ((m_HWVerPri == Const.Data.TIP_PSB) and (i == 3)) break;
             if ((m_HWVerPri == Const.Data.TIP_PS) and (i == 3)) break;
-            if (m_AktRel.hasFlag(relx)) {
+            if (dataMonitor.m_AktRel.hasFlag(relx)) {
 
                 var tstr = ""
                 if (status.hasFlag(Const.Data.REL_PROG_UNLOCK)) tstr += "|PROG_UNLOCK";
@@ -642,14 +636,14 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
 
     private fun UpEEBroPre(dbuf: ByteArray) {
-        m_BrPrekR1 = setOprelI(dbuf)
-        m_BrPrekR2 = setOprelI(dbuf)
-        m_BrPrekR3 = setOprelI(dbuf)
-        m_BrPrekR4 = setOprelI(dbuf)
-        if ((m_AktRel and 0x80) != 0) dataMonitor.dispR1_BrPrek = String.format("%d", m_BrPrekR1)
-        if ((m_AktRel and 0x40) != 0) dataMonitor.dispR2_BrPrek = String.format("%d", m_BrPrekR2)
-        if ((m_AktRel and 0x20) != 0) dataMonitor.dispR3_BrPrek = String.format("%d", m_BrPrekR3)
-        if ((m_AktRel and 0x10) != 0) dataMonitor.dispR4_BrPrek = String.format("%d", m_BrPrekR4)
+        val m_BrPrekR1 = setOprelI(dbuf)
+        val m_BrPrekR2 = setOprelI(dbuf)
+        val m_BrPrekR3 = setOprelI(dbuf)
+        val m_BrPrekR4 = setOprelI(dbuf)
+        if ((dataMonitor.m_AktRel and 0x80) != 0) dataMonitor.dispR_BrPrek[0] = String.format("%d", m_BrPrekR1)
+        if ((dataMonitor.m_AktRel and 0x40) != 0) dataMonitor.dispR_BrPrek[1] = String.format("%d", m_BrPrekR2)
+        if ((dataMonitor.m_AktRel and 0x20) != 0) dataMonitor.dispR_BrPrek[2] = String.format("%d", m_BrPrekR3)
+        if ((dataMonitor.m_AktRel and 0x10) != 0) dataMonitor.dispR_BrPrek[3] = String.format("%d", m_BrPrekR4)
 
     }
 
@@ -657,7 +651,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
 
         var b = dbuf[globalIndex++].toInt()
-        m_AktRel = b and 0xE0
+        dataMonitor.m_AktRel = b and 0xE0
         //m_PriMod=if(b.hasFlag(0x02)) true else false //TODO ?????  m_PriMod
         dbuf[globalIndex++]
 
@@ -742,7 +736,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
     }
 
-    fun SaveLogEvent() {
+    override fun SaveLogEvent() {
         var csvStr = getString(R.string.IDSC_TIME) + ";" +
                 getString(R.string.IDSTOC_EVENTLOG) + ";" +
                 getString(R.string.IDSI_SERIALNUM) + dataMonitor.disp_serNum + "\r\n"

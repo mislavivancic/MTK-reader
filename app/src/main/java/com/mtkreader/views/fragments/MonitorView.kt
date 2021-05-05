@@ -79,6 +79,11 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
         loading_layout.visibility = View.GONE
         tv_monitor_data.append(byte.toChar().toString())
     }
+    override fun onDispStatus(s: String) {
+        loading_layout.visibility = View.GONE
+        tv_monitor_status.text=s
+    }
+
 
     override fun onError(throwable: Throwable) {
         connectingDialog.dismiss()

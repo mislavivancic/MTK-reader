@@ -26,8 +26,8 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
         communicationManager.addData(byte)
     }
 
-    override fun startCommunication() {
-        waitMessageDisposable = Observable.fromCallable { communicate() }
+    override fun startCommunication(req:Int) { //0 status //1 eventlog //2 learn
+        waitMessageDisposable = Observable.fromCallable { communicate(req) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(this::onReadoutDone, view::onError)
@@ -37,30 +37,51 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
     }
 
 
-    private fun communicate(): String {
+    private fun communicate(req:Int): String {
         val headerMessage = communicationManager.waitForMessage()
 
         CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.SECOND_INIT)
         val message = communicationManager.waitForMessage()
+        when(req) {
 
-        val monitorStatusCmd = DataUtils.createMessageObject("V")
-        //CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.MONITOR_STATUS)
-        CommunicationUtil.writeToSocket(socket, monitorStatusCmd.getBufferData().toByteArray())
-        val monitorStatusMessage = communicationManager.waitForMessage(type = 1)
-        if (monitorStatusMessage.status == Const.Data.COMPLETE) {
-            val string = DataUtils.hexToAscii(DataUtils.byteArrayToHexString(monitorStatusMessage.getBufferData().toByteArray()))
-            val dataMonitor = service.parseMonitor(string.substring(1))
+            0 -> {
+                val monitorStatusCmd = DataUtils.createMessageObject("V")
+                //CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.MONITOR_STATUS)
+                CommunicationUtil.writeToSocket(socket, monitorStatusCmd.getBufferData().toByteArray())
+                val monitorStatusMessage = communicationManager.waitForMessage(type = 1)
+                if (monitorStatusMessage.status == Const.Data.COMPLETE) {
+                    val string = DataUtils.hexToAscii(DataUtils.byteArrayToHexString(monitorStatusMessage.getBufferData().toByteArray()))
+                    val dataMonitor = service.parseMonitor(string.substring(1))
+                    val s = dataMonitor.dispStatus()
+                    view.onDispStatus(s)
+                }
+            }
+            1 -> {
+                val readEventLogCommand = DataUtils.createMessageObject("Gs")
+                CommunicationUtil.writeToSocket(socket, readEventLogCommand.getBufferData().toByteArray())
+                val eventLog = communicationManager.waitForMessage(type = 1)
+                if (eventLog.status == Const.Data.COMPLETE) {
+                    val string = DataUtils.hexToAscii(DataUtils.byteArrayToHexString(eventLog.getBufferData().toByteArray()))
+                    val dataMonitor = service.parseMonitor(string.substring(1))
+                    service.SaveLogEvent()
+                    val s = dataMonitor.disp_eventlog
+                    view.onDispStatus(s)
+                }
+            }
+            2 -> {
 
+                val readLearnCommand = DataUtils.createMessageObject("Gh")
+                CommunicationUtil.writeToSocket(socket, readLearnCommand.getBufferData().toByteArray())
+                val learnLog = communicationManager.waitForMessage(type = 1)
+                if (learnLog.status == Const.Data.COMPLETE) {
+                    val string = DataUtils.hexToAscii(DataUtils.byteArrayToHexString(learnLog.getBufferData().toByteArray()))
+                    val dataMonitor = service.parseMonitor(string.substring(1))
+                    val s = dataMonitor.disp_learncycle
+                    view.onDispStatus(s)
+                }
+
+            }
         }
-        //Thread.sleep(3000)
-        //CommunicationUtil.writeToSocket(socket, Const.DeviceConstants.MONITOR_STATUS)
-        CommunicationUtil.writeToSocket(socket, monitorStatusCmd.getBufferData().toByteArray())
-        val monitorStatusMessage2 = communicationManager.waitForMessage(type = 1)
-
-        //Thread.sleep(4000)
-        val readEventLogCommand = DataUtils.createMessageObject("Gs")
-        CommunicationUtil.writeToSocket(socket, readEventLogCommand.getBufferData().toByteArray())
-        val eventLog = communicationManager.waitForMessage(type = 1)
         return ""
     }
 
