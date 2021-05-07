@@ -10,18 +10,40 @@
         android:id="@+id/btn_readout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/start_readout"
+        android:text="@string/monitor_readstatus"
         android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/btn_event_log"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="@string/monitor_readeventlog"
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toStartOf="@id/btn_learn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_readout" />
+
+    <Button
+        android:id="@+id/btn_learn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="@string/monitor_readlearn"
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_event_log"
+        app:layout_constraintTop_toBottomOf="@id/btn_readout" />
+
+    <Button
         android:id="@+id/btn_retry"
         style="@style/MtkButtonRetry"
         android:layout_width="wrap_content"
-        android:layout_height="38dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:background="@color/blood_red"
         android:paddingHorizontal="20dp"
         android:text="@string/retry"
@@ -29,7 +51,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_readout"
+        app:layout_constraintTop_toBottomOf="@id/btn_event_log"
         tools:visibility="visible" />
 
     <TextView

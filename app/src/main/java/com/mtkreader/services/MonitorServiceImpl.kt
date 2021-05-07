@@ -1,7 +1,6 @@
 package com.mtkreader.services
 
 import android.content.Context
-import android.util.Log
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.Const.Data.CLP_REL_X
@@ -187,7 +186,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         for (i in str.split("\n")) {
             var x = i.split("(", ")")
             if (x.count() > 2) {
-                Log.i(Const.Logging.MONITOR, "\n" + x[0] + " " + x[1])
+                //Log.i(Const.Logging.MONITOR, "\n" + x[0] + " " + x[1])
                 var db = x[1].decodeHex()
                 var mn = x[0].decodeHex()
 
@@ -395,7 +394,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
                 par = String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", TP.Toff / 60, TP.Toff % 60)
             if ((!TP.bTonb) or (!TP.bToffb))
                 res += par;
-            Log.i(Const.Logging.MONITOR, par)
+            //Log.i(Const.Logging.MONITOR, par)
         }
         if (res.isBlank())
             res = "    \r\n    T-a: --:-- T-b: --:--"
@@ -424,7 +423,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
         dataMonitor.disp_RTC = rtc.joinToString()
         dataMonitor.disp_RTCsync = sync
-        Log.i(Const.Logging.MONITOR, str)
+       // Log.i(Const.Logging.MONITOR, str)
     }
 
     private fun GetEventH(dbuf: ByteArray) {
@@ -469,12 +468,12 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
             }
         }
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
     }
 
     private fun GetPrijStatus(dbuf: ByteArray) {
         var res = String.format("\r\nGetPrijStatus:%02x", dbuf[globalIndex++])
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
     }
 
     private fun GetPrijEvents(dbuf: ByteArray) {
@@ -489,7 +488,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         if (status.hasFlag(Const.Data.PRIJ_EV_RTCST)) str += "|RTCST"
         if (status.hasFlag(Const.Data.PRIJ_EV_RTCOF)) str += "|RTCOF"
         str2 = String.format("\r\nGetPrijEvents: %02X (%s)", status, str);
-        Log.i(Const.Logging.MONITOR, str2)
+        //Log.i(Const.Logging.MONITOR, str2)
     }
 
     private fun GetRelStatus(dbuf: ByteArray) {
@@ -531,7 +530,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             }        //end akt rel;
 
         }
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
 
     }
 
@@ -549,7 +548,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             res += String.format(" R%d (%02X%s)", rel + 1, revents, tstr)
 
         }
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
 
     }
 
@@ -666,7 +665,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
         }
         dataMonitor.disp_paramfile = paramfile
-        Log.i(Const.Logging.MONITOR, paramfile)
+        //Log.i(Const.Logging.MONITOR, paramfile)
     }
 
 
@@ -684,7 +683,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
         res = String.format("%s-%02d:%02d:%02d", context.resources.getStringArray(R.array.a_days)[wtime], hour, min, sec)
         dataMonitor.disp_time = res
-        Log.i(Const.Logging.MONITOR, res)
+       // Log.i(Const.Logging.MONITOR, res)
 
     }
 
@@ -730,7 +729,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         }
         dataMonitor.disp_time = time
         dataMonitor.disp_date = date
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
         //return Pair(time, date)
 
 

@@ -6,11 +6,15 @@ interface MonitorContract {
 
     interface View : BluetoothContract.View {
         fun onByte(byte: Byte)
-        fun onDispStatus(s:String)
+        fun displayStatus(status: String)
+        fun onStatusReadingInProgress()
+        fun displayEventLog(eventLog: String)
+        fun displayLearn(learn: String)
     }
 
     interface Presenter : BluetoothContract.Presenter {
-
+        fun readEventLog()
+        fun readLearn()
     }
 
     interface Service {

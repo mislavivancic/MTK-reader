@@ -54,8 +54,19 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
 
         btn_retry.setOnClickListener { startConnecting() }
         btn_readout.setOnClickListener {
+            disableButtons()
             tv_monitor_data.text = ""
             startConnecting()
+        }
+
+        btn_event_log.setOnClickListener {
+            disableButtons()
+            presenter.readEventLog()
+        }
+
+        btn_learn.setOnClickListener {
+            disableButtons()
+            presenter.readLearn()
         }
     }
 
@@ -79,13 +90,43 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
         loading_layout.visibility = View.GONE
         tv_monitor_data.append(byte.toChar().toString())
     }
-    override fun onDispStatus(s: String) {
+
+    override fun displayStatus(status: String) {
         loading_layout.visibility = View.GONE
-        tv_monitor_status.text=s
+        tv_monitor_status.text = status
+    }
+
+    override fun onStatusReadingInProgress() {
+        enableButtons()
+    }
+
+    override fun displayEventLog(eventLog: String) {
+        tv_monitor_status.text = eventLog
+        enableButtons()
+    }
+
+    override fun displayLearn(learn: String) {
+        tv_monitor_status.text = learn
+        enableButtons()
+    }
+
+
+    private fun disableButtons() {
+        btn_readout.isEnabled = false
+        btn_event_log.isEnabled = false
+        btn_learn.isEnabled = false
+    }
+
+    private fun enableButtons() {
+        btn_readout.isEnabled = true
+        btn_event_log.isEnabled = true
+        btn_learn.isEnabled = true
     }
 
 
     override fun onError(throwable: Throwable) {
+        disableButtons()
+        btn_readout.isEnabled = true
         connectingDialog.dismiss()
         loading_layout.visibility = View.GONE
         handleError(throwable) { startConnecting() }
