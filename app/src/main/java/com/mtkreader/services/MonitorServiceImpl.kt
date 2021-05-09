@@ -594,7 +594,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             in 0..4 -> imp = String.format("A%d", nr)
             in 5..12 -> imp = String.format("B%d", nr - 4)
             in 13..44 -> {
-                if (nr % 2 == 1) imp = String.format("DP%dz", (nr - 13) / 2 + 1)
+                if ((nr % 2) == 1) imp = String.format("DP%dz", (nr - 13) / 2 + 1)
                 else imp = String.format("DP%dv", (nr - 13) / 2 + 1)
             }
             else -> imp = String.format("C%d", nr - 44)
@@ -609,7 +609,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         val imps = mutableListOf<String>()
         for (i in 0..7) {
             for (j in 0..7) {
-                if (dbuf[i].toInt() and Const.Data.bVtmask[j].toInt() != 0)
+                if(dbuf[i].toInt().hasFlag(Const.Data.bVtmask[j].toInt()))
                     imps.add(GetImpName(8 * i + j + 1))
 
             }
