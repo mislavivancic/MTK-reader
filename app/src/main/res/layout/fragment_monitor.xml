@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark">
+    android:background="@color/white">
 
     <Button
         android:id="@+id/btn_readout"
@@ -58,8 +58,15 @@
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@color/light_gray"
         app:layout_constraintTop_toBottomOf="@id/btn_retry"
-        app:tabBackground="@color/light_gray" />
+        app:tabBackground="@color/lighterer_gray"
+        app:tabIndicatorColor="@color/selected_indicator_color"
+        app:tabIndicatorHeight="5dp"
+        app:tabSelectedTextColor="@color/almost_black"
+        app:tabTextAppearance="@style/NoCapsTabs"
+        app:tabTextColor="@color/not_selected_almost_black" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"

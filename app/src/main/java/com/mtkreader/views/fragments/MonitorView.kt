@@ -17,6 +17,7 @@ import com.mtkreader.presenters.MonitorPresenter
 import com.mtkreader.views.adapters.MonitorDataAdapter
 import com.mtkreader.views.dialogs.ConnectingDialog
 import com.mtkreader.views.fragments.monitor.MonitorEventLogFragment
+import com.mtkreader.views.fragments.monitor.MonitorLearnCycleFragment
 import com.mtkreader.views.fragments.monitor.MonitorStatusFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_monitor.*
@@ -121,8 +122,9 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
     }
 
     override fun displayLearn(learn: String) {
-        //tv_monitor_status.text = learn
         enableButtons()
+        view_pager.currentItem = 2
+        (monitorDataAdapter.fragments[2] as MonitorLearnCycleFragment).update(learn)
     }
 
 
