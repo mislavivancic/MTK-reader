@@ -7,12 +7,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.tabs.TabLayoutMediator
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseBluetoothFragment
 import com.mtkreader.contracts.MonitorContract
+import com.mtkreader.data.MonitorStatus
 import com.mtkreader.presenters.MonitorPresenter
+import com.mtkreader.views.adapters.MonitorDataAdapter
 import com.mtkreader.views.dialogs.ConnectingDialog
+import com.mtkreader.views.fragments.monitor.MonitorEventLogFragment
+import com.mtkreader.views.fragments.monitor.MonitorStatusFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_monitor.*
 
@@ -20,6 +25,7 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
 
     private lateinit var connectedDevice: BluetoothDevice
     private lateinit var connectingDialog: Dialog
+    private lateinit var monitorDataAdapter: MonitorDataAdapter
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -51,11 +57,11 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
     private fun initializeViews() {
         requireActivity().title = getString(R.string.monitor)
         requireActivity().toolbar.setNavigationIcon(R.drawable.ic_back_white)
+        monitorDataAdapter = MonitorDataAdapter(this)
 
         btn_retry.setOnClickListener { startConnecting() }
         btn_readout.setOnClickListener {
             disableButtons()
-            tv_monitor_data.text = ""
             startConnecting()
         }
 
@@ -68,6 +74,15 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
             disableButtons()
             presenter.readLearn()
         }
+        view_pager.adapter = monitorDataAdapter
+        TabLayoutMediator(tab_layout, view_pager) { tab, position ->
+            when (position) {
+                0 -> tab.text = getString(R.string.status)
+                1 -> tab.text = getString(R.string.event_log)
+                2 -> tab.text = getString(R.string.learn_cycle)
+            }
+        }.attach()
+
     }
 
     private fun startConnecting() {
@@ -88,12 +103,11 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
 
     override fun onByte(byte: Byte) {
         loading_layout.visibility = View.GONE
-        tv_monitor_data.append(byte.toChar().toString())
     }
 
-    override fun displayStatus(status: String) {
+    override fun displayStatus(status: MonitorStatus) {
         loading_layout.visibility = View.GONE
-        tv_monitor_status.text = status
+        (monitorDataAdapter.fragments[0] as MonitorStatusFragment).updateMonitor(status)
     }
 
     override fun onStatusReadingInProgress() {
@@ -101,12 +115,13 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
     }
 
     override fun displayEventLog(eventLog: String) {
-        tv_monitor_status.text = eventLog
         enableButtons()
+        view_pager.currentItem = 1
+        (monitorDataAdapter.fragments[1] as MonitorEventLogFragment).update(eventLog)
     }
 
     override fun displayLearn(learn: String) {
-        tv_monitor_status.text = learn
+        //tv_monitor_status.text = learn
         enableButtons()
     }
 

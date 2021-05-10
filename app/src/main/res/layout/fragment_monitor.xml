@@ -54,25 +54,19 @@
         app:layout_constraintTop_toBottomOf="@id/btn_event_log"
         tools:visibility="visible" />
 
-    <TextView
-        android:id="@+id/tv_monitor_data"
-        android:layout_width="411dp"
-        android:layout_height="190dp"
-        android:layout_marginBottom="7dp"
-        android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_monitor_status" />
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/btn_retry"
+        app:tabBackground="@color/light_gray" />
 
-    <TextView
-        android:id="@+id/tv_monitor_status"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/tv_monitor_data"
-        app:layout_constraintTop_toBottomOf="@+id/btn_retry"
-        tools:layout_editor_absoluteX="0dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tab_layout" />
 
     <include
         android:id="@+id/loading_layout"

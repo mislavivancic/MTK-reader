@@ -450,7 +450,8 @@
 
     <string name="monitor">Monitor</string>
     <string name="monitor_status">Monitor status</string>
-
+    <string name="status">Status</string>
+    <string name="learn_cycle">Learn cycle</string>
 
 
     <string name="dmonitor_paramfile">Parameter file</string>
@@ -467,6 +468,8 @@
     <string name="dmonitor_loop">Loop programs enabled</string>
     <string name="dmonitor_transmiterfail">Transmiter failure</string>
     <string name="dmonitor_switchingcnt">Switching counter</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

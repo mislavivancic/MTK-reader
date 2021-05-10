@@ -3,6 +3,7 @@ package com.mtkreader.presenters
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.base.BaseBluetoothPresenter
 import com.mtkreader.contracts.MonitorContract
+import com.mtkreader.data.MonitorStatus
 import com.mtkreader.utils.CommunicationUtil
 import com.mtkreader.utils.DataUtils
 import io.reactivex.Completable
@@ -19,14 +20,14 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
     MonitorContract.Presenter, KoinComponent {
 
     companion object {
-        private const val MONITOR_STATUS_QUERY_INTERVAL = 4000L
+        private const val MONITOR_STATUS_QUERY_INTERVAL = 3000L
     }
 
     private val service: MonitorContract.Service by inject()
     private lateinit var waitMessageDisposable: Disposable
     private lateinit var getMonitorStatusDisposable: Disposable
 
-    private var status = ""
+    private var monitorStatus: MonitorStatus? = null
 
     override fun onByteReceive(byte: Byte) {
         stopTimeout()
@@ -52,12 +53,15 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
 
     private fun onCommunicationStarted() {
         getMonitorStatusDisposable = Observable.interval(0, MONITOR_STATUS_QUERY_INTERVAL, TimeUnit.MILLISECONDS)
-            .doOnNext { status = readMonitorStatus() }
+            .doOnNext { monitorStatus = readMonitorStatus() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
-                view.displayStatus(status)
-                view.onStatusReadingInProgress()
+                monitorStatus?.let {
+                    view.displayStatus(monitorStatus!!)
+                    view.onStatusReadingInProgress()
+                }
+
             }
             .doOnError(view::onError)
             .subscribe()
@@ -107,7 +111,7 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
     }
 
 
-    private fun readMonitorStatus(): String {
+    private fun readMonitorStatus(): MonitorStatus {
         val monitorStatusCmd = DataUtils.createMessageObject("V")
         CommunicationUtil.writeToSocket(socket, monitorStatusCmd.getBufferData().toByteArray())
         val monitorStatusMessage = communicationManager.waitForMessage(type = 1)
@@ -115,9 +119,9 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
             val string = DataUtils.hexToAscii(DataUtils.byteArrayToHexString(monitorStatusMessage.getBufferData().toByteArray()))
             val dataMonitor = service.parseMonitor(string.substring(1))
             return dataMonitor.dispStatus()
+        } else {
+            throw Exception("a") // TODO add exception
         }
-
-        return ""
     }
 
 }

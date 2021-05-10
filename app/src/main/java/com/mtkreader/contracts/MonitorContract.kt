@@ -1,12 +1,13 @@
 package com.mtkreader.contracts
 
 import com.mtkreader.data.DataStructMon
+import com.mtkreader.data.MonitorStatus
 
 interface MonitorContract {
 
     interface View : BluetoothContract.View {
         fun onByte(byte: Byte)
-        fun displayStatus(status: String)
+        fun displayStatus(status: MonitorStatus)
         fun onStatusReadingInProgress()
         fun displayEventLog(eventLog: String)
         fun displayLearn(learn: String)
