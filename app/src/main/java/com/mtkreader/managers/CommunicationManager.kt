@@ -17,6 +17,7 @@ class CommunicationManager {
     private val readData = mutableListOf<Byte>()
     private var retryCount = 0
     private var readoutType: Byte = 0
+    var timeOut = 0L
 
     fun addData(byte: Byte) {
         data.add(byte)
@@ -27,7 +28,7 @@ class CommunicationManager {
         readoutType = type
         retryCount = 0
         readMessageData = DataRXMessage()
-        val timeOut = if (type == 0.toByte()) System.currentTimeMillis() + 10000 else System.currentTimeMillis() + 60000
+        timeOut = System.currentTimeMillis() + 1500
         do {
             if (System.currentTimeMillis() > timeOut) {
                 throw CommunicationException()
@@ -43,6 +44,8 @@ class CommunicationManager {
         try {
 
             while (true) {
+                timeOut = System.currentTimeMillis() + 1500
+
                 if (data.isNotEmpty()) {
                     readData.clear()
                     readData.addAll(data)
@@ -56,7 +59,6 @@ class CommunicationManager {
                                 readMessageData.status = Const.Data.COMPLETE
                             } else {
                                 readMessageData.proterr = 0xCC.toByte()
-                                // todo error
                                 throw BccException()
                             }
                             return true

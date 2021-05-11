@@ -16,6 +16,7 @@ interface MonitorContract {
     interface Presenter : BluetoothContract.Presenter {
         fun readEventLog()
         fun readLearn()
+        fun reset()
     }
 
     interface Service {

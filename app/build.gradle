@@ -71,8 +71,6 @@ dependencies {
 
     implementation 'net.alexandroid.utils:mylogkt:1.12'
 
-    // showcase
-    implementation 'com.github.spiddekauga:MaterialShowcaseView:2.0.0'
 
     implementation "androidx.viewpager2:viewpager2:1.0.0"
 

@@ -86,6 +86,7 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .doAfterSuccess { onCommunicationStarted() }
             .subscribe(view::displayEventLog, view::onError)
         addDisposable(waitMessageDisposable)
     }
@@ -106,6 +107,7 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .doAfterSuccess { onCommunicationStarted() }
             .subscribe(view::displayLearn, view::onError)
         addDisposable(waitMessageDisposable)
     }
@@ -122,6 +124,18 @@ class MonitorPresenter(private val view: MonitorContract.View) : BaseBluetoothPr
         } else {
             throw Exception("a") // TODO add exception
         }
+    }
+
+    override fun reset() {
+        addDisposable(
+            Completable.fromCallable {
+                val resetCommand = DataUtils.createMessageObject("Q")
+                CommunicationUtil.writeToSocket(socket, resetCommand.getBufferData().toByteArray())
+            }
+                .subscribeOn(Schedulers.io())
+                .onErrorComplete()
+                .subscribe()
+        )
     }
 
 }

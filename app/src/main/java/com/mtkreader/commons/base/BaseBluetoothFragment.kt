@@ -10,6 +10,7 @@ import java.io.IOException
 open class BaseBluetoothFragment<T> : BaseMVPFragment<T>() where T : AutoDisposePresenter {
 
     protected fun handleError(throwable: Throwable, action: (() -> Unit)? = null) {
+        throwable.printStackTrace()
         when (throwable) {
             is ConnectionClosedException -> {
                 snack(getString(R.string.set_probe_in_connecting), action = {

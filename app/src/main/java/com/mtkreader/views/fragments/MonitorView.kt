@@ -69,11 +69,13 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
         btn_event_log.setOnClickListener {
             disableButtons()
             presenter.readEventLog()
+            loading_layout.visibility = View.VISIBLE
         }
 
         btn_learn.setOnClickListener {
             disableButtons()
             presenter.readLearn()
+            loading_layout.visibility = View.VISIBLE
         }
         view_pager.adapter = monitorDataAdapter
         TabLayoutMediator(tab_layout, view_pager) { tab, position ->
@@ -103,7 +105,8 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
     }
 
     override fun onByte(byte: Byte) {
-        loading_layout.visibility = View.GONE
+        btn_retry.visibility = View.GONE
+        //loading_layout.visibility = View.GONE
     }
 
     override fun displayStatus(status: MonitorStatus) {
@@ -116,12 +119,14 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
     }
 
     override fun displayEventLog(eventLog: String) {
+        loading_layout.visibility = View.GONE
         enableButtons()
         view_pager.currentItem = 1
         (monitorDataAdapter.fragments[1] as MonitorEventLogFragment).update(eventLog)
     }
 
     override fun displayLearn(learn: String) {
+        loading_layout.visibility = View.GONE
         enableButtons()
         view_pager.currentItem = 2
         (monitorDataAdapter.fragments[2] as MonitorLearnCycleFragment).update(learn)
@@ -142,11 +147,15 @@ class MonitorView : BaseBluetoothFragment<MonitorContract.Presenter>(), MonitorC
 
 
     override fun onError(throwable: Throwable) {
+        presenter.reset()
         disableButtons()
         btn_readout.isEnabled = true
         connectingDialog.dismiss()
         loading_layout.visibility = View.GONE
-        handleError(throwable) { startConnecting() }
+        handleError(throwable) {
+            btn_retry.visibility = View.GONE
+            startConnecting()
+        }
         presenter.stopTimeout()
         presenter.tryReset()
     }

@@ -20,5 +20,6 @@
     <color name="blood_red_trans">#EE9F0728</color>
     <color name="transparent">#00000000</color>
     <color name="selected_indicator_color">#f5b342</color>
+    <color name="selected_color">#FDD798</color>
 
 </resources>
