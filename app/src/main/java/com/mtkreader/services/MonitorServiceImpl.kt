@@ -1,7 +1,6 @@
 package com.mtkreader.services
 
 import android.content.Context
-import android.util.Log
 import com.mtkreader.R
 import com.mtkreader.commons.Const
 import com.mtkreader.commons.Const.Data.CLP_REL_X
@@ -41,6 +40,7 @@ import com.mtkreader.data.DataStructures
 import com.mtkreader.data.REL24HCSTR2
 import com.mtkreader.data.REL24HCSTR2.Companion.SIZE_24HC_TPAR2
 import com.mtkreader.data.reading.*
+import com.mtkreader.decodeHex
 import com.mtkreader.hasFlag
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -51,12 +51,12 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
     val context: Context by inject()
     private var dataS: DataStructures = DataStructures()
     var globalIndex = 0
-    private val datmon: DataStructMon = DataStructMon()
+    private val dataMonitor: DataStructMon = DataStructMon()
 
     fun a() {
-        testParse(statusS)
-        testParse(eventsS)
-        testParse(learnS)
+        parseMonitor(statusS)
+        parseMonitor(eventsS)
+        parseMonitor(learnS)
         SaveLogEvent()
     }
 
@@ -92,18 +92,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
     private var m_SWVerPri = 98     //TODO remove hardcode
     private var m_HWVerPri = Const.Data.TIP_PS
 
-
-    var m_BrPrekR1 = 0
-    var m_BrPrekR2 = 0
-    var m_BrPrekR3 = 0
-    var m_BrPrekR4 = 0
-
-    var m_AktRel = 0
     var m_PriMod = false
-
-    fun String.decodeHex(): ByteArray = chunked(2)
-        .map { it.toInt(16).toByte() }
-        .toByteArray()
 
 
     val statusS = """
@@ -187,9 +176,9 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 """
 
 
-    private fun testParse(str: String) {
+    override fun parseMonitor(str: String): DataStructMon {
         LearnedDaysRel = Array(4) { Array(7) { false } }
-        m_AktRel = 0xE0
+        dataMonitor.m_AktRel = 0xE0
         m_PriMod = false    //Mod HDO
         m_24cikN = ""
         dataS.mCfg.cID = 130 //TODO maknuti harcode init na startu
@@ -197,13 +186,15 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         for (i in str.split("\n")) {
             var x = i.split("(", ")")
             if (x.count() > 2) {
-                Log.i(Const.Logging.MONITOR, "\n" + x[0] + " " + x[1])
+                //Log.i(Const.Logging.MONITOR, "\n" + x[0] + " " + x[1])
                 var db = x[1].decodeHex()
                 var mn = x[0].decodeHex()
 
                 GetLineDat(db, mn[0].toInt())
             }
         }
+        dataMonitor.disp_learncycle=m_24cikN
+        return dataMonitor
     }
 
     private fun GetLineDat(dbuf: ByteArray, monadr: Int) {
@@ -403,7 +394,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
                 par = String.format("    \r\n    T-a: --:-- T-b: %02d:%02d", TP.Toff / 60, TP.Toff % 60)
             if ((!TP.bTonb) or (!TP.bToffb))
                 res += par;
-            Log.i(Const.Logging.MONITOR, par)
+            //Log.i(Const.Logging.MONITOR, par)
         }
         if (res.isBlank())
             res = "    \r\n    T-a: --:-- T-b: --:--"
@@ -430,20 +421,20 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             if (statRTC == 0) rtc.add("Vb>2.5V")
         }
 
-        datmon.disp_RTC = rtc.joinToString()
-        datmon.disp_RTCsync = sync
-        Log.i(Const.Logging.MONITOR, str)
+        dataMonitor.disp_RTC = rtc.joinToString()
+        dataMonitor.disp_RTCsync = sync
+       // Log.i(Const.Logging.MONITOR, str)
     }
 
     private fun GetEventH(dbuf: ByteArray) {
-        datmon.m_EvLogH.indx = dbuf[globalIndex++]
-        datmon.m_EvLogH.start = dbuf[globalIndex++]
-        datmon.m_EvLogH.MaxEvent = dbuf[globalIndex++]
-        datmon.m_EvLogH.Event = dbuf[globalIndex++]
+        dataMonitor.m_EvLogH.indx = dbuf[globalIndex++]
+        dataMonitor.m_EvLogH.start = dbuf[globalIndex++]
+        dataMonitor.m_EvLogH.MaxEvent = dbuf[globalIndex++]
+        dataMonitor.m_EvLogH.Event = dbuf[globalIndex++]
     }
 
     private fun GetDevSerNr(dbuf: ByteArray) {
-        datmon.disp_serNum = String.format("%d", setOprel4I(dbuf))
+        dataMonitor.disp_serNum = String.format("%d", setOprel4I(dbuf))
     }
 
     private fun GetAktFnRx(dbuf: ByteArray) {
@@ -457,7 +448,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
             if ((m_HWVerPri == Const.Data.TIP_PSB) and (i == 3)) break;
             if ((m_HWVerPri == Const.Data.TIP_PS) and (i == 3)) break;
-            if (m_AktRel.hasFlag(relx)) {
+            if (dataMonitor.m_AktRel.hasFlag(relx)) {
                 var str = ""
                 if (flags.hasFlag(Const.Data.AKT_FN_DLY)) str += "|FN_DLY";
                 if (flags.hasFlag(Const.Data.AKT_FN_WIPER)) str += "|FN_WIPER";
@@ -473,16 +464,16 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
                 res += String.format(" R%d (%04X%s)", i + 1, flags, str)
 
                 if (m_PriMod == false)
-                    datmon.dispR_Wiper[i] = if (flags.hasFlag(Const.Data.AKT_FN_WIPER)) getString(R.string.yes) else getString(R.string.no)
+                    dataMonitor.dispR_Wiper[i] = if (flags.hasFlag(Const.Data.AKT_FN_WIPER)) getString(R.string.yes) else getString(R.string.no)
 
             }
         }
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
     }
 
     private fun GetPrijStatus(dbuf: ByteArray) {
         var res = String.format("\r\nGetPrijStatus:%02x", dbuf[globalIndex++])
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
     }
 
     private fun GetPrijEvents(dbuf: ByteArray) {
@@ -497,7 +488,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         if (status.hasFlag(Const.Data.PRIJ_EV_RTCST)) str += "|RTCST"
         if (status.hasFlag(Const.Data.PRIJ_EV_RTCOF)) str += "|RTCOF"
         str2 = String.format("\r\nGetPrijEvents: %02X (%s)", status, str);
-        Log.i(Const.Logging.MONITOR, str2)
+        //Log.i(Const.Logging.MONITOR, str2)
     }
 
     private fun GetRelStatus(dbuf: ByteArray) {
@@ -509,7 +500,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
             if ((m_HWVerPri == Const.Data.TIP_PSB) and (i == 3)) break;
             if ((m_HWVerPri == Const.Data.TIP_PS) and (i == 3)) break;
-            if (m_AktRel.hasFlag(relx)) {
+            if (dataMonitor.m_AktRel.hasFlag(relx)) {
 
                 var tstr = ""
                 if (status.hasFlag(Const.Data.REL_PROG_UNLOCK)) tstr += "|PROG_UNLOCK";
@@ -523,22 +514,23 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
                 res += String.format(" R%d (%02X%s)", i + 1, status, tstr)
 
 
-                datmon.dispR_ProgEn[i] = if (status.hasFlag(Const.Data.REL_PROG_UNLOCK)) getString(R.string.yes) else getString(R.string.no)
+                dataMonitor.dispR_ProgEn[i] = if (status.hasFlag(Const.Data.REL_PROG_UNLOCK)) getString(R.string.yes) else getString(R.string.no)
                 if (m_PriMod == false) {
 
-                    if (!status.hasFlag(Const.Data.REL_LEARN_EN)) datmon.dispR_Learn[i] = getString(R.string.IDS_LRN_DIS)
-                    else if (!status.hasFlag(Const.Data.REL_LEARN_INTR)) datmon.dispR_Learn[i] = getString(R.string.IDS_LRN_OK)
-                    else datmon.dispR_Learn[i] = getString(R.string.IDS_LRN_INTR)
+                    if (!status.hasFlag(Const.Data.REL_LEARN_EN)) dataMonitor.dispR_Learn[i] = getString(R.string.IDS_LRN_DIS)
+                    else if (!status.hasFlag(Const.Data.REL_LEARN_INTR)) dataMonitor.dispR_Learn[i] = getString(R.string.IDS_LRN_OK)
+                    else dataMonitor.dispR_Learn[i] = getString(R.string.IDS_LRN_INTR)
 
-                    if (status.hasFlag(Const.Data.REL_EM_STATE)) datmon.dispR_ProgEn[i] = getString(R.string.HOZ)
+                    if (status.hasFlag(Const.Data.REL_EM_STATE)) dataMonitor.dispR_ProgEn[i] = getString(R.string.HOZ)
 
-                    datmon.dispR_TransmitFail[i] = if (status.hasFlag(Const.Data.REL_TA_STATE)) getString(R.string.yes) else getString(R.string.no)
-                    datmon.dispR_LoopEn[i] = if (status.hasFlag(Const.Data.REL_TIMPR_UNLOCK)) getString(R.string.yes) else getString(R.string.no)
+                    dataMonitor.dispR_TransmitFail[i] =
+                        if (status.hasFlag(Const.Data.REL_TA_STATE)) getString(R.string.yes) else getString(R.string.no)
+                    dataMonitor.dispR_LoopEn[i] = if (status.hasFlag(Const.Data.REL_TIMPR_UNLOCK)) getString(R.string.yes) else getString(R.string.no)
                 }
             }        //end akt rel;
 
         }
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
 
     }
 
@@ -556,15 +548,15 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             res += String.format(" R%d (%02X%s)", rel + 1, revents, tstr)
 
         }
-        Log.i(Const.Logging.MONITOR, res)
+        //Log.i(Const.Logging.MONITOR, res)
 
     }
 
     private fun UpBrTstF(dbuf: ByteArray) {
         if (m_SWVerPri >= 90)
-            datmon.disp_outage = String.format(" %d", setOprelI(dbuf))
+            dataMonitor.disp_outage = String.format(" %d", setOprelI(dbuf))
         else
-            datmon.disp_outage = String.format(" %d", dbuf[globalIndex++])
+            dataMonitor.disp_outage = String.format(" %d", dbuf[globalIndex++])
 
         if (dbuf.count() >= 6) {
             val tin = setOprel4I(dbuf)
@@ -572,7 +564,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             val hh: Int = tin % (3600 * 24) / 3600
             val mm: Int = tin % 3600 / 60
             val ss: Int = tin % 60
-            datmon.disp_timeInOp = String.format("%d day %02d:%02d:%02d ", days, hh, mm, ss)
+            dataMonitor.disp_timeInOp = String.format("%d day %02d:%02d:%02d ", days, hh, mm, ss)
 
 
         }
@@ -587,7 +579,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         } else
             utf = setOprelI(dbuf).toDouble() * 0.0028
 
-        datmon.disp_UTF = if (m_PriMod == false) String.format("%.2f", utf) else ""
+        dataMonitor.disp_UTF = if (m_PriMod == false) String.format("%.2f", utf) else ""
     }
 
     private fun UpKVUf(dbuf: ByteArray) {
@@ -602,7 +594,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             in 0..4 -> imp = String.format("A%d", nr)
             in 5..12 -> imp = String.format("B%d", nr - 4)
             in 13..44 -> {
-                if (nr % 2 == 1) imp = String.format("DP%dz", (nr - 13) / 2 + 1)
+                if ((nr % 2) == 1) imp = String.format("DP%dz", (nr - 13) / 2 + 1)
                 else imp = String.format("DP%dv", (nr - 13) / 2 + 1)
             }
             else -> imp = String.format("C%d", nr - 44)
@@ -617,7 +609,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         val imps = mutableListOf<String>()
         for (i in 0..7) {
             for (j in 0..7) {
-                if (dbuf[i].toInt() and Const.Data.bVtmask[j].toInt() != 0)
+                if(dbuf[i].toInt().hasFlag(Const.Data.bVtmask[j].toInt()))
                     imps.add(GetImpName(8 * i + j + 1))
 
             }
@@ -637,20 +629,20 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         if (m_PriMod == false) str; // ne mjenjaj
         else str = "" // brisi
 
-        datmon.disp_lastTlg = str
+        dataMonitor.disp_lastTlg = str
 
     }
 
 
     private fun UpEEBroPre(dbuf: ByteArray) {
-        m_BrPrekR1 = setOprelI(dbuf)
-        m_BrPrekR2 = setOprelI(dbuf)
-        m_BrPrekR3 = setOprelI(dbuf)
-        m_BrPrekR4 = setOprelI(dbuf)
-        if ((m_AktRel and 0x80) != 0) datmon.dispR1_BrPrek = String.format("%d", m_BrPrekR1)
-        if ((m_AktRel and 0x40) != 0) datmon.dispR2_BrPrek = String.format("%d", m_BrPrekR2)
-        if ((m_AktRel and 0x20) != 0) datmon.dispR3_BrPrek = String.format("%d", m_BrPrekR3)
-        if ((m_AktRel and 0x10) != 0) datmon.dispR4_BrPrek = String.format("%d", m_BrPrekR4)
+        val m_BrPrekR1 = setOprelI(dbuf)
+        val m_BrPrekR2 = setOprelI(dbuf)
+        val m_BrPrekR3 = setOprelI(dbuf)
+        val m_BrPrekR4 = setOprelI(dbuf)
+        if ((dataMonitor.m_AktRel and 0x80) != 0) dataMonitor.dispR_BrPrek[0] = String.format("%d", m_BrPrekR1)
+        if ((dataMonitor.m_AktRel and 0x40) != 0) dataMonitor.dispR_BrPrek[1] = String.format("%d", m_BrPrekR2)
+        if ((dataMonitor.m_AktRel and 0x20) != 0) dataMonitor.dispR_BrPrek[2] = String.format("%d", m_BrPrekR3)
+        if ((dataMonitor.m_AktRel and 0x10) != 0) dataMonitor.dispR_BrPrek[3] = String.format("%d", m_BrPrekR4)
 
     }
 
@@ -658,7 +650,7 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
 
         var b = dbuf[globalIndex++].toInt()
-        m_AktRel = b and 0xE0
+        dataMonitor.m_AktRel = b and 0xE0
         //m_PriMod=if(b.hasFlag(0x02)) true else false //TODO ?????  m_PriMod
         dbuf[globalIndex++]
 
@@ -672,8 +664,8 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             paramfile += c.toChar() //TODO
 
         }
-        datmon.disp_paramfile = paramfile
-        Log.i(Const.Logging.MONITOR, paramfile)
+        dataMonitor.disp_paramfile = paramfile
+        //Log.i(Const.Logging.MONITOR, paramfile)
     }
 
 
@@ -690,8 +682,8 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
         wtime /= 24
 
         res = String.format("%s-%02d:%02d:%02d", context.resources.getStringArray(R.array.a_days)[wtime], hour, min, sec)
-        datmon.disp_time = res
-        Log.i(Const.Logging.MONITOR, res)
+        dataMonitor.disp_time = res
+       // Log.i(Const.Logging.MONITOR, res)
 
     }
 
@@ -714,8 +706,8 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             time = "? : ? : ?"
             date = "? - ? - ? - ?"
             res = date + time
-            datmon.disp_time = time
-            datmon.disp_date = date
+            dataMonitor.disp_time = time
+            dataMonitor.disp_date = date
             //return res
         } else {
             time = String.format(
@@ -735,63 +727,63 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
             if (true) res = date + time //TODO add hw version TIP_PS || TIP_PSB
             else res = time
         }
-        datmon.disp_time = time
-        datmon.disp_date = date
-        Log.i(Const.Logging.MONITOR, res)
+        dataMonitor.disp_time = time
+        dataMonitor.disp_date = date
+        //Log.i(Const.Logging.MONITOR, res)
         //return Pair(time, date)
 
 
     }
 
-    fun SaveLogEvent() {
+    override fun SaveLogEvent() {
         var csvStr = getString(R.string.IDSC_TIME) + ";" +
                 getString(R.string.IDSTOC_EVENTLOG) + ";" +
-                getString(R.string.IDSI_SERIALNUM) + datmon.disp_serNum + "\r\n"
+                getString(R.string.IDSI_SERIALNUM) + dataMonitor.disp_serNum + "\r\n"
         var res = ""
         var rindx = 0;
         var endidx = 0;
         //CListBox *loglist=(CListBox*)GetDlgItem(IDC_LOGEVENT);
         //loglist->ResetContent();
 
-        if (datmon.m_EvLogH.start > 0 || datmon.m_EvLogH.indx > 0) {
-            if (datmon.m_EvLogH.start < datmon.m_EvLogH.indx) //nije napravio krug
+        if (dataMonitor.m_EvLogH.start > 0 || dataMonitor.m_EvLogH.indx > 0) {
+            if (dataMonitor.m_EvLogH.start < dataMonitor.m_EvLogH.indx) //nije napravio krug
             {
-                rindx = datmon.m_EvLogH.start.toInt()
-                endidx = datmon.m_EvLogH.indx.toInt()
+                rindx = dataMonitor.m_EvLogH.start.toInt()
+                endidx = dataMonitor.m_EvLogH.indx.toInt()
             } else {
-                rindx = datmon.m_EvLogH.indx.toInt()
-                endidx = datmon.m_EvLogH.indx.toInt()
+                rindx = dataMonitor.m_EvLogH.indx.toInt()
+                endidx = dataMonitor.m_EvLogH.indx.toInt()
             }
 
 
             do {
-                var day = datmon.m_EvLog[rindx].Time.day
+                var day = dataMonitor.m_EvLog[rindx].Time.day
                 var sdan = context.resources.getStringArray(R.array.a_days)
                 var strday = if (day > 0) sdan[day - 1] else "???"
-                var obj = datmon.m_EvLog[rindx].Obj
+                var obj = dataMonitor.m_EvLog[rindx].Obj
                 var event = ""
 
                 when (obj) {
-                    0x80 -> event = "Telegram:" + GetTlgImp(datmon.m_EvLog[rindx].Event.Imp) //SNO_TLG
-                    0xA0 -> event = "Telegram:" + GetTlgString(datmon.m_EvLog[rindx].Event.Imp) //HOZ
-                    0xC0 -> event = "Telegram:" + GetTlgString(datmon.m_EvLog[rindx].Event.Imp) //SYNC
+                    0x80 -> event = "Telegram:" + GetTlgImp(dataMonitor.m_EvLog[rindx].Event.Imp) //SNO_TLG
+                    0xA0 -> event = "Telegram:" + GetTlgString(dataMonitor.m_EvLog[rindx].Event.Imp) //HOZ
+                    0xC0 -> event = "Telegram:" + GetTlgString(dataMonitor.m_EvLog[rindx].Event.Imp) //SYNC
                     else -> {
-                        var name = (datmon.m_EvLog[rindx].Event.bH shl 8) or (datmon.m_EvLog[rindx].Event.bL)
+                        var name = (dataMonitor.m_EvLog[rindx].Event.bH shl 8) or (dataMonitor.m_EvLog[rindx].Event.bL)
                         event = GetEventString(obj, name)
                     }
                 }
 
                 var datum = String.format(
                     "%02X-%02X-%02X",
-                    datmon.m_EvLog[rindx].Time.dat,
-                    datmon.m_EvLog[rindx].Time.month,
-                    datmon.m_EvLog[rindx].Time.year
+                    dataMonitor.m_EvLog[rindx].Time.dat,
+                    dataMonitor.m_EvLog[rindx].Time.month,
+                    dataMonitor.m_EvLog[rindx].Time.year
                 );
                 var vrijeme = String.format(
                     "%02X:%02X:%02X",
-                    datmon.m_EvLog[rindx].Time.hour,
-                    datmon.m_EvLog[rindx].Time.min,
-                    datmon.m_EvLog[rindx].Time.sec
+                    dataMonitor.m_EvLog[rindx].Time.hour,
+                    dataMonitor.m_EvLog[rindx].Time.min,
+                    dataMonitor.m_EvLog[rindx].Time.sec
                 );
 
                 vrijeme += strday;
@@ -808,8 +800,8 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
                 }
             } while (rindx != endidx);
         }
-        datmon.disp_eventlog = res
-        datmon.disp_eventlogCSV = csvStr
+        dataMonitor.disp_eventlog = res
+        dataMonitor.disp_eventlogCSV = csvStr
     }
 
     private fun GetTlgString(tlg: ByteArray): String {
@@ -878,29 +870,29 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
 
         for (i in (cnt)..(cnt + 3)) {
 
-            datmon.m_EvLog[i].Time.sec = dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[i].Time.min = dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[i].Time.hour = dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[i].Time.day = dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[i].Time.dat = dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[i].Time.month = dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[i].Time.year = dbuf[globalIndex++].toInt()
-            datmon.m_EvLog[i].Obj = dbuf[globalIndex++].toInt()
+            dataMonitor.m_EvLog[i].Time.sec = dbuf[globalIndex++].toInt()
+            dataMonitor.m_EvLog[i].Time.min = dbuf[globalIndex++].toInt()
+            dataMonitor.m_EvLog[i].Time.hour = dbuf[globalIndex++].toInt()
+            dataMonitor.m_EvLog[i].Time.day = dbuf[globalIndex++].toInt()
+            dataMonitor.m_EvLog[i].Time.dat = dbuf[globalIndex++].toInt()
+            dataMonitor.m_EvLog[i].Time.month = dbuf[globalIndex++].toInt()
+            dataMonitor.m_EvLog[i].Time.year = dbuf[globalIndex++].toInt()
+            dataMonitor.m_EvLog[i].Obj = dbuf[globalIndex++].toInt()
 
             var tmp = dbuf[globalIndex++]
-            datmon.m_EvLog[i].Event.bH = tmp.toInt()
-            datmon.m_EvLog[i].Event.Imp[0] = tmp
+            dataMonitor.m_EvLog[i].Event.bH = tmp.toInt()
+            dataMonitor.m_EvLog[i].Event.Imp[0] = tmp
 
             tmp = dbuf[globalIndex++]
-            datmon.m_EvLog[i].Event.bL = tmp.toInt()
-            datmon.m_EvLog[i].Event.Imp[1] = tmp
+            dataMonitor.m_EvLog[i].Event.bL = tmp.toInt()
+            dataMonitor.m_EvLog[i].Event.Imp[1] = tmp
 
-            datmon.m_EvLog[i].Event.Imp[2] = dbuf[globalIndex++]
-            datmon.m_EvLog[i].Event.Imp[3] = dbuf[globalIndex++]
-            datmon.m_EvLog[i].Event.Imp[4] = dbuf[globalIndex++]
-            datmon.m_EvLog[i].Event.Imp[5] = dbuf[globalIndex++]
-            datmon.m_EvLog[i].Event.Imp[6] = dbuf[globalIndex++]
-            datmon.m_EvLog[i].Event.Imp[7] = dbuf[globalIndex++]
+            dataMonitor.m_EvLog[i].Event.Imp[2] = dbuf[globalIndex++]
+            dataMonitor.m_EvLog[i].Event.Imp[3] = dbuf[globalIndex++]
+            dataMonitor.m_EvLog[i].Event.Imp[4] = dbuf[globalIndex++]
+            dataMonitor.m_EvLog[i].Event.Imp[5] = dbuf[globalIndex++]
+            dataMonitor.m_EvLog[i].Event.Imp[6] = dbuf[globalIndex++]
+            dataMonitor.m_EvLog[i].Event.Imp[7] = dbuf[globalIndex++]
 
         }
     }

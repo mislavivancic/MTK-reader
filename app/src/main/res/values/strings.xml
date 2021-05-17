@@ -442,4 +442,34 @@
     <string name="start_program_s">Program (%s)</string>
     <string name="start_program">Program</string>
 
+
+    <string name="monitor_readstatus">Read status</string>
+    <string name="monitor_readeventlog">Read Event Log</string>
+    <string name="monitor_readlearn">Read Learn</string>
+
+
+    <string name="monitor">Monitor</string>
+    <string name="monitor_status">Monitor status</string>
+    <string name="status">Status</string>
+    <string name="learn_cycle">Learn cycle</string>
+
+
+    <string name="dmonitor_paramfile">Parameter file</string>
+    <string name="dmonitor_devicetime">Device time</string>
+    <string name="dmonitor_RTC">RTC</string>
+    <string name="dmonitor_timeinOp">Time in operation</string>
+    <string name="dmonitor_outages">Outage count</string>
+    <string name="dmonitor_UTF">Utf(V)</string>
+    <string name="dmonitor_lastTlg">Last telegram</string>
+
+    <string name="dmonitor_wiper">Wiper Active</string>
+    <string name="dmonitor_learn">Learn</string>
+    <string name="dmonitor_programs">Programs enabled</string>
+    <string name="dmonitor_loop">Loop programs enabled</string>
+    <string name="dmonitor_transmiterfail">Transmiter failure</string>
+    <string name="dmonitor_switchingcnt">Switching counter</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
 </resources>

@@ -18,7 +18,6 @@ import com.mtkreader.commons.base.BaseBluetoothFragment
 import com.mtkreader.contracts.TimeContract
 import com.mtkreader.data.DeviceDate
 import com.mtkreader.data.DeviceTime
-import com.mtkreader.managers.ShowcaseManager
 import com.mtkreader.presenters.TimePresenter
 import com.mtkreader.utils.TimeUtils
 import com.mtkreader.views.adapters.DeviceOperation
@@ -127,13 +126,6 @@ class TimeView : BaseBluetoothFragment<TimeContract.Presenter>(), TimeContract.V
             )
         tv_time.text = String.format(getString(R.string.day_time_format_d), hours, minutes, seconds)
         checkTimeDateSet()
-
-        ShowcaseManager.startTimeWriteShowcase(
-            requireActivity(),
-            btn_time_pick,
-            btn_date_pick,
-            btn_program_time
-        )
         presenter.setTimeDate(time, deviceDate)
     }
 
@@ -159,9 +151,6 @@ class TimeView : BaseBluetoothFragment<TimeContract.Presenter>(), TimeContract.V
                 startReading()
                 toast(getString(R.string.retrying))
             })
-            //btn_retry.visibility = View.VISIBLE
-            //tv_error.text = getString(R.string.setting_time_is_impossible)
-            //toast(getString(R.string.setting_time_is_impossible))
         }
     }
 

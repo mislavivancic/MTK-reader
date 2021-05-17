@@ -40,7 +40,7 @@ open class BaseMVPFragment<T> : Fragment(), ErrorHandlingFragment where T : Auto
 
     fun snack(text: String, actionText: String = getString(R.string.retry), isError: Boolean = true, action: (() -> Unit)? = null) {
         view?.let {
-            val snackBar = Snackbar.make(it, text, Snackbar.LENGTH_INDEFINITE)
+            val snackBar = Snackbar.make(it, text, Snackbar.LENGTH_LONG)
             with(snackBar) {
                 setAction(actionText) { action?.invoke() }
                 if (isError)

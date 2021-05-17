@@ -9,7 +9,7 @@ import com.mtkreader.R
 import kotlinx.android.synthetic.main.connected_device_item.view.*
 
 enum class DeviceOperation {
-    TIME_READ, TIME_SET, PARAM_READ, PARAM_WRITE
+    TIME_READ, TIME_SET, PARAM_READ, PARAM_WRITE, MONITOR_READ
 }
 
 class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
@@ -99,6 +99,12 @@ class ConnectedDevicesRecyclerView(private val layoutInflater: LayoutInflater) :
                     onClickListener?.onClick(
                         this,
                         DeviceOperation.PARAM_WRITE
+                    )
+                }
+                view.btn_monitor_read.setOnClickListener {
+                    onClickListener?.onClick(
+                        this,
+                        DeviceOperation.MONITOR_READ
                     )
                 }
                 if (shouldExpand) {

@@ -35,4 +35,7 @@ data class DataTXMessage(
         result = 31 * result + buffer.contentHashCode()
         return result
     }
+
+    fun getBufferData() = buffer.take(count)
+
 }

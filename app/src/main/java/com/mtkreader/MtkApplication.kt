@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.github.ivbaranov.rxbluetooth.RxBluetooth
 import com.mtkreader.contracts.DisplayDataContract
+import com.mtkreader.contracts.MonitorContract
 import com.mtkreader.contracts.ParamsWriteContract
 import com.mtkreader.contracts.TimeContract
 import com.mtkreader.services.*
@@ -17,6 +18,7 @@ class MtkApplication : Application() {
     private val mtkModule = module {
 
         // services
+        single<MonitorContract.Service> { MonitorServiceImpl() }
         single<DisplayDataContract.DisplayService> { DisplayServiceImpl() }
         single<DisplayDataContract.ProcessService> { ProcessDataServiceImpl() }
         single<TimeContract.Service> { TimeServiceImpl() }

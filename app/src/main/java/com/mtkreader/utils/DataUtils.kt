@@ -5,8 +5,10 @@ import com.mtkreader.data.DataStructures
 import com.mtkreader.data.reading.LadderNets
 import com.mtkreader.data.reading.StrParFil
 import com.mtkreader.data.reading.StrParFilVer9
+import com.mtkreader.data.writing.DataTXMessage
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import kotlin.experimental.xor
 
 object DataUtils {
     private val HEXADECIMAL_PATTERN: Pattern = Pattern.compile("\\p{XDigit}+")
@@ -508,4 +510,24 @@ object DataUtils {
         }
         return mb
     }
+
+    fun createMessageObject(string: String): DataTXMessage {
+        val mSendMesageData = DataTXMessage()
+        var index = 0
+        if (string.isNotEmpty()) {
+            mSendMesageData.buffer[index++] = Const.Data.SOH
+            for (char in string) {
+                mSendMesageData.buffer[index++] = char.toByte()
+                mSendMesageData.bcc = mSendMesageData.bcc xor char.toByte()
+            }
+        }
+
+        mSendMesageData.buffer[index++] = Const.Data.ETX
+        mSendMesageData.bcc = mSendMesageData.bcc xor Const.Data.ETX
+        mSendMesageData.buffer[index++] = mSendMesageData.bcc
+        mSendMesageData.count = index
+        return mSendMesageData
+    }
+
+
 }

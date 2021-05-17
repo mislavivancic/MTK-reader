@@ -652,28 +652,11 @@ class WriteDataService : ParamsWriteContract.WriteDataService {
         return mSendMesageData
     }
 
-    override fun createMessageObject(string: String): DataTXMessage {
-        val mSendMesageData = DataTXMessage()
-        var index = 0
-        if (string.isNotEmpty()) {
-            mSendMesageData.buffer[index++] = Const.Data.SOH
-            for (char in string) {
-                mSendMesageData.buffer[index++] = char.toByte()
-                mSendMesageData.bcc = mSendMesageData.bcc xor char.toByte()
-            }
-        }
-
-        mSendMesageData.buffer[index++] = Const.Data.ETX
-        mSendMesageData.bcc = mSendMesageData.bcc xor Const.Data.ETX
-        mSendMesageData.buffer[index++] = mSendMesageData.bcc
-        mSendMesageData.count = index
-        return mSendMesageData
-    }
 
     override fun createMTKCommandMessageObject(string: String): DataTXMessage {
         val mSendMesageData = DataTXMessage()
         if (data.mSoftwareVersion >= 90)
-            return createMessageObject(string)
+            return DataUtils.createMessageObject(string)
         return mSendMesageData
     }
 

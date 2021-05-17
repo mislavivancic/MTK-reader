@@ -12,6 +12,7 @@ import com.mtkreader.data.writing.DataTXMessage
 import com.mtkreader.exceptions.NotProgrammingModeException
 import com.mtkreader.exceptions.ProgrammingError
 import com.mtkreader.utils.CommunicationUtil
+import com.mtkreader.utils.DataUtils
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -121,7 +122,7 @@ class ParamsWritePresenter(private val view: ParamsWriteContract.View) : BaseBlu
 
         // todo how in the fuck do i get this string
         //val waitMtkAnswer = writeDataService.createMessageObject("G6(A0A0A020)")
-        val waitMtkAnswer = writeDataService.createMessageObject("G6(20202020)")
+        val waitMtkAnswer = DataUtils.createMessageObject("G6(20202020)")
         CommunicationUtil.writeToSocket(socket, waitMtkAnswer.buffer.take(waitMtkAnswer.count).toByteArray())
         message = communicationManager.waitForMessage()
 

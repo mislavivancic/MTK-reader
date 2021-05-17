@@ -7,6 +7,7 @@ import com.mtkreader.contracts.DisplayDataContract
 import com.mtkreader.data.DataStructures
 import com.mtkreader.data.reading.*
 import com.mtkreader.utils.Css
+import com.mtkreader.utils.DBQ
 import com.mtkreader.utils.DataUtils
 import com.mtkreader.utils.HtmlTags.b
 import com.mtkreader.utils.HtmlTags.bC
@@ -806,7 +807,9 @@ private fun generateTelegramSync(
 
     for (i in 0..7) {
         builder.append(tr)
-        builder.append(th +"DBQ:GetTlgNameByContent"+ thC)
+        val DBQ= DBQ()
+        val name=DBQ.GetTlgNameByContent( data.mTelegSync[i].CmdDB,data.mBrojRast)
+        builder.append(th +name+ thC)
         builder.append(th + getSyncTime(data.mOp50rij.SinhTime[i], m_HWVerPri) + thC)
         getRasterString(builder, data.mTelegSync[i].Cmd)
     }
@@ -829,7 +832,10 @@ private fun generateAdditionalTelegram(
         for(i in 0..7)
         {
             builder.append(tr)
-            builder.append(th +"DBQ:GetTlgNameByContent"+ thC)
+            val DBQ= DBQ()
+            val name=DBQ.GetTlgNameByContent( data.mOp50rij.tlg[i].tel1.CmdDB,data.mBrojRast)
+
+            builder.append(th +name+ thC)
             val f:Int=data.mOp50rij.tlg[i].tel1.Cmd.Fn.toInt()
 
             if (i in 0..6)
@@ -970,7 +976,9 @@ private fun SetRasterHead(builder: StringBuilder, s1:String, s2:String) {
 
 private fun GetRelTlgs(builder: StringBuilder, T: Telegrel, index:Int) {
     builder.append(tr)
-    builder.append(thrw2 +"DBQ:GetTlgNameByContentK"+ thC)
+    val DBQ= DBQ()
+    val name=DBQ.GetTlgNameByContentK( T.Uk.CmdDB,T.Isk.CmdDB,data.mBrojRast)
+    builder.append(thrw2 +name+ thC)
     builder.append(th +"R"+index+getString(R.string.IDSI_ON)+ thC)
     getRasterString(builder,T.Uk)
     builder.append(trC)
