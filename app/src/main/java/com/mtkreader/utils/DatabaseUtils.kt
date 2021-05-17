@@ -142,7 +142,7 @@ class DBQ: KoinComponent {
     constructor()
     val context: Context by inject()
 
-    fun readAllTelegrams(): ArrayList<TelegramModel> {
+    fun GetAllTelegrams(): ArrayList<TelegramModel> { //readAllTelegrams
         val telegrams = ArrayList<TelegramModel>()
         // = writableDatabase
 
@@ -246,10 +246,45 @@ class DBQ: KoinComponent {
 
     }
 
+    fun GetTlgNamesMatchingRectlg(rectlg:ByteArray):List<String>{
+        var res = mutableListOf<String>()
+
+        var T=GetAllTelegrams()
+        for (t in T) {
+            if( (tlgmatches(t.tlg,rectlg) or tlgmatches(t.tlg2,rectlg) ) and (t.kat.compareTo("K")!=0)) {
+                res.add(t.name)
+                var imps = TelgImp2String(t.tlg, 4)
+                Log.d("#DB", t.name + " - " + imps) //will show you database entries in Logcat.
+            }
+        }
+        return res
+    }
 
 
+    fun tlgmatches(tlgdb: ByteArray, tlg: ByteArray): Boolean {
+
+        if (tlgdb.all { it.toInt() == 0.toInt() }) return false //ako je telegram iz baze prazan
+        if (tlg.all { it.toInt() == 0.toInt() }) return false//ako je primljeni telegram prazan
+        for (i in 0..6) {
+            for (j in 0..6) {
+                val recimp = 8 * i + j + 1
+                val dbimp = GetImpTLgAplus(tlgdb, recimp)
+                val rescmp = tlg[i].toInt().hasFlag(Const.Data.bVtmask[j].toInt())
+
+                if (rescmp)//ako 1 primljena//a u bazi mora bit/je 0
+                    if (dbimp == "0")
+                        return false
+                if (!rescmp)// ako 0 primljena//a u bazi mora bit/je 1
+                    if (dbimp == "1")
+                        return false
+                if (recimp > 50)
+                    return true
+            }
+        }
+        return false
 
 
+    }
 
 
 
