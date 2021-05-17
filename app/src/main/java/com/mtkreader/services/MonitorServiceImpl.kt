@@ -42,6 +42,7 @@ import com.mtkreader.data.REL24HCSTR2.Companion.SIZE_24HC_TPAR2
 import com.mtkreader.data.reading.*
 import com.mtkreader.decodeHex
 import com.mtkreader.hasFlag
+import com.mtkreader.utils.DBQ
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import kotlin.experimental.and
@@ -620,14 +621,13 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
     }
 
     private fun UpZadTeleg(dbuf: ByteArray) {
-
         var str = GetTlgImp(dbuf);
 
-        //std::vector<CString> names = DBQ::GetTlgNamesMatchingRectlg(tlgx);
-        //for (auto value : names) str += " - " + value;
+        val DBQ= DBQ()
+        val names=DBQ.GetTlgNamesMatchingRectlg(dbuf)
+        str+=names.joinToString ( " - " )
 
-        if (m_PriMod == false) str; // ne mjenjaj
-        else str = "" // brisi
+        if (m_PriMod == true) str = "" // brisi
 
         dataMonitor.disp_lastTlg = str
 
@@ -805,11 +805,16 @@ class MonitorServiceImpl : MonitorContract.Service, KoinComponent {
     }
 
     private fun GetTlgString(tlg: ByteArray): String {
-        //CString str = _T("");
-        //std::vector<CString> names = DBQ::GetTlgNamesMatchingRectlg(tlgx);
-        //for (auto value : names) str += " - "+ value;
-        //if(str.GetLength() <= 0)
-        var str = GetTlgImp(tlg);
+        var str = ""
+
+        val DBQ = DBQ()
+        val names = DBQ.GetTlgNamesMatchingRectlg(tlg)
+
+        str = if (names.count() == 0)
+            GetTlgImp(tlg)
+        else
+            names.joinToString(" - ")
+
         return str;
 
     }
